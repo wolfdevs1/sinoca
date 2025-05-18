@@ -1,14 +1,19 @@
-import io from 'socket.io-client'
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.jsx'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import App from './App';
+import { AuthProvider } from './context/AuthProvider';
+import { SocketProvider } from './context/SocketProvider';
+import './index.css';
 
-const IP = 'http://192.168.1.184:3000';
-export const socket = io(IP);
-
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <BrowserRouter>
+      <AuthProvider>
+        <SocketProvider>
+          <App />
+        </SocketProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  </React.StrictMode>
 );

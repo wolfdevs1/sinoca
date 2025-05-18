@@ -1,48 +1,76 @@
-// src/App.jsx
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Login from "./pages/Login";
-import Registro from "./pages/Registro";
-import Panel from "./pages/Panel";
-import Carga from "./pages/Carga";
-import Retiro from "./pages/Retiro";
-import ProtectedRoute from "./components/ProtectedRoute";
+import { Routes, Route } from 'react-router-dom';
+
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import Home from './pages/Home';
+import AdminPage from './pages/AdminPage';
+
+import ProtectedRoute from './components/ProtectedRoute';
+import AdminRoute from './components/AdminRoute';
+import PublicRoute from './components/PublicRoute';
+import DepositPage from './pages/DepositPage';
+import WithdrawPage from './pages/WithdrawPage';
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Públicas */}
-        <Route path="/" element={<Login />} />
-        <Route path="/registro" element={<Registro />} />
+    <Routes>
+      {/* Si ya está logueado, /login va a "/" */}
+      <Route
+        path="/login"
+        element={
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
+        }
+      />
 
-        {/* Protegidas */}
-        <Route
-          path="/panel"
-          element={
-            <ProtectedRoute>
-              <Panel />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/carga"
-          element={
-            <ProtectedRoute>
-              <Carga />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/retiro"
-          element={
-            <ProtectedRoute>
-              <Retiro />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-    </BrowserRouter>
+      <Route
+        path="/register"
+        element={
+          <PublicRoute>
+            <RegisterPage />
+          </PublicRoute>
+        }
+      />
+
+      {/* Rutas protegidas */}
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/deposit"
+        element={
+          <ProtectedRoute>
+            <DepositPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/withdraw"
+        element={
+          <ProtectedRoute>
+            <WithdrawPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin"
+        element={
+          <AdminRoute>
+            <AdminPage />
+          </AdminRoute>
+        }
+      />
+    </Routes>
   );
-}
+};
 
 export default App;

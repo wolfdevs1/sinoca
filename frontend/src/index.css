@@ -110,3 +110,25 @@ input:focus {
 a {
   text-decoration: none;
 }
+
+
+/* ---------- SPINNER ---------- */
+
+.spinner {
+  width: 100%;
+  height: 100%;
+  animation: rotate 2s linear infinite;
+}
+.spinner .path {
+  stroke: #333;            /* color de la línea */
+  stroke-linecap: round;
+  animation: dash 1.5s ease-in-out infinite;
+}
+@keyframes rotate {
+  100% { transform: rotate(360deg); }
+}
+@keyframes dash {
+  0%   { stroke-dasharray: 1,150; stroke-dashoffset: 0; }
+  50%  { stroke-dasharray: 90,150; stroke-dashoffset: -35; }
+  100% { stroke-dasharray: 90,150; stroke-dashoffset: -124; }
+}
