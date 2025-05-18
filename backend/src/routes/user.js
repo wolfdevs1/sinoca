@@ -3,6 +3,7 @@ const { protect, adminOnly } = require('../middleware/auth');
 const User = require('../models/User');
 const Transfer = require('../models/Transfer');
 const { deposit, withdraw, changePassword } = require('../services/scrapPage');
+const Withdraw = require('../models/Withdraw');
 
 // Ruta para cualquier usuario autenticado
 router.get('/profile', protect, async (req, res) => {
@@ -29,9 +30,10 @@ router.post('/deposit', protect, async (req, res) => {
 });
 
 router.post('/withdraw', protect, async (req, res) => {
-    const { name, amount } = req.body;
+    const { name, amount, account } = req.body;
     const response = await withdraw(name, amount);
     if (response === 'ok') {
+        await Withdraw.create({ account, amount });
         res.json({ message: 'Retiro cargado correctamente' });
     } else if (response === 'error') {
         res.status(400).json({ error: 'Error al cargar el retiro' });
@@ -56,10 +58,38 @@ router.post('/change-password', protect, async (req, res) => {
     }
 });
 
+router.post('/new-account', protect, async (req, res) => {
+    try {
+        const { account } = req.body;
+        const user = await User.findByIdAndUpdate(
+            req.user.id,
+            {
+                // pushea un nuevo objeto al array accounts
+                $push: {
+                    accounts: { name: account }
+                }
+            },
+            { new: true } // devuelve el documento actualizado
+        );
+        if (!user) {
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        };
+        return res.status(200).json({ message: 'Alias agregado correctamente', user: { name: user.name, phone: user.phone, accounts: user.accounts, role: user.role } });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
+
 // Ruta solo para administradores
 router.get('/all', protect, adminOnly, async (req, res) => {
-    const users = await User.find().select('name email role');  // sólo esos tres
+    const users = await User.find().select('name phone role');  // sólo esos tres
     res.json(users);
+});
+
+router.get('/withdraws', protect, adminOnly, async (req, res) => {
+    const withdraws = await Withdraw.find().select('account amount');
+    res.json(withdraws);
 });
 
 module.exports = router;

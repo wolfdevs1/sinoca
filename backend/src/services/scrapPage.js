@@ -155,13 +155,10 @@ async function adjustBalance(name, amount, action) {
             );
             const recheck = parseFloat(formatNumber(text)) * -1;
             const expected = parseFloat(amount.replace(',', '.'));
-            await new Promise(resolve => setTimeout(resolve, 10000));
 
             await browser.close();
             return recheck === expected ? 'ok' : 'insufficient';
         }
-
-        await new Promise(resolve => setTimeout(resolve, 10000));
 
         await browser.close();
         return 'ok';

@@ -18,10 +18,14 @@ client.on('message', async message => {
     const from = message.from;
     if (pending.has(from)) {
         const { name, socket, step } = pending.get(from);
-        if (step === 'register') {
+        if (step === 'register' && message.body.toLowerCase() === 'si') {
             await message.reply('¡Número verificado! 🎉');
             pending.remove(from);
             socket.emit('verified', { ok: true, msg: 'Número verificado' });
+        } else if (step === 'new-account' && message.body.toLowerCase() === 'si') {
+            await message.reply('¡Número verificado! 🎉');
+            pending.remove(from);
+            socket.emit('verified', { ok: true, msg: 'Alias verificado' });
         }
     }
 });

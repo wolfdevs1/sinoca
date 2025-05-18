@@ -39,7 +39,7 @@ export default function RegisterPage() {
         }
 
         // Si ya está validado, emito el evento
-        socket.emit("verify", name, `549${phone}@c.us`, (res) => {
+        socket.emit("verify", name, `549${phone}@c.us`, 'register', (res) => {
             if (res.ok) {
                 setVerified(true);
                 alert(res.msg);

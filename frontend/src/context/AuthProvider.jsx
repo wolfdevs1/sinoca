@@ -1,7 +1,7 @@
 // src/context/AuthProvider.jsx
 import { useState, useEffect } from 'react';
 import { jwtDecode } from "jwt-decode";
-import { getProfile, login as loginAPI, setToken as setAuthHeader } from '../services/auth';
+import { getProfile, login as loginAPI, setToken as setAuthHeader, newAccount as newAccountAPI } from '../services/auth';
 import { AuthContext } from './AuthContext';
 
 export function AuthProvider({ children }) {
@@ -57,8 +57,13 @@ export function AuthProvider({ children }) {
         localStorage.removeItem('token');
     };
 
+    const addAcount = async (account) => {
+        const res = await newAccountAPI({ account });
+        setUser(res.data.user);
+    };
+
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout }}>
+        <AuthContext.Provider value={{ user, loading, login, logout, addAcount }}>
             {children}
         </AuthContext.Provider>
     );

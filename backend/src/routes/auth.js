@@ -10,7 +10,7 @@ router.post('/login', async (req, res) => {
         const user = await User.findOne({ name });
         if (!user) return res.status(400).json({ error: 'Credenciales inválidas' });
         const payload = { id: user._id, role: user.role };
-        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRATION });
+        const token = jwt.sign(payload, process.env.JWT_SECRET);
         res.json({ token, user: { name: user.name, phone: user.phone, accounts: user.accounts, role: user.role } });
     } catch (err) {
         console.log(err);
@@ -28,7 +28,7 @@ router.post('/register', async (req, res) => {
         if (response === 'ok') {
             const newUser = await User.create({ name, phone, role: 'user' });
             const payload = { id: newUser._id, role: newUser.role };
-            const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRATION });
+            const token = jwt.sign(payload, process.env.JWT_SECRET);
             res.json({ token });
         }
     } catch (err) {

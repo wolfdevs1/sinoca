@@ -4,7 +4,7 @@ const pending = require('./pendingPhones');
 module.exports = (io) => {
     io.on('connection', (socket) => {
         // Ahora el evento recibe: usuario, teléfono y callback
-        socket.on('verify', async (name, phone, callback) => {
+        socket.on('verify', async (name, phone, step, callback) => {
             if (pending.has(phone)) {
                 return callback({
                     ok: false,
@@ -12,7 +12,7 @@ module.exports = (io) => {
                 });
             }
             // Guardamos el teléfono, el usuario y el socket
-            pending.add(phone, name, socket, 'register');
+            pending.add(phone, name, socket, step);
             // Auto-eliminación a los 5 minutos si no confirman
             setTimeout(async () => {
                 // Si ya no está en pendientes, salir
