@@ -1,10 +1,10 @@
-// src/pages/WithdrawPage.jsx
 import { useState, useContext, useEffect, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { withdraw as withdrawAPI } from "../services/auth";
 import { AuthContext } from '../context/AuthContext';
-import Spinner from "../components/Spinner";
 import { SocketContext } from "../context/SocketContext";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function WithdrawPage() {
     const { user, addAcount } = useContext(AuthContext);
@@ -15,52 +15,46 @@ export default function WithdrawPage() {
     const [loading, setLoading] = useState(false);
     const [newAccount, setNewAccount] = useState("");
 
-    // Invertir el orden para que el último agregado salga primero
     const reversedAccounts = useMemo(
         () => user.accounts.slice().reverse(),
         [user.accounts]
     );
 
-    // Inicializar account con la primera cuenta válida
     useEffect(() => {
         if (!account && reversedAccounts.length > 0) {
             setAccount(reversedAccounts[0].name);
         }
     }, [reversedAccounts, account]);
 
-    // Maneja el retiro
     const handleWithdraw = async (e) => {
         e.preventDefault();
         setLoading(true);
         try {
             const res = await withdrawAPI({ name: user.name, amount, account });
-            alert(res.data.message);
+            toast.success(res.data.message || "Retiro realizado correctamente");
             setAmount("");
             setAccount("");
         } catch (error) {
             const errMsg = error.response?.data?.error || "Error interno del servidor";
-            alert(errMsg);
+            toast.error(errMsg);
         } finally {
             setLoading(false);
         }
     };
 
-    // Añade nueva cuenta tras verificación
     const handleNewAccount = useCallback(async () => {
         setLoading(true);
         try {
             const res = await addAcount(newAccount);
-            alert(res.data.message);
+            toast.success(res.message || "Alias agregado correctamente");
             setNewAccount("");
-            // account se inicializará al detectarse el cambio en user.accounts
         } catch (err) {
-            alert(err.message);
+            toast.error(err.message || "Error al agregar alias");
         } finally {
             setLoading(false);
         }
     }, [newAccount, addAcount]);
 
-    // Dispara verificación vía socket
     const handleAlias = (e) => {
         e.preventDefault();
         socket.emit(
@@ -69,18 +63,21 @@ export default function WithdrawPage() {
             user.phone,
             "new-account",
             (res) => {
-                alert(res.msg);
+                if (res.ok) {
+                    toast.success(res.msg);
+                } else {
+                    toast.error(res.msg);
+                }
             }
         );
     };
 
-    // Escucha el evento 'verified' y, si ok, ejecuta handleNewAccount
     useEffect(() => {
         const onVerified = (res) => {
             if (res.ok) {
                 handleNewAccount();
             } else {
-                alert(res.msg);
+                toast.error(res.msg);
             }
         };
         socket.on("verified", onVerified);
@@ -116,7 +113,7 @@ export default function WithdrawPage() {
                 <div className="btn-group">
                     <Link to="/" className="btn">Regresar</Link>
                     <button type="submit" className="btn" disabled={loading}>
-                        {loading ? <Spinner /> : "Retirar"}
+                        {loading ? "Retirando..." : "Retirar"}
                     </button>
                 </div>
             </form>
@@ -132,9 +129,11 @@ export default function WithdrawPage() {
                     required
                 />
                 <button type="submit" className="btn" disabled={loading}>
-                    {loading ? <Spinner /> : "Agregar Alias"}
+                    {loading ? "Agregando..." : "Agregar Alias"}
                 </button>
             </form>
+
+            <ToastContainer />
         </>
     );
 }

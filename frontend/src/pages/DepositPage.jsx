@@ -2,71 +2,110 @@ import { useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import { deposit as depositAPI } from "../services/auth";
 import { AuthContext } from '../context/AuthContext';
-import Spinner from "../components/Spinner";
+import { toast, ToastContainer } from 'react-toastify';
+import { NumericFormat } from 'react-number-format';
+import 'react-toastify/dist/ReactToastify.css';
 
 function DepositPage() {
-
     const [name, setName] = useState("");
-    const [amount, setAmount] = useState("");
+    const [amount, setAmount] = useState(""); // Almacena valor como string para formateo
     const { user } = useContext(AuthContext);
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            // Si es 2xx, entra aquí
             setLoading(true);
-            const res = await depositAPI({ name: user.name, amount });
-            // El back devuelve: { message: 'Depósito cargado correctamente' }
-            alert(res.data.message);
+
+            // Convertir a número limpio (sin comas)
+            const numericAmount = parseFloat(amount.toString().replace(/,/g, ""));
+
+            const res = await depositAPI({ name: user.name, amount: numericAmount });
+            toast.success(res.data.message);
             setName("");
             setAmount("");
         } catch (error) {
-            // Aquí caen los 400 (‘error’ y ‘insufficient’) y 500
             const errMsg = error.response?.data?.error;
-            if (errMsg) {
-                alert(errMsg); // ‘No tiene esa cantidad de fichas’ o ‘Error al cargar el depósito’
-            } else {
-                alert("Error interno del servidor");
-            }
+            toast.error(errMsg || "Error interno del servidor");
         } finally {
             setLoading(false);
         }
     };
 
+    const handleCopy = () => {
+        const textToCopy = 'roberpay2';
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(textToCopy)
+                .then(() => toast.success("Alias copiado al portapapeles!"))
+                .catch(() => toast.error("Error al copiar al portapapeles"));
+        } else {
+            const textArea = document.createElement('textarea');
+            textArea.style.position = 'absolute';
+            textArea.style.left = '-9999px';
+            textArea.value = textToCopy;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                toast.success("Alias copiado al portapapeles!");
+            } catch {
+                toast.error("Error al copiar al portapapeles");
+            }
+            document.body.removeChild(textArea);
+        }
+    };
+
     return (
-        <form onSubmit={handleSubmit}>
-            <h1>Carga</h1>
+        <>
+            <form onSubmit={handleSubmit}>
 
-            <p>PASO 1:</p>
-            <p>Realice una transferencia a la siguiente cuenta:</p>
-            <p>Cuenta: Roberto Flores</p>
-            <p>Alias: roberpay2</p>
-            <p>PASO 2:</p>
-            <p>Complete los siguientes datos:</p>
+                <Link to="/" className="back-button">🔙</Link>
 
-            <input
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="input"
-                type="number"
-                placeholder="Importe transferido"
-                required
-            />
-            <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="input"
-                type="text"
-                placeholder="Nombre completo del titular de la cuenta"
-                required
-            />
+                <h1>CARGA</h1>
+                <p>🏦 Realice la transferencia a la siguiente cuenta</p>
+                <p className="copy-alias" onClick={handleCopy}>👤 TITULAR: Roberto Flores</p>
+                <p className="copy-alias" onClick={handleCopy}>
+                    🔗 ALIAS: roberpay2
+                    <span className="copy-icon" title="Copiar alias">📌</span>
+                </p>
+                <p className="warning">⚠️ El ALIAS puede cambiar con el tiempo ⚠️</p>
+                <p>Una vez realizada la transferencia, complete los siguientes datos 👇👇👇</p>
 
-            <div className="btn-group">
-                <Link to="/" className="btn">Regresar</Link>
-                <button className="btn" type="submit" disabled={loading}>{loading ? <Spinner /> : 'Cargar'} </button>
-            </div>
-        </form>
+                <NumericFormat
+                    value={amount}
+                    onValueChange={(values) => {
+                        setAmount(values.value); // values.value es el valor sin formato
+                    }}
+                    prefix="$ "
+                    thousandSeparator="."
+                    decimalSeparator=","
+                    allowNegative={false}
+                    className="input"
+                    placeholder="Importe transferido"
+                    required
+                />
+
+                <input
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="input"
+                    type="text"
+                    placeholder="Titular de la cuenta"
+                    required
+                />
+
+                <div className="btn-group">
+                    <button
+                        className={`btn ${loading ? "gray" : ""}`}
+                        type="submit"
+                        disabled={loading}
+                    >
+                        {loading ? "Cargando..." : "Cargar"}
+                    </button>
+                </div>
+            </form>
+            <ToastContainer />
+        </>
     );
 }
 

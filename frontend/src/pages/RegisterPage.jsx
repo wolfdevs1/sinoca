@@ -1,8 +1,11 @@
+import React from 'react';
 import { useContext, useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { SocketContext } from "../context/SocketContext";
 import { register as registerAPI } from "../services/auth";
 import { parsePhoneNumberFromString, AsYouType } from "libphonenumber-js";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; // Asegúrate de importar los estilos
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -11,59 +14,81 @@ export default function RegisterPage() {
   const [verified, setVerified] = useState(false);
   const [isValidPhone, setIsValidPhone] = useState(null);
 
+  const [tokenTrigger, setTokenTrigger] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const socket = useContext(SocketContext);
 
   const handleRegister = useCallback(async () => {
     try {
+
+      setIsSubmitting(true);
+
       const parsed = parsePhoneNumberFromString(phoneRaw, "AR");
       if (!parsed?.isValid()) {
-        alert("El número de teléfono no es válido.");
+        toast.error("El número de teléfono no es válido.");
+        setIsSubmitting(false);
         return;
       }
 
-      const formattedPhone = parsed.number.replace("+", "") + "@c.us";
+      const formattedPhone = parsed.number.replace("+54", "549") + "@c.us";
 
       const res = await registerAPI({ name, phone: formattedPhone });
       const { token } = res.data;
-      localStorage.setItem("token", token);
-      window.location.href = "/";
+      setTokenTrigger(token);
     } catch (error) {
-      alert("Error al registrarse: " + (error.response?.data?.error || error.message));
+      toast.error("Error al registrarse: " + (error.response?.data?.error || error.message));
+      setIsSubmitting(false);
     }
   }, [name, phoneRaw]);
 
   const ingresar = async (e) => {
     e.preventDefault();
 
-    const parsed = parsePhoneNumberFromString(phoneRaw, "AR");
-    if (!parsed?.isValid()) {
-      alert("El número de teléfono no es válido.");
-      return;
-    }
+    if (isSubmitting) return; // Evita múltiples clics
+    setIsSubmitting(true);
 
-    if (verified) {
-      await handleRegister();
-      return;
-    }
-
-    const formattedPhone = parsed.number.replace("+", "") + "@c.us";
-
-    socket.emit("verify", name, formattedPhone, "register", (res) => {
-      if (res.ok) {
-        setVerified(true);
-        alert(res.msg);
-      } else {
-        alert(res.msg);
+    try {
+      const parsed = parsePhoneNumberFromString(phoneRaw, "AR");
+      if (!parsed?.isValid()) {
+        toast.error("El número de teléfono no es válido.");
+        setIsSubmitting(false);
+        return;
       }
-    });
+
+      if (verified) {
+        toast.success('Creando usuario...');
+        await handleRegister();
+      } else {
+        const formattedPhone = parsed.number.replace("+54", "549") + "@c.us";
+        socket.emit("verify", name, formattedPhone, "register", (res) => {
+          if (res.ok) {
+            setVerified(true);
+            toast.success(res.msg);
+          } else {
+            toast.error(res.msg);
+          }
+        });
+      }
+    } catch (err) {
+      toast.error("Ocurrió un error.");
+      setIsSubmitting(false);
+    }
   };
+
+  useEffect(() => {
+    if (tokenTrigger) {
+      localStorage.setItem('token', tokenTrigger);
+      window.location.reload();
+    }
+  }, [tokenTrigger])
 
   useEffect(() => {
     const onVerified = (res) => {
       if (res.ok) {
         handleRegister();
       } else {
-        alert(res.msg);
+        toast.error(res.msg);
       }
     };
 
@@ -86,44 +111,52 @@ export default function RegisterPage() {
   };
 
   return (
-    <form onSubmit={ingresar}>
-      <h1>Registro</h1>
+    <React.Fragment>
+      <form onSubmit={ingresar}>
+        <h1>Registro</h1>
 
-      <input
-        className="input"
-        type="text"
-        placeholder="Nombre de usuario"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        required
-      />
-
-      <div className="input-icon-group">
         <input
           className="input"
-          type="tel"
-          placeholder="Celular"
-          value={phoneFormatted}
-          onChange={handlePhoneChange}
-          disabled={verified}
+          type="text"
+          placeholder="Nombre de usuario"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           required
         />
-        {isValidPhone !== null && (
-          <span className="input-icon">
-            {isValidPhone ? "✓" : "X"}
-          </span>
-        )}
-      </div>
 
-      <div className="btn-group">
-        <button className="btn" type="submit">
-          Ingresar
-        </button>
-        <div className="link-group">
-          <span>¿Tienes una cuenta? </span>
-          <Link to="/">Iniciar sesión</Link>
+        <div className="input-icon-group">
+          <input
+            className="input"
+            type="tel"
+            placeholder="Celular"
+            value={phoneFormatted}
+            onChange={handlePhoneChange}
+            disabled={verified}
+            required
+          />
+          {isValidPhone !== null && (
+            <span className="input-icon">
+              {isValidPhone ? "✓" : ""}
+            </span>
+          )}
         </div>
-      </div>
-    </form>
+
+        <div className="btn-group">
+          <button
+            className={`btn ${isSubmitting ? "gray" : ""}`}
+            type="submit"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Registrando..." : "Registrarse"}
+          </button>
+          <div className="link-group">
+            <span>¿Tienes una cuenta? </span>
+            <Link to="/">Iniciar sesión</Link>
+          </div>
+        </div>
+
+      </form>
+      <ToastContainer />
+    </React.Fragment>
   );
 }

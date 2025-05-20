@@ -2,7 +2,8 @@ import { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { changePassword as changePasswordAPI } from '../services/auth';
-import Spinner from '../components/Spinner';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export function Home() {
   const { user, logout } = useContext(AuthContext);
@@ -12,12 +13,10 @@ export function Home() {
     try {
       setLoading(true);
       const { data } = await changePasswordAPI({ name: user.name });
-      // Axios sólo entra aquí si es 2xx
-      alert(data.message); // 'Contraseña cambiada correctamente'
+      toast.success(data.message); // 'Contraseña cambiada correctamente'
     } catch (err) {
-      // Aquí caen los 400 y 500
       const errMsg = err.response?.data?.error;
-      alert(errMsg || 'Error interno del servidor');
+      toast.error(errMsg || 'Error interno del servidor');
     } finally {
       setLoading(false);
     }
@@ -36,11 +35,14 @@ export function Home() {
       <div className="btn-group btn-group-panel">
         <Link to="/deposit" className="btn">Cargar</Link>
         <Link to="/withdraw" className="btn">Retirar</Link>
-        <button onClick={handleChangePassword} type="button" className="btn" disabled={loading}>{loading ? <Spinner /> : 'Cambiar Contraseña'} </button>
+        <button onClick={handleChangePassword} type="button" className="btn" disabled={loading}>
+          {loading ? "Cambiando..." : 'Cambiar Contraseña'}
+        </button>
         <button onClick={handleLogout} className="btn">
           Cerrar Sesión
         </button>
       </div>
+      <ToastContainer />
     </div>
   );
 }

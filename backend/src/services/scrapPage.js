@@ -76,7 +76,7 @@ async function createUser(name) {
         );
 
         await clickVisible(page, '#NewPlayerButton');
-        await typeVisible(page, '#NewUserPlayername', name);
+        await typeVisible(page, '#NewUserPlayerUsername', name);
         await typeVisible(page, '#NewUserPlayerPassword', 'cambiar123');
 
         await Promise.all([

@@ -60,6 +60,7 @@ export function AuthProvider({ children }) {
     const addAcount = async (account) => {
         const res = await newAccountAPI({ account });
         setUser(res.data.user);
+        return res.data;
     };
 
     return (

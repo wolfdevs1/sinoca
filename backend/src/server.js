@@ -23,7 +23,7 @@ socketHandler(io);
 //checkEmails();
 
 // Conexión a MongoDB
-mongoose.connect("mongodb://localhost:27017/11deabril")
+mongoose.connect("mongodb://localhost:27017/sinoca")
     .then(() => console.log('MongoDB conectado'))
     .catch(err => console.error(err));
 
