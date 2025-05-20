@@ -1,53 +1,127 @@
-/* ---------- FUENTE ---------- */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');
 
-/* ---------- RESETEO GENERAL ---------- */
+/* ---------- RESET GLOBAL ---------- */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
   font-family: 'Montserrat', sans-serif;
-  font-size: 14px;
-  color: #333;
+  font-size: 16px;
+  color: #e5e7eb;
 }
 
+/* ---------- BODY ---------- */
 body {
-  height: 100dvh;
-  background-color: #f4f4f4;
-  line-height: 1.6;
+  min-height: 100dvh;
+  background-image: linear-gradient(rgba(0,0,0,0.5), rgba(15,15,30,0.7)), url('/casino.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 20px;
+  position: relative;
+  z-index: 0;
 }
 
-/* ---------- FORMULARIO PRINCIPAL ---------- */
+@media (min-width: 768px) {
+  body {
+    background-image: linear-gradient(rgba(0,0,0,0.5), rgba(15,15,30,0.7)), url('/casino.png');
+  }
+}
+
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(15, 15, 30, 0.8));
+  backdrop-filter: blur(3px);
+  z-index: -1;
+}
+
+/* ---------- FORMULARIO ---------- */
 form {
-  gap: 20px;
-  width: 400px;
   display: flex;
   flex-direction: column;
-  align-items: center;
   padding: 20px;
-  background: #fff;
-  border-radius: 5px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  gap: 16px;
+  background-color: rgba(31, 41, 55, 0.7);
+  border-radius: 12px;
+box-shadow:
+  0 6px 20px rgba(0, 0, 0, 0.4),
+  inset 0 1px 2px rgba(255,255,255,0.05),
+  inset 0 -1px 2px rgba(0,0,0,0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 0 auto;
+  z-index: 1;
+  position: relative;
+  overflow: hidden;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
-.alerta {
-  font-size: 11px;
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
+
+
+/* ---------- TÍTULOS Y BRANDING ---------- */
 h1 {
+  text-align: center;
   font-size: 24px;
-  color: #333;
 }
 
-/* ---------- CAMPOS DE TELÉFONO EN FILA ---------- */
+.branding {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.branding-icon {
+  font-size: 36px;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.2));
+}
+
+.titulo-profesional {
+  font-size: 32px;
+  font-weight: 700;
+  color: #ffffffda;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+        text-shadow: 0 1px 4px rgba(255, 255, 255, 0.1);
+}
+
+.subtitulo-profesional {
+  font-size: 14px;
+  color: #9ca3af;
+  font-weight: 400;
+  letter-spacing: 1px;
+}
+
+/* ---------- ALERTA ---------- */
+.alerta {
+  font-size: 12px;
+  text-align: center;
+  color: #f87171;
+}
+
+/* ---------- INPUTS ---------- */
 .input-group {
   display: flex;
   gap: 10px;
   width: 100%;
-  align-items: center;
 }
 
 .input-codArea {
@@ -59,76 +133,201 @@ h1 {
 }
 
 .input {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 12px;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  width: 100%;
+  background-color: #1f2937;
+  color: #e5e7eb;
+transition: all 0.2s ease-in-out;
+}
+
+input:focus {
+  border-color: #facc15a4;
+  outline: none;
+box-shadow: 0 0 5px 3px rgba(250, 204, 21, 0.1);
+  background-color: #273244;
+}
+
+
+
+.input-icon-group {
+  position: relative;
   width: 100%;
 }
 
-/* ---------- INPUT GENERAL ---------- */
-input:focus {
-  border-color: #007BFF;
-  outline: none;
+.input-icon-group .input {
+  padding-right: 36px; /* espacio para el icono */
 }
 
-/* ---------- BOTONES REUTILIZABLES ---------- */
+.input-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+
+/* ---------- BOTONES ---------- */
 .btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 20px;
-  background-color: #007BFF;
+  position: relative;
+  overflow: hidden;
+  padding: 10px;
+  width: 100%;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
   color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
   font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
   text-align: center;
-  text-decoration: none;
-  height: 38px;
-  box-sizing: border-box;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+  margin-top: 6px;
+  margin-bottom: 4px;
 }
 
-/* ---------- GRUPO DE BOTONES ---------- */
+.btn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
+  transform: skewX(-25deg);
+  animation: shine 2.5s infinite;
+}
+
+@keyframes shine {
+  0% { left: -75%; }
+  100% { left: 125%; }
+}
+
+.btn:hover {
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.9);
+  transform: scale(1.03);
+}
+
+/* ---------- BOTÓN GROUP ---------- */
 .btn-group {
   display: flex;
-  justify-content: space-between;
-  width: 100%;
-  align-items: center;
-}
-
-.btn-group-panel {
   flex-direction: column;
+  gap: 10px;
 }
 
 .btn-group-panel .btn {
   width: 100%;
-  margin-bottom: 10px;
 }
 
-/* ---------- LINK GENERAL ---------- */
+/* ---------- LINKS ---------- */
+.link-group {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.link-group span {
+  font-size: 14px;
+}
+
 a {
   text-decoration: none;
+  color: #facc15;
+  font-weight: 500;
+  font-size: 14px;
 }
 
-
 /* ---------- SPINNER ---------- */
-
 .spinner {
   width: 100%;
   height: 100%;
   animation: rotate 2s linear infinite;
 }
+
 .spinner .path {
-  stroke: #333;            /* color de la línea */
+  stroke: #facc15;
   stroke-linecap: round;
   animation: dash 1.5s ease-in-out infinite;
 }
+
 @keyframes rotate {
   100% { transform: rotate(360deg); }
 }
+
 @keyframes dash {
   0%   { stroke-dasharray: 1,150; stroke-dashoffset: 0; }
   50%  { stroke-dasharray: 90,150; stroke-dashoffset: -35; }
   100% { stroke-dasharray: 90,150; stroke-dashoffset: -124; }
+}
+
+/* ---------- RESPONSIVE DESIGN ---------- */
+@media (min-width: 768px) {
+  form {
+    padding: 32px;
+    gap: 20px;
+  }
+
+  .titulo-profesional {
+    font-size: 36px;
+
+  }
+
+  .subtitulo-profesional {
+    font-size: 16px;
+  }
+
+  .input {
+    padding: 14px;
+    font-size: 17px;
+  }
+
+  .btn {
+    font-size: 16px;
+    padding: 14px;
+  }
+
+  .link-group span,
+  .link-group a {
+    font-size: 15px;
+  }
+
+  .branding-icon {
+    font-size: 40px;
+  }
+}
+
+@media (min-width: 1024px) {
+  form {
+    padding: 36px;
+    border-radius: 20px;
+    box-shadow:
+      0 8px 24px rgba(0, 0, 0, 0.4),
+      0 0 80px rgba(255, 255, 255, 0.08);
+  }
+
+  .titulo-profesional {
+    font-size: 40px;
+    letter-spacing: 2px;
+  }
+
+  .subtitulo-profesional {
+    font-size: 18px;
+  }
+
+  .input {
+    padding: 16px;
+    font-size: 18px;
+  }
+
+  .btn {
+    font-size: 17px;
+    padding: 16px;
+  }
+
+  .branding-icon {
+    font-size: 42px;
+  }
 }

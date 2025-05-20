@@ -18,13 +18,24 @@ function LoginPage() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <h1>Casino</h1>
+<div className="branding">
+  <div className="branding-icon">🎲</div>
+  <h1 className="titulo-profesional">¡Bienvenido!</h1>
+  <p className="subtitulo-profesional">Casino Joyita</p>
+</div>
+
+
+
 
       <input value={name} onChange={e => setName(e.target.value)} className="input" type="text" placeholder="Usuario" required />
 
       <div className="btn-group">
-        <Link to="/register" className="btn">Registrarse</Link>
         <button className="btn" type="submit">Ingresar</button>
+        <div className="link-group">
+          <span>¿No tienes una cuenta? </span>
+          <Link to="/register">Registrarse</Link>
+        </div>
+
       </div>
 
     </form>

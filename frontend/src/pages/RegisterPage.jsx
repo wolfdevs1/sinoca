@@ -1,103 +1,129 @@
-// src/pages/RegisterPage.jsx
 import { useContext, useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { SocketContext } from "../context/SocketContext";
 import { register as registerAPI } from "../services/auth";
+import { parsePhoneNumberFromString, AsYouType } from "libphonenumber-js";
 
 export default function RegisterPage() {
-    const [name, setName] = useState("");
-    const [phone, setPhone] = useState("");
-    const [verified, setVerified] = useState(false);
+  const [name, setName] = useState("");
+  const [phoneRaw, setPhoneRaw] = useState("");
+  const [phoneFormatted, setPhoneFormatted] = useState("");
+  const [verified, setVerified] = useState(false);
+  const [isValidPhone, setIsValidPhone] = useState(null);
 
-    const socket = useContext(SocketContext);
+  const socket = useContext(SocketContext);
 
-    // 1) Función única que hace la llamada a la API,
-    // guarda el token y redirige
-    const handleRegister = useCallback(async () => {
-        try {
-            const formattedPhone = `549${phone}@c.us`;
-            const res = await registerAPI({ name, phone: formattedPhone });
-            const { token } = res.data;
-            localStorage.setItem("token", token);
-            window.location.href = '/'; // Redirige a la página principal
-        } catch (error) {
-            alert(
-                "Error al registrarse: " +
-                (error.response?.data?.error || error.message)
-            );
-        }
-    }, [name, phone]);
+  const handleRegister = useCallback(async () => {
+    try {
+      const parsed = parsePhoneNumberFromString(phoneRaw, "AR");
+      if (!parsed?.isValid()) {
+        alert("El número de teléfono no es válido.");
+        return;
+      }
 
-    // 2) Al pulsar “Ingresar”
-    const ingresar = async (e) => {
-        e.preventDefault();
+      const formattedPhone = parsed.number.replace("+", "") + "@c.us";
 
-        // Si no está validado, llamo directo al registro
-        if (verified) {
-            await handleRegister();
-            return;
-        }
+      const res = await registerAPI({ name, phone: formattedPhone });
+      const { token } = res.data;
+      localStorage.setItem("token", token);
+      window.location.href = "/";
+    } catch (error) {
+      alert("Error al registrarse: " + (error.response?.data?.error || error.message));
+    }
+  }, [name, phoneRaw]);
 
-        // Si ya está validado, emito el evento
-        socket.emit("verify", name, `549${phone}@c.us`, 'register', (res) => {
-            if (res.ok) {
-                setVerified(true);
-                alert(res.msg);
-            } else {
-                alert(res.msg);
-            }
-        });
+  const ingresar = async (e) => {
+    e.preventDefault();
+
+    const parsed = parsePhoneNumberFromString(phoneRaw, "AR");
+    if (!parsed?.isValid()) {
+      alert("El número de teléfono no es válido.");
+      return;
+    }
+
+    if (verified) {
+      await handleRegister();
+      return;
+    }
+
+    const formattedPhone = parsed.number.replace("+", "") + "@c.us";
+
+    socket.emit("verify", name, formattedPhone, "register", (res) => {
+      if (res.ok) {
+        setVerified(true);
+        alert(res.msg);
+      } else {
+        alert(res.msg);
+      }
+    });
+  };
+
+  useEffect(() => {
+    const onVerified = (res) => {
+      if (res.ok) {
+        handleRegister();
+      } else {
+        alert(res.msg);
+      }
     };
 
-    // 3) Escucho el evento del socket y reutilizo handleRegister
-    useEffect(() => {
-        const onVerified = (res) => {
-            if (res.ok) {
-                handleRegister();
-            } else {
-                alert(res.msg);
-            }
-        };
+    socket.on("verified", onVerified);
+    return () => {
+      socket.off("verified", onVerified);
+    };
+  }, [socket, handleRegister]);
 
-        socket.on("verified", onVerified);
-        return () => {
-            socket.off("verified", onVerified);
-        };
-    }, [socket, handleRegister]);
+  const handlePhoneChange = (e) => {
+    const rawDigits = e.target.value.replace(/\D/g, "");
+    const formatter = new AsYouType("AR");
+    const formatted = formatter.input(rawDigits);
 
-    return (
-        <form onSubmit={ingresar}>
-            <h1>Registro</h1>
+    setPhoneRaw(rawDigits);
+    setPhoneFormatted(formatted);
 
-            <input
-                className="input"
-                type="text"
-                placeholder="Nombre de usuario"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-            />
+    const parsed = parsePhoneNumberFromString(rawDigits, "AR");
+    setIsValidPhone(parsed?.isValid() ?? false);
+  };
 
-            <div className="input-group">
-                <input
-                    className="input"
-                    type="tel"
-                    placeholder="Celular"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    required
-                    disabled={verified}
-                />
-            </div>
+  return (
+    <form onSubmit={ingresar}>
+      <h1>Registro</h1>
 
-            <div className="btn-group">
-                <Link to="/" className="btn">
-                    Regresar
-                </Link>
-                <button className="btn" type="submit">
-                    Ingresar
-                </button>
-            </div>
-        </form>
-    );
+      <input
+        className="input"
+        type="text"
+        placeholder="Nombre de usuario"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        required
+      />
+
+      <div className="input-icon-group">
+        <input
+          className="input"
+          type="tel"
+          placeholder="Celular"
+          value={phoneFormatted}
+          onChange={handlePhoneChange}
+          disabled={verified}
+          required
+        />
+        {isValidPhone !== null && (
+          <span className="input-icon">
+            {isValidPhone ? "✓" : "X"}
+          </span>
+        )}
+      </div>
+
+      <div className="btn-group">
+        <button className="btn" type="submit">
+          Ingresar
+        </button>
+        <div className="link-group">
+          <span>¿Tienes una cuenta? </span>
+          <Link to="/">Iniciar sesión</Link>
+        </div>
+      </div>
+    </form>
+  );
 }
