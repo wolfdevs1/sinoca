@@ -4,6 +4,7 @@ const User = require('../models/User');
 const Transfer = require('../models/Transfer');
 const { deposit, withdraw, changePassword } = require('../services/scrapPage');
 const Withdraw = require('../models/Withdraw');
+const Account = require('../models/Account');
 
 // Ruta para cualquier usuario autenticado
 router.get('/profile', protect, async (req, res) => {
@@ -81,6 +82,37 @@ router.post('/new-account', protect, async (req, res) => {
     }
 });
 
+router.post('/add-new-account', protect, adminOnly, async (req, res) => {
+    try {
+        const { name, alias } = req.body;
+        await Account.create({ name, alias });
+        return res.status(200).json({ message: 'Cuenta agregada correctamente' });
+    } catch (error) {
+        console.log(err);
+        return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
+
+router.post('/delete-account', protect, adminOnly, async (req, res) => {
+    try {
+        await Account.findByIdAndDelete(req.body.id);
+        return res.status(200).json({ message: 'Cuenta borrada correctamente' });
+    } catch (error) {
+        console.log(err);
+        return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
+
+router.post('/change-withdraw-state', protect, adminOnly, async (req, res) => {
+    try {
+        await Withdraw.findByIdAndUpdate(req.body.id, { state: req.body.value });
+        res.status(200).json({ message: 'Estado actualizado correctamente' });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
+
 // Ruta solo para administradores
 router.get('/all', protect, adminOnly, async (req, res) => {
     const users = await User.find().select('name phone role');  // sólo esos tres
@@ -90,6 +122,19 @@ router.get('/all', protect, adminOnly, async (req, res) => {
 router.get('/withdraws', protect, adminOnly, async (req, res) => {
     const withdraws = await Withdraw.find().select('account amount');
     res.json(withdraws);
+});
+
+router.get('/accounts', protect, adminOnly, async (req, res) => {
+    const accounts = await Account.find().select('name alias');
+    res.json(accounts);
+});
+
+router.get('/random-account', protect, async (req, res) => {
+    const account = await Account.aggregate([
+        { $sample: { size: 1 } },  // Selecciona un documento aleatorio
+        { $project: { name: 1, alias: 1 } }  // Proyecta solo los campos name y alias
+    ]);
+    res.json(account[0]);  // Dado que $sample devuelve un array, accedemos al primer elemento
 });
 
 module.exports = router;

@@ -1,16 +1,20 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { deposit as depositAPI } from "../services/auth";
+import { deposit as depositAPI, getRandomAccount } from "../services/auth";
 import { AuthContext } from '../context/AuthContext';
 import { toast, ToastContainer } from 'react-toastify';
 import { NumericFormat } from 'react-number-format';
 import 'react-toastify/dist/ReactToastify.css';
+import { FaArrowLeft } from 'react-icons/fa';
+
+
 
 function DepositPage() {
     const [name, setName] = useState("");
     const [amount, setAmount] = useState(""); // Almacena valor como string para formateo
     const { user } = useContext(AuthContext);
     const [loading, setLoading] = useState(false);
+    const [randomAccount, setRandomAccount] = useState(null);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -33,12 +37,27 @@ function DepositPage() {
     };
 
     const handleCopy = () => {
-        const textToCopy = 'roberpay2';
+        const textToCopy = randomAccount.alias;
+        const toastId = 'alias-copy-toast'; // Un ID único para el toast
+
+        // Escribir el alias al portapapeles
         if (navigator.clipboard) {
             navigator.clipboard.writeText(textToCopy)
-                .then(() => toast.success("Alias copiado al portapapeles!"))
-                .catch(() => toast.error("Error al copiar al portapapeles"));
+                .then(() => {
+                    // Si ya existe el toast con este ID, se actualiza
+                    toast.success("Alias copiado al portapapeles!", {
+                        toastId,  // Usar el mismo ID para reemplazar el anterior
+                        autoClose: 2000, // Opcional: tiempo de cierre
+                    });
+                })
+                .catch(() => {
+                    toast.error("Error al copiar al portapapeles", {
+                        toastId,  // Usar el mismo ID para reemplazar el anterior
+                        autoClose: 3000, // Opcional: tiempo de cierre
+                    });
+                });
         } else {
+            // Si no se puede usar clipboard API
             const textArea = document.createElement('textarea');
             textArea.style.position = 'absolute';
             textArea.style.left = '-9999px';
@@ -47,25 +66,52 @@ function DepositPage() {
             textArea.select();
             try {
                 document.execCommand('copy');
-                toast.success("Alias copiado al portapapeles!");
+                toast.success("Alias copiado al portapapeles!", {
+                    toastId,  // Usar el mismo ID para reemplazar el anterior
+                    autoClose: 2000, // Opcional: tiempo de cierre
+                });
             } catch {
-                toast.error("Error al copiar al portapapeles");
+                toast.error("Error al copiar al portapapeles", {
+                    toastId,  // Usar el mismo ID para reemplazar el anterior
+                    autoClose: 3000, // Opcional: tiempo de cierre
+                });
             }
             document.body.removeChild(textArea);
         }
     };
 
+    useEffect(() => {
+        const fetchRandomAccount = async () => {
+            try {
+                // Asume que axios ya usa el baseURL y el header Authorization con el token
+                const { data } = await getRandomAccount();
+                setRandomAccount(data);
+
+            } catch (err) {
+                console.error('Error al obtener usuarios:', err);
+            }
+        }
+        fetchRandomAccount();
+    }, []);
+
     return (
         <>
             <form onSubmit={handleSubmit}>
 
-                <Link to="/" className="back-button">🔙</Link>
+<div className="form-header">
+  <Link to="/" className="circle-back-button" title="Volver al inicio">
+    <FaArrowLeft />
+  </Link>
+  <h1 className="page-title">CARGA</h1>
+</div>
 
-                <h1>CARGA</h1>
+
                 <p>🏦 Realice la transferencia a la siguiente cuenta</p>
-                <p className="copy-alias" onClick={handleCopy}>👤 TITULAR: Roberto Flores</p>
                 <p className="copy-alias" onClick={handleCopy}>
-                    🔗 ALIAS: roberpay2
+                    👤 TITULAR: {randomAccount ? randomAccount.name : 'Cargando...'}
+                </p>
+                <p className="copy-alias" onClick={handleCopy}>
+                    🔗 ALIAS: {randomAccount ? randomAccount.alias : 'Cargando...'}
                     <span className="copy-icon" title="Copiar alias">📌</span>
                 </p>
                 <p className="warning">⚠️ El ALIAS puede cambiar con el tiempo ⚠️</p>

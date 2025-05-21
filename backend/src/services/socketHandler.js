@@ -31,7 +31,7 @@ module.exports = (io) => {
             }, 5 * 60 * 1000);
             await client.sendMessage(
                 phone,
-                'Te estás intentando registrar en el casino. ¿Autorizas este número?'
+                `Te estás intentando registrar en el casino. ¿Autorizas este número?`
             );
             callback({ ok: true, msg: 'Mensaje de validación enviado.' });
         });

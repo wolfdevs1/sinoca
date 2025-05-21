@@ -7,7 +7,7 @@ const { createUser } = require('../services/scrapPage');
 router.post('/login', async (req, res) => {
     try {
         const { name } = req.body;
-        const user = await User.findOne({ name });
+        const user = await User.findOne({ name: new RegExp(`^${name}$`, 'i') });
         if (!user) return res.status(400).json({ error: 'Credenciales inválidas' });
         const payload = { id: user._id, role: user.role };
         const token = jwt.sign(payload, process.env.JWT_SECRET);

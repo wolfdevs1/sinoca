@@ -1,4 +1,4 @@
-2025/05/21-03:25:44.732 218c Reusing MANIFEST C:\Users\juli1\Desktop\sinoca\backend\.wwebjs_auth\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
-2025/05/21-03:25:44.733 218c Recovering log #66
-2025/05/21-03:25:44.736 218c Reusing old log C:\Users\juli1\Desktop\sinoca\backend\.wwebjs_auth\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000066.log 
-2025/05/21-03:25:49.926 10e4 Manual compaction at level-0 from '\x00\x1b\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x1c\x00\x00\x00' @ 0 : 0; will stop at (end)
+2025/05/21-18:29:41.417 1004 Reusing MANIFEST C:\Users\Programacion_1\Desktop\sinoca\backend\.wwebjs_auth\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2025/05/21-18:29:41.418 1004 Recovering log #112
+2025/05/21-18:29:41.432 1004 Reusing old log C:\Users\Programacion_1\Desktop\sinoca\backend\.wwebjs_auth\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000112.log 
+2025/05/21-18:29:45.392 235c Manual compaction at level-0 from '\x00&\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00'\x00\x00\x00' @ 0 : 0; will stop at (end)

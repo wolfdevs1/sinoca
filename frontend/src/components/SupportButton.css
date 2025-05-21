@@ -1,0 +1,44 @@
+.support-button-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.support-button {
+  display: flex;
+  align-items: center;
+  background-color: #00ff5e45;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: bold;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 50px; /* solo icono al inicio */
+}
+
+.support-button:hover {
+  background-color: #128c7e;
+  transform: translateY(-2px);
+  max-width: 220px; /* se expande */
+}
+
+.icon {
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.support-text {
+  opacity: 0;
+  margin-left: 6px;
+  transition: opacity 0.3s ease;
+}
+
+/* Mostrar texto solo en hover */
+.support-button:hover .support-text {
+  opacity: 1;
+}
