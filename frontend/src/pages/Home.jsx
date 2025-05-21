@@ -27,23 +27,60 @@ export function Home() {
   };
 
   return (
-    <div>
-      <h1>Bienvenido, {user.name}!</h1>
-      <div className="alerta">
-        Si es la primera vez que ingresas tu contraseña es cambiar123
+    <>
+    <div className="home-container">
+    
+      
+      <div className="welcome-section">
+        <h1 className="welcome-title">Bienvenido, <span className="user-name">{user.name}</span></h1>
+        <div className="password-alert">
+          <span className="alert-icon">⚠️</span>
+          <p>Si es la primera vez que ingresas tu contraseña es <strong>cambiar123</strong></p>
+        </div>
       </div>
-      <div className="btn-group btn-group-panel">
-        <Link to="/deposit" className="btn">Cargar</Link>
-        <Link to="/withdraw" className="btn">Retirar</Link>
-        <button onClick={handleChangePassword} type="button" className="btn" disabled={loading}>
-          {loading ? "Cambiando..." : 'Cambiar Contraseña'}
+
+      <div className="casino-link-container">
+        <Link to="/casino" className="casino-link">
+          <span className="casino-icon">🎰</span>
+          <span className="casino-text">Link al casino ¡CLICK AQUI!</span>
+          <span className="shine-effect"></span>
+        </Link>
+      </div>
+
+      <div className="action-buttons">
+        <Link to="/deposit" className="action-button deposit-button">
+          <span className="button-icon">💰</span>
+          <span className="button-text">Cargar Saldo</span>
+        </Link>
+        
+        <Link to="/withdraw" className="action-button withdraw-button">
+          <span className="button-icon">💸</span>
+          <span className="button-text">Retirar Fondos</span>
+        </Link>
+        
+        <button 
+          className="action-button password-button"
+          onClick={handleChangePassword}
+          disabled={loading}
+        >
+          <span className="button-icon">🔑</span>
+          <span className="button-text">
+            {loading ? "Cambiando..." : 'Cambiar Contraseña'}
+          </span>
         </button>
-        <button onClick={handleLogout} className="btn">
-          Cerrar Sesión
+        
+        <button 
+          className="action-button logout-button"
+          onClick={handleLogout}
+        >
+          <span className="button-icon">🚪</span>
+          <span className="button-text">Cerrar Sesión</span>
         </button>
       </div>
-      <ToastContainer />
+        
     </div>
+    <ToastContainer/>
+    </>
   );
 }
 
