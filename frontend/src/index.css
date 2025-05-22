@@ -379,10 +379,10 @@ input[type="number"] {
 .home-container {
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: 16px;
   width: 100%;
   max-width: 100%;
-  gap: 20px;
+  gap: 16px;
   background-color: rgba(31, 41, 55, 0.7);
   border-radius: 12px;
   box-shadow:
@@ -401,14 +401,14 @@ input[type="number"] {
 /* ---------- WELCOME SECTION ---------- */
 .welcome-section {
   text-align: center;
-  padding-bottom: 15px;
+  padding-bottom: 10px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .welcome-title {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 600;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   color: #ffffffda;
   text-shadow: 0 1px 4px rgba(255, 255, 255, 0.1);
 }
@@ -423,9 +423,9 @@ input[type="number"] {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   background-color: rgba(0, 0, 0, 0.25);
-  padding: 10px;
+  padding: 6px 16px;
   border-radius: 8px;
   margin-top: 10px;
 }
@@ -456,12 +456,12 @@ input[type="number"] {
   justify-content: center;
   gap: 10px;
   width: 100%;
-  padding: 12px;
+  padding: 10px;
   background: linear-gradient(135deg, #2d3748, #1a202c);
   border-radius: 10px;
   text-decoration: none;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 15px;
   color: white;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -470,7 +470,7 @@ input[type="number"] {
 }
 
 .casino-icon {
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .casino-text {
@@ -511,8 +511,8 @@ input[type="number"] {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 18px 10px;
+  gap: 8px;
+  padding: 14px 10px;
   border-radius: 12px;
   text-decoration: none;
   border: none;
@@ -777,7 +777,7 @@ input[type="number"] {
   justify-content: center;
   gap: 10px;
   width: 100%;
-  padding: 8px;
+  padding: 6px;
 
   border-radius: 8px;
   background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(220, 38, 38, 0.3));

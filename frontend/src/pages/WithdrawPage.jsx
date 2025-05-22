@@ -5,6 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 import { SocketContext } from "../context/SocketContext";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { FaArrowLeft } from 'react-icons/fa';
 
 export default function WithdrawPage() {
     const { user, addAcount } = useContext(AuthContext);
@@ -89,7 +90,12 @@ export default function WithdrawPage() {
     return (
         <>
             <form onSubmit={handleWithdraw} className="form">
-                <h1>Retiro</h1>
+                <div className="form-header">
+                  <Link to="/" className="circle-back-button" title="Volver al inicio">
+                    <FaArrowLeft />
+                  </Link>
+                  <h1 className="page-title">RETIRO</h1>
+                </div>
                 <input
                     type="number"
                     placeholder="Importe"
@@ -111,7 +117,6 @@ export default function WithdrawPage() {
                     ))}
                 </select>
                 <div className="btn-group">
-                    <Link to="/" className="btn">Regresar</Link>
                     <button type="submit" className="btn" disabled={loading}>
                         {loading ? "Retirando..." : "Retirar"}
                     </button>
