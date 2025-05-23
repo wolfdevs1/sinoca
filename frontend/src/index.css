@@ -815,3 +815,141 @@ input[type="number"] {
     font-size: 15px;
   }
 }
+
+.account-selector {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    width: 100%;
+}
+
+/* Para asegurar que funcione en todos los navegadores */
+.account-select::-ms-expand {
+    display: none; /* Ocultar flecha en IE */
+}
+
+/* Opcional: Cambiar color de la flecha en hover */
+.account-selector:hover .account-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23facc15' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+}
+
+.account-select {
+    flex: 1;
+    min-width: 0;
+    /* Remover la flecha predeterminada */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    
+    /* Agregar flecha personalizada */
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    
+    /* Agregar padding derecho para que el texto no se superponga con la flecha */
+    padding-right: 40px !important;
+}
+
+
+.select-wrapper {
+    position: relative;
+    flex: 1;
+}
+
+.select-wrapper::after {
+    content: '';
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid #ffffff;
+    pointer-events: none;
+}
+
+
+select:focus {
+  border-color: #facc15a4 !important;
+  outline: none !important;
+  box-shadow: 0 0 5px 3px rgba(250, 204, 21, 0.1) !important;
+  background-color: #273244 !important;
+}
+
+
+.account-select-alternative {
+    flex: 1;
+    min-width: 0;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    position: relative;
+    padding-right: 40px !important;
+}
+
+.add-account-btn {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    color: #e5e7eb;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.add-account-btn:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #facc15;
+}
+
+.add-account-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    background-color: rgba(17, 24, 39, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    animation: slideDown 0.3s ease-out;
+}
+
+.add-btn {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3) !important;
+}
+
+.add-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #059669, #047857) !important;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4) !important;
+}
+
+@keyframes slideDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 200px;
+    }
+}
+
+@media (min-width: 768px) {
+    .add-account-btn {
+        width: 48px;
+        height: 48px;
+        font-size: 18px;
+    }
+}
+
