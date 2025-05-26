@@ -2,7 +2,7 @@ const router = require('express').Router();
 const { protect, adminOnly } = require('../middleware/auth');
 const User = require('../models/User');
 const Transfer = require('../models/Transfer');
-const { deposit, withdraw, changePassword } = require('../services/scrapPage');
+const { deposit, withdraw, changePassword, desbloquear } = require('../services/scrapPage');
 const Withdraw = require('../models/Withdraw');
 const Account = require('../models/Account');
 
@@ -53,6 +53,20 @@ router.post('/change-password', protect, async (req, res) => {
             return res.status(400).json({ error: 'Error al cambiar la contraseña' });
         }
         return res.status(200).json({ message: 'Contraseña cambiada correctamente' });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
+
+router.post('/unlock-user', protect, async (req, res) => {
+    try {
+        const { name } = req.body;
+        const result = await unlockUser(name);
+        if (result !== 'ok') {
+            return res.status(400).json({ error: 'Error al desbloquear usuario' });
+        }
+        return res.status(200).json({ message: 'Usuario desbloqueado correctamente' });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ error: 'Error interno del servidor' });

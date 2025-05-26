@@ -180,7 +180,7 @@ async function withdraw(name, amount) {
 /**
  * Desbloquea un usuario (click en “Desbloquear”).
  */
-async function desbloquear(name) {
+async function unlockUser(name) {
     const { browser, page } = await initBrowser();
     try {
         await goToUser(page, name);
@@ -219,6 +219,6 @@ module.exports = {
     createUser,
     deposit,
     withdraw,
-    desbloquear,
+    unlockUser,
     changePassword,
 };
