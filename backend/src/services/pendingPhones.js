@@ -1,37 +1,36 @@
 // pendingPhones.js
 // ----------------
 // Gestiona la lista de teléfonos pendientes de verificar,
-// guardando para cada uno el socket y el usuario que lo inició.
+// guardando para cada uno el socket, usuario y su timeoutId
 
 const map = new Map();
 
 /**
- * Añade un teléfono pendiente junto con su socket y usuario
+ * Añade un teléfono pendiente junto con su socket, usuario y paso
  * @param {string} phone 
+ * @param {string} name 
  * @param {Socket} socket 
- * @param {any} name 
+ * @param {string} step 
+ * @param {Timeout} timeoutId 
  */
-function add(phone, name, socket, step = '') {
-    map.set(phone, { name, socket, step });
+function add(phone, name, socket, step = '', timeoutId) {
+    map.set(phone, { name, socket, step, timeoutId });
 }
 
-/** @param {string} phone */
 function has(phone) {
     return map.has(phone);
 }
 
-/** @param {string} phone */
 function remove(phone) {
+    const data = map.get(phone);
+    if (data?.timeoutId) {
+        clearTimeout(data.timeoutId); // Cancelar timeout si existe
+    }
     map.delete(phone);
 }
 
-/**
- * Devuelve el objeto { socket, user } para un teléfono dado
- * @param {string} phone 
- */
 function get(phone) {
     return map.get(phone);
 }
-
 
 module.exports = { add, has, remove, get };

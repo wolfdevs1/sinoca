@@ -17,13 +17,12 @@ export default function WithdrawPage() {
     const [newAccount, setNewAccount] = useState("");
     const [showAddAlias, setShowAddAlias] = useState(false);
 
-    const reversedAccounts = useMemo(
-        () => user.accounts.slice().reverse(),
-        [user.accounts]
-    );
+    const reversedAccounts = useMemo(() => {
+        return [...user.accounts].reverse();
+    }, [user.accounts]);
 
     useEffect(() => {
-        if (!account && reversedAccounts.length > 0) {
+        if (reversedAccounts.length > 0 && !account) {
             setAccount(reversedAccounts[0].name);
         }
     }, [reversedAccounts, account]);
@@ -49,6 +48,8 @@ export default function WithdrawPage() {
         try {
             const res = await addAcount(newAccount);
             toast.success(res.message || "Alias agregado correctamente");
+            // 🟢 Establecer como alias seleccionado actual
+            setAccount(newAccount);
             setNewAccount("");
             setShowAddAlias(false);
         } catch (err) {

@@ -1,22 +1,60 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { AuthContext } from '../context/AuthContext';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { SocketContext } from "../context/SocketContext";
 
 function LoginPage() {
   const [name, setName] = useState('');
   const { login } = useContext(AuthContext);
+  const socket = useContext(SocketContext);
+  const [loading, setLoading] = useState(false);
+  const timeoutRef = useRef(null); // referencia para limpiar el timeout
 
   const handleSubmit = async e => {
     e.preventDefault();
-    try {
-      await login(name);
-    } catch (err) {
-      const errMsg = err.response?.data?.error || err.message;
-      toast.error('Error al iniciar sesión: ' + errMsg);
-    }
+    setLoading(true);
+
+    // Configura el timeout para resetear `loading` en 5 minutos
+    timeoutRef.current = setTimeout(() => {
+      setLoading(false);
+      toast.info("La sesión de validación ha expirado.");
+    }, 5 * 60 * 1000); // 5 minutos en milisegundos
+
+    socket.emit('login', name, (res) => {
+      if (res.ok) {
+        toast.success(res.msg);
+      } else {
+        toast.error(res.msg);
+        setLoading(false); // en caso de error, detiene el loading
+        clearTimeout(timeoutRef.current); // limpia el timeout
+      }
+    });
   };
+
+  useEffect(() => {
+    socket.on('verified', async (res) => {
+      if (res.ok) {
+        try {
+          await login(name);
+          clearTimeout(timeoutRef.current); // limpia si todo salió bien
+          setLoading(false);
+        } catch (err) {
+          const errMsg = err.response?.data?.error || err.message;
+          toast.error('Error al iniciar sesión: ' + errMsg);
+          setLoading(false);
+        }
+      } else {
+        toast.error(res.msg);
+        setLoading(false);
+      }
+    });
+    return () => {
+      socket.off('verified');
+      clearTimeout(timeoutRef.current); // limpiar timeout si el componente se desmonta
+    }
+  }, [socket, name]);
 
   return (
     <>
@@ -37,7 +75,13 @@ function LoginPage() {
         />
 
         <div className="btn-group">
-          <button className="btn" type="submit">Ingresar</button>
+          <button
+            type="submit"
+            className={`btn ${loading ? "gray" : ""}`}
+            disabled={loading}
+          >
+            {loading ? "Validando..." : "Ingresar"}
+          </button>
           <div className="link-group">
             <span>¿No tienes una cuenta? </span>
             <Link to="/register">Registrarse</Link>

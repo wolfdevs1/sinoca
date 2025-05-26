@@ -18,15 +18,23 @@ client.on('message', async message => {
     const from = message.from;
     if (pending.has(from)) {
         const { socket, step } = pending.get(from);
-        const isRegisterStep = step === 'register' || step === 'new-account';
+        const isRegisterStep = step === 'register' || step === 'new-account' || step === 'login';
         const isNegativeResponse = message.body.trim().toLowerCase() === 'no';
         if (isRegisterStep) {
             if (isNegativeResponse) {
+                await message.reply('Acción denegada');
+                pending.remove(from);
                 return;
             }
-            await message.reply('¡Número verificado! 🎉');
+            let successMessage = '¡Número verificado! 🎉';
+            if (step === 'new-account') {
+                successMessage = 'Alias registrado con éxito';
+            } else if (step === 'login') {
+                successMessage = 'Acceso verificado';
+            }
+            await message.reply(successMessage);
             pending.remove(from);
-            socket.emit('verified', { ok: true, msg: 'Número verificado' });
+            socket.emit('verified', { ok: true, msg: successMessage });
         }
     }
 });
