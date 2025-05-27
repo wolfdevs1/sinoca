@@ -31,10 +31,10 @@ router.post('/deposit', protect, async (req, res) => {
 });
 
 router.post('/withdraw', protect, async (req, res) => {
-    const { name, amount, account } = req.body;
+    const { name, amount, account, phone } = req.body;
     const response = await withdraw(name, amount);
     if (response === 'ok') {
-        await Withdraw.create({ account, amount });
+        await Withdraw.create({ account, amount, name, phone });
         res.json({ message: 'Retiro cargado correctamente' });
     } else if (response === 'error') {
         res.status(400).json({ error: 'Error al cargar el retiro' });
@@ -134,7 +134,7 @@ router.get('/all', protect, adminOnly, async (req, res) => {
 });
 
 router.get('/withdraws', protect, adminOnly, async (req, res) => {
-    const withdraws = await Withdraw.find().select('account amount');
+    const withdraws = await Withdraw.find();
     res.json(withdraws);
 });
 

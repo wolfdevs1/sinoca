@@ -31,7 +31,7 @@ export default function WithdrawPage() {
         e.preventDefault();
         setLoading(true);
         try {
-            const res = await withdrawAPI({ name: user.name, amount, account });
+            const res = await withdrawAPI({ name: user.name, amount, account, phone: user.phone });
             toast.success(res.data.message || "Retiro realizado correctamente");
             setAmount("");
             setAccount("");

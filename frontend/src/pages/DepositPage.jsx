@@ -22,7 +22,7 @@ function DepositPage() {
             setLoading(true);
 
             // Convertir a número limpio (sin comas)
-            const numericAmount = parseFloat(amount.toString().replace(/,/g, ""));
+            const numericAmount = parseFloat(amount.toString().replace(/,/g, "")).toString();
 
             const res = await depositAPI({ name: user.name, amount: numericAmount });
             toast.success(res.data.message);
@@ -98,12 +98,12 @@ function DepositPage() {
         <>
             <form onSubmit={handleSubmit}>
 
-<div className="form-header">
-  <Link to="/" className="circle-back-button" title="Volver al inicio">
-    <FaArrowLeft />
-  </Link>
-  <h1 className="page-title">CARGA</h1>
-</div>
+                <div className="form-header">
+                    <Link to="/" className="circle-back-button" title="Volver al inicio">
+                        <FaArrowLeft />
+                    </Link>
+                    <h1 className="page-title">CARGA</h1>
+                </div>
 
 
                 <p>🏦 Realice la transferencia a la siguiente cuenta</p>
