@@ -16,9 +16,9 @@ router.post('/deposit', protect, async (req, res) => {
     const { name, amount } = req.body;
     const transfer = await Transfer.findOne({ amount });
     if (transfer) {
+        //await Transfer.findByIdAndDelete(transfer._id);
         const response = await deposit(name, amount);
         if (response === 'ok') {
-            //await Transfer.findByIdAndDelete(transfer._id);
             res.json({ message: 'Depósito cargado correctamente' });
         } else if (response === 'error') {
             res.status(400).json({ error: 'Error al cargar el depósito' });

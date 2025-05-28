@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import React from 'react';
 
 import LoginPage from './pages/LoginPage';
@@ -11,14 +11,15 @@ import AdminRoute from './components/AdminRoute';
 import PublicRoute from './components/PublicRoute';
 import DepositPage from './pages/DepositPage';
 import WithdrawPage from './pages/WithdrawPage';
-import WhatsAppButton from './components/SupportButton'
+import WhatsAppButton from './components/SupportButton';
 
 function App() {
+  const location = useLocation();
+
   return (
     <React.Fragment>
-      <WhatsAppButton />
+      {!location.pathname.startsWith('/admin') && <WhatsAppButton />}
       <Routes>
-        {/* Si ya está logueado, /login va a "/" */}
         <Route
           path="/login"
           element={
@@ -27,7 +28,6 @@ function App() {
             </PublicRoute>
           }
         />
-
         <Route
           path="/register"
           element={
@@ -36,8 +36,6 @@ function App() {
             </PublicRoute>
           }
         />
-
-        {/* Rutas protegidas */}
         <Route
           path="/"
           element={
@@ -46,7 +44,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/deposit"
           element={
@@ -55,7 +52,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/withdraw"
           element={
@@ -64,7 +60,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/admin"
           element={
@@ -73,10 +68,9 @@ function App() {
             </AdminRoute>
           }
         />
-
       </Routes>
     </React.Fragment>
   );
-};
+}
 
 export default App;
