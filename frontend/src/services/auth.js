@@ -10,8 +10,8 @@ export const deposit = data => API.post('/user/deposit', data);
 export const withdraw = data => API.post('/user/withdraw', data);
 export const changePassword = data => API.post('/user/change-password', data);
 export const unlockUser = data => API.post('/user/unlock-user', data);
-export const newAccount = data => API.post('/user/new-account', data);
-export const addNewAccount = data => API.post('/user/add-new-account', data);
+export const newUserAccount = data => API.post('/user/new-account', data);
+export const addAccount = data => API.post('/user/add-new-account', data);
 export const deleteAccount = data => API.post('/user/delete-account', data);
 export const changeWithdrawState = data => API.post('/user/change-withdraw-state', data);
 

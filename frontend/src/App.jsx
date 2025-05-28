@@ -5,6 +5,8 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import Home from './pages/Home';
 import AdminPage from './pages/AdminPage';
+import AdminWithdraw from './pages/AdminWithdraws';
+import AdminAccounts from './pages/AdminAccounts';
 
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
@@ -65,6 +67,22 @@ function App() {
           element={
             <AdminRoute>
               <AdminPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/retiros"
+          element={
+            <AdminRoute>
+              <AdminWithdraw />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/cuentas"
+          element={
+            <AdminRoute>
+              <AdminAccounts />
             </AdminRoute>
           }
         />

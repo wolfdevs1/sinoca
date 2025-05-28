@@ -5,7 +5,8 @@ const withdrawSchema = new mongoose.Schema({
     amount: { type: String },
     state: { type: Boolean },
     name: { type: String },
-    phone: { type: String }
+    phone: { type: String },
+    withdrawAccount: { type: String },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Withdraw', withdrawSchema);

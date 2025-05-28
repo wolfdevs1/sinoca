@@ -8,7 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { FaArrowLeft, FaPlus, FaTimes, FaWallet } from 'react-icons/fa';
 
 export default function WithdrawPage() {
-    const { user, addAcount } = useContext(AuthContext);
+    const { user, newUserAccount } = useContext(AuthContext);
     const socket = useContext(SocketContext);
 
     const [amount, setAmount] = useState("");
@@ -46,7 +46,7 @@ export default function WithdrawPage() {
     const handleNewAccount = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await addAcount(newAccount);
+            const res = await newUserAccount(newAccount);
             toast.success(res.message || "Alias agregado correctamente");
             // 🟢 Establecer como alias seleccionado actual
             setAccount(newAccount);
@@ -57,7 +57,7 @@ export default function WithdrawPage() {
         } finally {
             setLoading(false);
         }
-    }, [newAccount, addAcount]);
+    }, [newAccount, newUserAccount]);
 
     const handleAlias = (e) => {
         e.preventDefault();

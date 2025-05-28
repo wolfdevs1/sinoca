@@ -119,7 +119,7 @@ router.post('/delete-account', protect, adminOnly, async (req, res) => {
 
 router.post('/change-withdraw-state', protect, adminOnly, async (req, res) => {
     try {
-        await Withdraw.findByIdAndUpdate(req.body.id, { state: req.body.value });
+        await Withdraw.findByIdAndUpdate(req.body.withdrawId, { state: true, withdrawAccount: req.body.withdrawAccount });
         res.status(200).json({ message: 'Estado actualizado correctamente' });
     } catch (error) {
         console.log(error);
