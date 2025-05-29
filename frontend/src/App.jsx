@@ -7,6 +7,7 @@ import Home from './pages/Home';
 import AdminPage from './pages/AdminPage';
 import AdminWithdraw from './pages/AdminWithdraws';
 import AdminAccounts from './pages/AdminAccounts';
+import AdminUsers from './pages/AdminUsers';
 
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
@@ -14,6 +15,7 @@ import PublicRoute from './components/PublicRoute';
 import DepositPage from './pages/DepositPage';
 import WithdrawPage from './pages/WithdrawPage';
 import WhatsAppButton from './components/SupportButton';
+
 
 function App() {
   const location = useLocation();
@@ -86,6 +88,15 @@ function App() {
             </AdminRoute>
           }
         />
+        <Route
+          path="/admin/users"
+          element={
+            <AdminRoute>
+              <AdminUsers />
+            </AdminRoute>
+          }
+        />
+
       </Routes>
     </React.Fragment>
   );
