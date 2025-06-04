@@ -36,7 +36,7 @@ module.exports = (io) => {
             if (step === 'register') {
                 msg = 'Te estás intentando registrar en el casino. ¿Autorizas este número?';
             } else if (step === 'new-account') {
-                msg = 'Estas agregando un nuevo alias. ¿Autorizas este número?';
+                msg = '¿Estas agregando un nuevo alias?';
             }
 
             if (msg) {
