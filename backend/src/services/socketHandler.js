@@ -43,7 +43,7 @@ module.exports = (io) => {
                 await client.sendMessage(phone, msg);
             }
 
-            callback({ ok: true, msg: 'Mensaje de validación enviado.' });
+            callback({ ok: true, msg: 'Mensaje de validación enviado. Revisa tu Whatsapp' });
         });
 
         socket.on('login', async (name, callback) => {
