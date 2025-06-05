@@ -1,14 +1,16 @@
 import { useEffect, useState, useContext } from 'react';
 import { getWithdraws, changeWithdrawState as changeWithdrawStateAPI, getAccounts as getAccountsAPI } from '../services/auth';
 import { AuthContext } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function AdminWithdraw() {
     const [selectedBanks, setSelectedBanks] = useState({});
     const [bankList, setBankList] = useState([]);
     const [withdraws, setWithdraws] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
-    const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'pending', 'completed'
+    const [filterStatus, setFilterStatus] = useState('all');
     const { logout } = useContext(AuthContext);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchWithdraws = async () => {
@@ -29,7 +31,7 @@ export default function AdminWithdraw() {
         const fetchBanks = async () => {
             try {
                 const { data } = await getAccountsAPI();
-                setBankList(data); // [{ name: 'Banco Nación', alias: 'Banco1' }, ...]
+                setBankList(data);
             } catch (err) {
                 console.error('Error al obtener bancos:', err);
             }
@@ -58,7 +60,10 @@ export default function AdminWithdraw() {
         setSelectedBanks(prev => ({ ...prev, [withdrawId]: bank }));
     };
 
-    // Filtrar retiros basado en búsqueda y estado
+    const handleGoBack = () => {
+        navigate('/admin'); // Ajusta esta ruta si necesitas otra
+    };
+
     const filteredWithdraws = withdraws.filter(withdraw => {
         const matchesSearch = withdraw.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             withdraw.phone.includes(searchTerm) ||
@@ -73,11 +78,36 @@ export default function AdminWithdraw() {
 
     return (
         <div className="admin-container">
-            <div className="admin-header">
-                <h1 className="admin-title">Retiros</h1>
-                <button className="logout-btn" onClick={logout}>
-                    Cerrar Sesión
+            <div className='admin-header'>
+                <button
+                    onClick={handleGoBack}
+                    style={{
+                        background: 'rgba(31, 41, 55, 0.8)',
+                        border: '1px solid rgba(75, 85, 99, 0.5)',
+                        borderRadius: '8px',
+                        padding: '8px 12px',
+                        color: '#e5e7eb',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                        e.target.style.background = 'rgba(55, 65, 81, 0.9)';
+                        e.target.style.borderColor = 'rgba(156, 163, 175, 0.7)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.target.style.background = 'rgba(31, 41, 55, 0.8)';
+                        e.target.style.borderColor = 'rgba(75, 85, 99, 0.5)';
+                    }}
+                >
+                    <span style={{ fontSize: '16px' }}>←</span>
+                    <span>Volver</span>
                 </button>
+                <div className='titulo-profesional'>Retiros</div>
             </div>
 
             <div className="admin-controls">
@@ -85,7 +115,7 @@ export default function AdminWithdraw() {
                     <input
                         type="text"
                         className="search-input"
-                        placeholder="Buscar por usuario, teléfono o cuenta..."
+                        placeholder="Buscar..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -113,7 +143,6 @@ export default function AdminWithdraw() {
                 </div>
             </div>
 
-            {/* Desktop & Tablet Table View */}
             <div className="table-container desktop-view">
                 {filteredWithdraws.length === 0 ? (
                     <div className="empty-state">
@@ -164,7 +193,6 @@ export default function AdminWithdraw() {
                 )}
             </div>
 
-            {/* Mobile Card View */}
             <div className="mobile-view">
                 {filteredWithdraws.length === 0 ? (
                     <div className="empty-state">

@@ -988,7 +988,7 @@ select:focus {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 30px;
-  padding-bottom: 20px;
+  padding-bottom: 10px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
@@ -1339,7 +1339,6 @@ select:focus {
 @media (max-width: 480px) {
   .admin-container {
     padding: 12px;
-    margin: 8px;
     border-radius: 8px;
   }
 
@@ -1349,7 +1348,6 @@ select:focus {
   }
 
   .admin-header {
-    flex-direction: column;
     gap: 16px;
     align-items: center;
     text-align: center;
@@ -1450,7 +1448,7 @@ select:focus {
 /* Responsive Design - Large Desktop */
 @media (min-width: 1200px) {
   .admin-container {
-    width: 65vw;
+
     padding: 30px;
   }
 
@@ -1509,14 +1507,7 @@ select:focus {
   justify-content: center;
 }
 
-.account-form input {
-  width: 100%;
-  /* Tamaño fijo */
-  padding: 8px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
+
 
 .account-form button {
   padding: 8px 16px;
@@ -1578,4 +1569,10 @@ select:focus {
   text-align: center;
   color: #888;
   font-style: italic;
+}
+
+.action-admin {
+    display: flex;
+    flex-direction: column; /* o 'row' si quieres que estén en fila */
+    gap: 1rem; /* ajusta la separación según tu diseño */
 }

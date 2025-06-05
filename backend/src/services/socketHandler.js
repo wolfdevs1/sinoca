@@ -78,7 +78,7 @@ module.exports = (io) => {
             pending.add(user.phone, user.name, socket, 'login', timeoutId);
 
             await client.sendMessage(user.phone, '¿Estas intentando iniciar sesión?');
-            callback({ ok: true, msg: 'Mensaje de validación enviado.' });
+            callback({ ok: true, msg: 'Mensaje de validación enviado. Revisa tu Whatsapp' });
         });
 
     });
