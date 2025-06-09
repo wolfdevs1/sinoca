@@ -41,10 +41,21 @@ export default function RegisterPage() {
     }
   }, [name, phoneRaw]);
 
+  const isValidUsername = (username) => {
+    const regex = /^[A-Za-z][A-Za-z0-9]{3,14}$/;
+    return regex.test(username);
+  };
+
   const ingresar = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
     setIsSubmitting(true);
+
+    if (!isValidUsername(name)) {
+      toast.error("El nombre de usuario debe comenzar con una letra, ser alfanumérico y tener entre 4 y 15 caracteres.");
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const parsed = parsePhoneNumberFromString("+54" + phoneRaw, "AR");

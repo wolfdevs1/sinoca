@@ -98,11 +98,11 @@ router.post('/new-account', protect, async (req, res) => {
 
 router.post('/add-new-account', protect, adminOnly, async (req, res) => {
     try {
-        const { name, alias } = req.body;
-        await Account.create({ name, alias });
+        const { name, alias, bank, email, password } = req.body;
+        await Account.create({ name, alias, bank, email, password });
         return res.status(200).json({ message: 'Cuenta agregada correctamente' });
     } catch (error) {
-        console.log(err);
+        console.log(error);
         return res.status(500).json({ error: 'Error interno del servidor' });
     }
 });
@@ -112,7 +112,7 @@ router.post('/delete-account', protect, adminOnly, async (req, res) => {
         await Account.findByIdAndDelete(req.body.id);
         return res.status(200).json({ message: 'Cuenta borrada correctamente' });
     } catch (error) {
-        console.log(err);
+        console.log(error);
         return res.status(500).json({ error: 'Error interno del servidor' });
     }
 });
@@ -139,7 +139,7 @@ router.get('/withdraws', protect, adminOnly, async (req, res) => {
 });
 
 router.get('/accounts', protect, adminOnly, async (req, res) => {
-    const accounts = await Account.find().select('name alias');
+    const accounts = await Account.find().select('name alias bank email password');
     res.json(accounts);
 });
 

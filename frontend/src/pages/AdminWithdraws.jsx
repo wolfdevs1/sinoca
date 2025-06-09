@@ -1,6 +1,9 @@
-import { useEffect, useState, useContext } from 'react';
-import { getWithdraws, changeWithdrawState as changeWithdrawStateAPI, getAccounts as getAccountsAPI } from '../services/auth';
-import { AuthContext } from '../context/AuthContext';
+import { useEffect, useState } from 'react';
+import {
+    getWithdraws,
+    changeWithdrawState as changeWithdrawStateAPI,
+    getAccounts as getAccountsAPI
+} from '../services/auth';
 import { useNavigate } from 'react-router-dom';
 
 export default function AdminWithdraw() {
@@ -8,37 +11,32 @@ export default function AdminWithdraw() {
     const [bankList, setBankList] = useState([]);
     const [withdraws, setWithdraws] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
-    const [filterStatus, setFilterStatus] = useState('all');
-    const { logout } = useContext(AuthContext);
+    const [filterStatus, setFilterStatus] = useState('pending');
     const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchWithdraws = async () => {
+        const loadData = async () => {
             try {
-                const { data } = await getWithdraws();
-                setWithdraws(data);
+                const [withdrawRes, bankRes] = await Promise.all([
+                    getWithdraws(),
+                    getAccountsAPI()
+                ]);
+                const withdrawData = withdrawRes.data;
+                const bankData = bankRes.data;
+                setBankList(bankData);
 
                 const initialBanks = {};
-                data.forEach(w => {
-                    initialBanks[w._id] = w.withdrawAccount || '';
+                withdrawData.forEach(w => {
+                    initialBanks[w._id] = w.withdrawAccount || (bankData.length > 0 ? bankData[0].name : '');
                 });
                 setSelectedBanks(initialBanks);
+                setWithdraws(withdrawData);
             } catch (err) {
-                console.error('Error al obtener retiros:', err);
+                console.error('Error al cargar datos:', err);
             }
         };
 
-        const fetchBanks = async () => {
-            try {
-                const { data } = await getAccountsAPI();
-                setBankList(data);
-            } catch (err) {
-                console.error('Error al obtener bancos:', err);
-            }
-        };
-
-        fetchWithdraws();
-        fetchBanks();
+        loadData();
     }, []);
 
     const handleSend = async (withdrawId) => {
@@ -61,15 +59,16 @@ export default function AdminWithdraw() {
     };
 
     const handleGoBack = () => {
-        navigate('/admin'); // Ajusta esta ruta si necesitas otra
+        navigate('/admin');
     };
 
     const filteredWithdraws = withdraws.filter(withdraw => {
-        const matchesSearch = withdraw.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        const matchesSearch =
+            withdraw.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             withdraw.phone.includes(searchTerm) ||
             withdraw.account.toLowerCase().includes(searchTerm.toLowerCase());
 
-        const matchesFilter = filterStatus === 'all' ||
+        const matchesFilter =
             (filterStatus === 'pending' && !withdraw.state) ||
             (filterStatus === 'completed' && withdraw.state);
 
@@ -123,12 +122,6 @@ export default function AdminWithdraw() {
 
                 <div className="filter-container">
                     <button
-                        className={`filter-btn ${filterStatus === 'all' ? 'active' : ''}`}
-                        onClick={() => setFilterStatus('all')}
-                    >
-                        Todos
-                    </button>
-                    <button
                         className={`filter-btn ${filterStatus === 'pending' ? 'active' : ''}`}
                         onClick={() => setFilterStatus('pending')}
                     >
@@ -153,9 +146,10 @@ export default function AdminWithdraw() {
                         <thead>
                             <tr>
                                 <th>Usuario</th>
-                                <th>Alias Usuario</th>
+                                <th>Alias</th>
                                 <th>Cantidad</th>
                                 <th>Cuenta Pago</th>
+                                <th>Seleccione</th>
                                 <th>Enviar</th>
                             </tr>
                         </thead>
@@ -163,16 +157,18 @@ export default function AdminWithdraw() {
                             {filteredWithdraws.map(withdraw => (
                                 <tr key={withdraw._id} className={withdraw.state ? 'completed' : 'pending'}>
                                     <td className="user-name">{withdraw.name}</td>
-                                    <td className="user-alias">{withdraw.phone.replace('549', '').replace('@c.us', '')}</td>
+                                    <td className="user-name">{withdraw.account}</td>
                                     <td className="amount">${withdraw.amount}</td>
+                                    <td className="user-name">{withdraw.withdrawAccount}</td>
                                     <td className="bank-select-cell">
                                         <select
                                             className="bank-select"
-                                            value={selectedBanks[withdraw._id] || 'Banco1'}
+                                            value={selectedBanks[withdraw._id] || ''}
                                             onChange={(e) => handleBankChange(withdraw._id, e.target.value)}
                                         >
+                                            <option value=""></option>
                                             {bankList.map(bank => (
-                                                <option key={bank.id} value={bank.id}>
+                                                <option key={bank._id} value={bank.name}>
                                                     {bank.name}
                                                 </option>
                                             ))}
@@ -215,11 +211,11 @@ export default function AdminWithdraw() {
                                         <label className="card-label">Cuenta de Pago:</label>
                                         <select
                                             className="bank-select"
-                                            value={selectedBanks[withdraw._id] || 'Banco1'}
+                                            value={selectedBanks[withdraw._id] || ''}
                                             onChange={(e) => handleBankChange(withdraw._id, e.target.value)}
                                         >
                                             {bankList.map(bank => (
-                                                <option key={bank.id} value={bank.id}>
+                                                <option key={bank._id} value={bank.name}>
                                                     {bank.name}
                                                 </option>
                                             ))}

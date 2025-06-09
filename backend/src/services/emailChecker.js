@@ -1,44 +1,39 @@
 const imap = require("imap-simple");
 const { simpleParser } = require("mailparser");
 const Transferencia = require('../models/Transferencia');
+const Account = require('../models/Account');
 
-/***************************************************
- * MÚLTIPLES CUENTAS DE MAIL
- ***************************************************/
+// Obtenemos cuentas desde la base de datos
+async function getMailAccountsFromDB() {
+    try {
+        const accounts = await Account.find({}, 'name email password'); // Solo selecciona email y password
+        return accounts.map(acc => ({
+            name: acc.name, // Opcional: puedes usar acc.name si lo prefieres
+            imapConfig: {
+                imap: {
+                    user: acc.email,
+                    password: acc.password,
+                    host: 'imap.gmail.com',
+                    port: 993,
+                    tls: true,
+                    authTimeout: 30000,
+                    tlsOptions: { rejectUnauthorized: false },
+                }
+            },
+            lastEmailReaded: 0
+        }));
+    } catch (err) {
+        console.error("Error al obtener cuentas de la DB:", err);
+        return [];
+    }
+}
 
-// Aquí puedes agregar tantas cuentas como quieras.
-// Ajusta el user, password y demás según tus datos.
-const mailAccounts = [
-    {
-        name: 'albertmerk45',
-        imapConfig: {
-            imap: {
-                user: 'danielaclaropay@gmail.com',   // Tu correo de Gmail
-                password: 'itmh isve jeld iwyy', // Contraseña de app
-                host: 'imap.gmail.com',
-                port: 993,
-                tls: true,
-                authTimeout: 30000,
-                tlsOptions: { rejectUnauthorized: false },
-            }
-        },
-        lastEmailReaded: 0 // Para registrar el último UID leído
-    },
-];
-
-/***************************************************
- * checkEmail: Revisa UNA cuenta de correo
- ***************************************************/
 async function checkEmail(account) {
     let connection;
     try {
-        // Conexión IMAP
         connection = await imap.connect(account.imapConfig);
-
-        // Abrimos bandeja (INBOX)
         await connection.openBox("INBOX", { readOnly: false });
 
-        // Buscar correos no leídos
         const searchCriteria = ["UNSEEN"];
         const fetchOptions = {
             bodies: ["HEADER", "TEXT"],
@@ -51,24 +46,14 @@ async function checkEmail(account) {
             return;
         }
 
-        // Tomamos el último correo del batch
-        // (O podrías iterar todos si quisieras)
         const latestEmail = messages[messages.length - 1];
-        if (!latestEmail) {
+        if (!latestEmail || latestEmail.attributes.uid === account.lastEmailReaded) {
             connection.end();
             return;
         }
 
-        // Verificamos UID para no repetir
-        if (latestEmail.attributes.uid === account.lastEmailReaded) {
-            connection.end();
-            return;
-        }
-
-        // Guardamos el UID para no procesar dos veces
         account.lastEmailReaded = latestEmail.attributes.uid;
 
-        // Obtenemos el texto
         const textPart = latestEmail.parts.find(part => part.which === "TEXT");
         if (!textPart) {
             console.log(`[${account.name}] No se pudo obtener el contenido del correo.`);
@@ -80,8 +65,6 @@ async function checkEmail(account) {
         const { headerLines } = parsedEmail;
         const allLines = headerLines.map(h => h.line).join('\n');
 
-        // Ajusta tu lógica de regex aquí:
-        // Ejemplo: Regex para "Claro Pay" que tenías
         const regex = /\$(.*?) en/;
         const match = allLines.match(regex);
 
@@ -93,13 +76,10 @@ async function checkEmail(account) {
             };
             console.log(`[${account.name}] Se detectó nueva acreditación:`, data);
 
-            // Registramos en la DB
             await Transferencia.create(data);
 
-            // (Opcional) Eliminar el correo del servidor IMAP
             try {
                 await connection.deleteMessage(latestEmail.attributes.uid);
-                // console.log(`[${account.name}] Correo eliminado del servidor.`);
             } catch (err) {
                 console.error(`[${account.name}] Error al borrar correo:`, err);
             }
@@ -110,28 +90,27 @@ async function checkEmail(account) {
     } catch (error) {
         console.error(`[${account.name}] Error`, error);
     } finally {
-        if (connection) {
-            connection.end();
-        }
+        if (connection) connection.end();
     }
 }
 
-/***************************************************
- * BUCLE PRINCIPAL DE MAIL
- ***************************************************/
 async function checkEmails() {
     while (true) {
         try {
-            // Revisamos cada cuenta de correo
+            const mailAccounts = await getMailAccountsFromDB(); // <- aquí se cargan desde la DB
             for (const account of mailAccounts) {
                 await checkEmail(account);
             }
         } catch (err) {
             console.error('Error en main mail loop:', err);
         }
-        // Esperamos 10s antes de la siguiente iteración
-        await new Promise(resolve => setTimeout(resolve, 10000));
+        await new Promise(resolve => setTimeout(resolve, 10000)); // espera 10s
     }
-};
+}
+
+// Utilidad opcional para limpiar el monto si deseas
+function formatNumber(value) {
+    return parseFloat(value.replace(/[^\d.-]/g, ''));
+}
 
 module.exports = checkEmails;

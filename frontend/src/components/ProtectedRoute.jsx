@@ -8,6 +8,8 @@ export default function ProtectedRoute({ children }) {
     // Mientras cargo la sesión, puedo mostrar un spinner o nada
     if (loading) return "Cargando...";
 
+    if (user?.role === 'admin') return <Navigate to="/admin" />
+
     // Una vez cargado, si no hay user, voy a /login
     return user ? children : <Navigate to="/login" />;
 }

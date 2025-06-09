@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 
 export default function AdminAccounts() {
     const [accounts, setAccounts] = useState([]);
-    const [newAccount, setNewAccount] = useState({ name: '', alias: '' });
+    const [newAccount, setNewAccount] = useState({ name: '', alias: '', bank: '', email: '', password: '' });
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -27,14 +27,14 @@ export default function AdminAccounts() {
     const handleAddAccount = async (e) => {
         e.preventDefault();
 
-        if (!newAccount.name || !newAccount.alias) {
+        if (!newAccount.name || !newAccount.alias || !newAccount.bank || !newAccount.email || !newAccount.password) {
             alert('Por favor completa ambos campos.');
             return;
         }
 
         try {
             await addAccountAPI(newAccount);
-            setNewAccount({ name: '', alias: '' });
+            setNewAccount({ name: '', alias: '', bank: '', email: '', password: '' });
             fetchAccounts();
         } catch (error) {
             console.error('Error al agregar cuenta:', error);
@@ -90,11 +90,19 @@ export default function AdminAccounts() {
                 </button>
                 <div className='titulo-profesional'>Cuentas</div>
             </div>
+
             <form onSubmit={handleAddAccount} className="account-form">
                 <input
                     className='input'
                     type="text"
-                    placeholder="Nombre del banco"
+                    placeholder="Banco"
+                    value={newAccount.bank}
+                    onChange={(e) => setNewAccount({ ...newAccount, bank: e.target.value })}
+                />
+                <input
+                    className='input'
+                    type="text"
+                    placeholder="Titular"
                     value={newAccount.name}
                     onChange={(e) => setNewAccount({ ...newAccount, name: e.target.value })}
                 />
@@ -104,6 +112,20 @@ export default function AdminAccounts() {
                     placeholder="Alias"
                     value={newAccount.alias}
                     onChange={(e) => setNewAccount({ ...newAccount, alias: e.target.value })}
+                />
+                <input
+                    className='input'
+                    type="text"
+                    placeholder="Email"
+                    value={newAccount.email}
+                    onChange={(e) => setNewAccount({ ...newAccount, email: e.target.value })}
+                />
+                <input
+                    className='input'
+                    type="text"
+                    placeholder="Password"
+                    value={newAccount.password}
+                    onChange={(e) => setNewAccount({ ...newAccount, password: e.target.value })}
                 />
                 <button className='btn' type="submit">Agregar Cuenta</button>
             </form>
@@ -115,16 +137,22 @@ export default function AdminAccounts() {
                     <table>
                         <thead>
                             <tr>
-                                <th>Nombre</th>
+                                <th>Banco</th>
+                                <th>Titular</th>
                                 <th>Alias</th>
+                                <th>Email</th>
+                                <th>Password</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             {accounts.map(account => (
                                 <tr key={account.alias}>
+                                    <td>{account.bank}</td>
                                     <td>{account.name}</td>
                                     <td>{account.alias}</td>
+                                    <td>{account.email}</td>
+                                    <td>{account.password}</td>
                                     <td>
                                         <button onClick={() => handleDeleteAccount(account._id)}>
                                             Eliminar
@@ -138,4 +166,4 @@ export default function AdminAccounts() {
             </div>
         </div>
     );
-}
+};
