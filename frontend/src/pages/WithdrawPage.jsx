@@ -29,6 +29,13 @@ export default function WithdrawPage() {
 
     const handleWithdraw = async (e) => {
         e.preventDefault();
+
+        const parsedAmount = parseFloat(amount);
+        if (isNaN(parsedAmount) || parsedAmount <= 0) {
+            toast.error("El importe debe ser mayor a 0.");
+            return;
+        }
+
         setLoading(true);
         try {
             const res = await withdrawAPI({ name: user.name, amount, account, phone: user.phone });
@@ -65,6 +72,7 @@ export default function WithdrawPage() {
             "verify",
             user.name,
             user.phone,
+            newAccount,
             "new-account",
             (res) => {
                 if (res.ok) {
@@ -109,10 +117,17 @@ export default function WithdrawPage() {
 
                 <input
                     type="number"
+                    min="1"
+                    step="1"
                     placeholder="Importe a retirar"
                     className="input"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === '.' || e.key === ',') {
+                            e.preventDefault();
+                        }
+                    }}
                     required
                 />
                 <div className="account-selector">

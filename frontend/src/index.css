@@ -1572,7 +1572,9 @@ select:focus {
 }
 
 .action-admin {
-    display: flex;
-    flex-direction: column; /* o 'row' si quieres que estén en fila */
-    gap: 1rem; /* ajusta la separación según tu diseño */
+  display: flex;
+  flex-direction: column;
+  /* o 'row' si quieres que estén en fila */
+  gap: 1rem;
+  /* ajusta la separación según tu diseño */
 }

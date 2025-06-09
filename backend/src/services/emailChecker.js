@@ -13,23 +13,8 @@ const mailAccounts = [
         name: 'albertmerk45',
         imapConfig: {
             imap: {
-                user: 'albertmerk45@gmail.com',   // Tu correo de Gmail
-                password: 'cwnc ommg clks ybpj', // Contraseña de app
-                host: 'imap.gmail.com',
-                port: 993,
-                tls: true,
-                authTimeout: 30000,
-                tlsOptions: { rejectUnauthorized: false },
-            }
-        },
-        lastEmailReaded: 0 // Para registrar el último UID leído
-    },
-    {
-        name: 'Agostinabritez738',
-        imapConfig: {
-            imap: {
-                user: 'Agostinabritez738@gmail.com',   // Tu correo de Gmail
-                password: 'ditn qpbm lwsv eocp', // Contraseña de app
+                user: 'danielaclaropay@gmail.com',   // Tu correo de Gmail
+                password: 'itmh isve jeld iwyy', // Contraseña de app
                 host: 'imap.gmail.com',
                 port: 993,
                 tls: true,

@@ -12,7 +12,7 @@ export default function AdminPage() {
                         Panel
                     </div>
                 </div>
-                
+
                 <Link to="/admin/users" className="action-button withdraw-button">
                     <span className="button-text">👤 Usuarios</span>
                 </Link>

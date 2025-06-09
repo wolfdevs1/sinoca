@@ -92,14 +92,14 @@ export default function AdminAccounts() {
             </div>
             <form onSubmit={handleAddAccount} className="account-form">
                 <input
-                className='input'
+                    className='input'
                     type="text"
                     placeholder="Nombre del banco"
                     value={newAccount.name}
                     onChange={(e) => setNewAccount({ ...newAccount, name: e.target.value })}
                 />
                 <input
-                className='input'
+                    className='input'
                     type="text"
                     placeholder="Alias"
                     value={newAccount.alias}
