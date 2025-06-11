@@ -72,7 +72,8 @@ async function checkEmail(account) {
             const monto = match[1];
             let data = {
                 cantidad: formatNumber(monto),
-                nombre: "claropay"
+                nombre: "claropay",
+                account: account.name
             };
             console.log(`[${account.name}] Se detectó nueva acreditación:`, data);
 

@@ -12,32 +12,52 @@ export default function AdminWithdraw() {
     const [withdraws, setWithdraws] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('pending');
+
+    // estados de paginación
+    const [page, setPage] = useState(1);
+    const [pages, setPages] = useState(1);
+    const limit = 10;
+
     const navigate = useNavigate();
 
     useEffect(() => {
         const loadData = async () => {
             try {
-                const [withdrawRes, bankRes] = await Promise.all([
-                    getWithdraws(),
+                const [{ data: wResp }, { data: bResp }] = await Promise.all([
+                    getWithdraws(page, limit),
                     getAccountsAPI()
                 ]);
-                const withdrawData = withdrawRes.data;
-                const bankData = bankRes.data;
-                setBankList(bankData);
 
-                const initialBanks = {};
-                withdrawData.forEach(w => {
-                    initialBanks[w._id] = w.withdrawAccount || (bankData.length > 0 ? bankData[0].name : '');
+                const { withdraws, page: curr, pages: totalPages } = wResp;
+                setWithdraws(withdraws);
+                setPages(totalPages);
+                setPage(curr);
+
+                setBankList(bResp);
+                // inicializar selección
+                const initBanks = {};
+                withdraws.forEach(w => {
+                    initBanks[w._id] = w.withdrawAccount || (bResp[0]?.name || '');
                 });
-                setSelectedBanks(initialBanks);
-                setWithdraws(withdrawData);
+                setSelectedBanks(initBanks);
             } catch (err) {
-                console.error('Error al cargar datos:', err);
+                console.error(err);
             }
         };
-
         loadData();
-    }, []);
+    }, [page]);
+
+    // filtrado cliente (sobre la página actual)
+    const filtered = withdraws.filter(w => {
+        const matchesSearch =
+            w.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            w.phone.includes(searchTerm) ||
+            w.account.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesFilter =
+            (filterStatus === 'pending' && !w.state) ||
+            (filterStatus === 'completed' && w.state);
+        return matchesSearch && matchesFilter;
+    });
 
     const handleSend = async (withdrawId) => {
         const selectedBank = selectedBanks[withdrawId];
@@ -61,19 +81,6 @@ export default function AdminWithdraw() {
     const handleGoBack = () => {
         navigate('/admin');
     };
-
-    const filteredWithdraws = withdraws.filter(withdraw => {
-        const matchesSearch =
-            withdraw.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            withdraw.phone.includes(searchTerm) ||
-            withdraw.account.toLowerCase().includes(searchTerm.toLowerCase());
-
-        const matchesFilter =
-            (filterStatus === 'pending' && !withdraw.state) ||
-            (filterStatus === 'completed' && withdraw.state);
-
-        return matchesSearch && matchesFilter;
-    });
 
     return (
         <div className="admin-container">
@@ -137,7 +144,7 @@ export default function AdminWithdraw() {
             </div>
 
             <div className="table-container desktop-view">
-                {filteredWithdraws.length === 0 ? (
+                {filtered.length === 0 ? (
                     <div className="empty-state">
                         <p>No hay retiros que coincidan con los filtros</p>
                     </div>
@@ -154,7 +161,7 @@ export default function AdminWithdraw() {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredWithdraws.map(withdraw => (
+                            {filtered.map(withdraw => (
                                 <tr key={withdraw._id} className={withdraw.state ? 'completed' : 'pending'}>
                                     <td className="user-name">{withdraw.name}</td>
                                     <td className="user-name">{withdraw.account}</td>
@@ -190,13 +197,13 @@ export default function AdminWithdraw() {
             </div>
 
             <div className="mobile-view">
-                {filteredWithdraws.length === 0 ? (
+                {filtered.length === 0 ? (
                     <div className="empty-state">
                         <p>No hay retiros que coincidan con los filtros</p>
                     </div>
                 ) : (
                     <div className="cards-container">
-                        {filteredWithdraws.map(withdraw => (
+                        {filtered.map(withdraw => (
                             <div key={withdraw._id} className={`withdraw-card ${withdraw.state ? 'completed' : 'pending'}`}>
                                 <div className="card-header">
                                     <div className="user-info">
@@ -235,6 +242,22 @@ export default function AdminWithdraw() {
                         ))}
                     </div>
                 )}
+            </div>
+            {/* CONTROLES DE PAGINACIÓN */}
+            <div className="pagination">
+                <button
+                    disabled={page <= 1}
+                    onClick={() => setPage(page - 1)}
+                >
+                    ← Anterior
+                </button>
+                <span> {page} / {pages} </span>
+                <button
+                    disabled={page >= pages}
+                    onClick={() => setPage(page + 1)}
+                >
+                    Siguiente →
+                </button>
             </div>
         </div>
     );

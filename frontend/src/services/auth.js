@@ -17,7 +17,7 @@ export const changeWithdrawState = data => API.post('/user/change-withdraw-state
 
 export const getProfile = () => API.get('/user/profile');
 export const getAllUsers = () => API.get('/user/all');
-export const getWithdraws = () => API.get('/user/withdraws');
+export const getWithdraws = (page = 1, limit = 10) => API.get(`/user/withdraws?page=${page}&limit=${limit}`);
 export const getAccounts = () => API.get('/user/accounts');
 export const getRandomAccount = () => API.get('/user/random-account');
 

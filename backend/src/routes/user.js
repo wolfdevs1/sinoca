@@ -14,9 +14,9 @@ router.get('/profile', protect, async (req, res) => {
 
 router.post('/deposit', protect, async (req, res) => {
     const { name, amount } = req.body;
-    const transfer = await Transfer.findOne({ amount });
+    const transfer = await Transfer.findOne({ amount, used: false });
     if (transfer) {
-        //await Transfer.findByIdAndDelete(transfer._id);
+        await Transfer.findByIdAndUpdate(transfer._id, { used: true });
         const response = await deposit(name, amount);
         if (response === 'ok') {
             res.json({ message: 'Depósito cargado correctamente' });
@@ -133,10 +133,27 @@ router.get('/all', protect, adminOnly, async (req, res) => {
     res.json(users);
 });
 
-router.get('/withdraws', protect, adminOnly, async (req, res) => {
-    const withdraws = await Withdraw.find();
-    res.json(withdraws);
-});
+router.get(
+    '/withdraws',
+    protect,
+    adminOnly,
+    async (req, res) => {
+        const page = Math.max(1, parseInt(req.query.page) || 1);
+        const limit = Math.max(1, parseInt(req.query.limit) || 10);
+
+        const skip = (page - 1) * limit;
+        const total = await Withdraw.countDocuments();
+        const pages = Math.ceil(total / limit);
+
+        const withdraws = await Withdraw
+            .find()
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 });  // opcional: los más recientes primero
+
+        res.json({ withdraws, total, page, pages });
+    }
+);
 
 router.get('/accounts', protect, adminOnly, async (req, res) => {
     const accounts = await Account.find().select('name alias bank email password');

@@ -6,6 +6,7 @@ const accountSchema = new mongoose.Schema({
     bank: { type: String },
     email: { type: String },
     password: { type: String },
+
 }, { timestamps: true });
 
 module.exports = mongoose.model('Account', accountSchema);
