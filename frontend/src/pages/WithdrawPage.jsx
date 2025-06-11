@@ -72,7 +72,6 @@ export default function WithdrawPage() {
             "verify",
             user.name,
             user.phone,
-            newAccount,
             "new-account",
             (res) => {
                 if (res.ok) {

@@ -22,7 +22,10 @@ export default function AdminPage() {
                 <Link to="/admin/cuentas" className="action-button withdraw-button">
                     <span className="button-text">🏦 Cuentas</span>
                 </Link>
-                <Link to="/admin/config" className="action-button withdraw-button">
+                <Link to="/admin/caja" className="action-button withdraw-button">
+                    <span className="button-text">🏧 Caja</span>
+                </Link>
+                                <Link to="/admin/config" className="action-button withdraw-button">
                     <span className="button-text">⚙️ Configuración</span>
                 </Link>
             </div>

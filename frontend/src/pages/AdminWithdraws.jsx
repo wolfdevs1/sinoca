@@ -249,14 +249,14 @@ export default function AdminWithdraw() {
                     disabled={page <= 1}
                     onClick={() => setPage(page - 1)}
                 >
-                    ← Anterior
+                    ←
                 </button>
                 <span> {page} / {pages} </span>
                 <button
                     disabled={page >= pages}
                     onClick={() => setPage(page + 1)}
                 >
-                    Siguiente →
+                    →
                 </button>
             </div>
         </div>

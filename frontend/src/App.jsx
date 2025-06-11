@@ -8,6 +8,7 @@ import AdminPage from './pages/AdminPage';
 import AdminWithdraw from './pages/AdminWithdraws';
 import AdminAccounts from './pages/AdminAccounts';
 import AdminUsers from './pages/AdminUsers';
+import AdminCaja from './pages/AdminCaja'
 
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
@@ -93,6 +94,14 @@ function App() {
           element={
             <AdminRoute>
               <AdminUsers />
+            </AdminRoute>
+          }
+        />
+                <Route
+          path="/admin/caja"
+          element={
+            <AdminRoute>
+              <AdminCaja />
             </AdminRoute>
           }
         />

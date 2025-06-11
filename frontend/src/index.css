@@ -1574,3 +1574,104 @@ select:focus {
   gap: 1rem;
   /* ajusta la separación según tu diseño */
 }
+
+/* ---------- PAGINACIÓN ---------- */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 30px;
+  padding: 20px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pagination button {
+  padding: 10px 16px;
+  background-color: rgba(17, 24, 39, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: #e5e7eb;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.pagination button:hover:not(:disabled) {
+  background-color: rgba(59, 130, 246, 0.8);
+  border-color: #3b82f6;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.pagination button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: rgba(17, 24, 39, 0.4);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #6b7280;
+  box-shadow: none;
+}
+
+.pagination span {
+  font-size: 14px;
+  font-weight: 600;
+  color: #d1d5db;
+  padding: 0 8px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .pagination {
+    gap: 8px;
+    margin-top: 20px;
+    padding: 16px 0;
+  }
+
+  .pagination button {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .pagination span {
+    font-size: 13px;
+    padding: 0 6px;
+  }
+}
+
+@media (min-width: 768px) {
+  .pagination {
+    gap: 16px;
+    margin-top: 40px;
+  }
+
+  .pagination button {
+    padding: 12px 20px;
+    font-size: 15px;
+  }
+
+  .pagination span {
+    font-size: 15px;
+    padding: 0 12px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .pagination button {
+    padding: 14px 24px;
+    font-size: 16px;
+  }
+
+  .pagination span {
+    font-size: 16px;
+  }
+}

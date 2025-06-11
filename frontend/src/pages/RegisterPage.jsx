@@ -170,7 +170,7 @@ export default function RegisterPage() {
 
       <ToastContainer />
 
-      <style jsx>{`
+      <style>{`
         .phone-input-container {
           width: 100%;
           display: flex;
