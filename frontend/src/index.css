@@ -1675,3 +1675,118 @@ select:focus {
     font-size: 16px;
   }
 }
+
+
+/* Podés poner esto en tu CSS global o módulo */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.4); /* fondo oscuro translúcido */
+    backdrop-filter: blur(4px);        /* 🎯 desenfoque del fondo */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-formulario {
+    background: #1f2937; /* gris oscuro (igual que tu botón "Volver") */
+    color: #f1f5f9;       /* texto claro */
+    padding: 24px;
+    border-radius: 10px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5); /* sombra más fuerte */
+    position: relative;
+}
+
+.modal-formulario {
+  transform: scale(0.95);
+  opacity: 0;
+  transition: all 0.2s ease-in-out;
+}
+
+.modal-overlay.active .modal-formulario {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.card {
+  background-color: rgba(17, 24, 39, 0.7);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.cuenta-item,
+.cuenta-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.cuenta-item h3,
+.cuenta-total h3 {
+  font-size: 16px;
+  color: #f3f4f6;
+}
+
+.monto,
+.monto-total {
+  font-weight: 700;
+  font-size: 18px;
+  color: #facc15;
+}
+
+.resumen-item {
+  background-color: rgba(31, 41, 55, 0.7);
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.resumen-item h4 {
+  font-size: 14px;
+  color: #d1d5db;
+  margin-bottom: 8px;
+}
+
+.resumen-item .valor {
+  font-weight: 600;
+  font-size: 18px;
+  color: #10b981;
+}
+
+.resumen-item.egresos .valor {
+  color: #ef4444;
+}
+
+.resumen-item.retiros .valor {
+  color: #6366f1;
+}
+
+@media (max-width: 480px) {
+  .cuenta-item h3,
+  .cuenta-total h3 {
+    font-size: 15px;
+  }
+
+  .monto,
+  .monto-total {
+    font-size: 16px;
+  }
+
+  .resumen-item .valor {
+    font-size: 16px;
+  }
+}
