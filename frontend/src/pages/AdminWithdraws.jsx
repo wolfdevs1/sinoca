@@ -67,8 +67,10 @@ export default function AdminWithdraw() {
         }
         try {
             await changeWithdrawStateAPI({ withdrawId, withdrawAccount: selectedBank });
-            const updated = await getWithdraws();
-            setWithdraws(updated.data);
+            const { data } = await getWithdraws(page, limit);
+            setWithdraws(data.withdraws);
+            setPage(data.page);
+            setPages(data.pages);
         } catch (error) {
             console.error("Error al cambiar estado del retiro:", error);
         }

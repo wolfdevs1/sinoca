@@ -567,6 +567,10 @@ input[type="number"] {
   background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.2));
 }
 
+.aporte-button::after {
+  background: linear-gradient(135deg, rgba(228, 239, 68, 0.2), rgba(196, 220, 38, 0.2));
+}
+
 .deposit-button:hover,
 .deposit-button:active {
   border-color: rgba(16, 185, 129, 0.5);
@@ -1680,28 +1684,33 @@ select:focus {
 /* Podés poner esto en tu CSS global o módulo */
 
 .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(15, 23, 42, 0.4); /* fondo oscuro translúcido */
-    backdrop-filter: blur(4px);        /* 🎯 desenfoque del fondo */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.4);
+  /* fondo oscuro translúcido */
+  backdrop-filter: blur(4px);
+  /* 🎯 desenfoque del fondo */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
 }
 
 .modal-formulario {
-    background: #1f2937; /* gris oscuro (igual que tu botón "Volver") */
-    color: #f1f5f9;       /* texto claro */
-    padding: 24px;
-    border-radius: 10px;
-    max-width: 500px;
-    width: 90%;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5); /* sombra más fuerte */
-    position: relative;
+  background: #1f2937;
+  /* gris oscuro (igual que tu botón "Volver") */
+  color: #f1f5f9;
+  /* texto claro */
+  padding: 24px;
+  border-radius: 10px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+  /* sombra más fuerte */
+  position: relative;
 }
 
 .modal-formulario {
@@ -1731,6 +1740,7 @@ select:focus {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 15px;
   margin-bottom: 12px;
 }
 
@@ -1775,7 +1785,12 @@ select:focus {
   color: #6366f1;
 }
 
+.resumen-item.aportes .valor {
+  color: #e8f163;
+}
+
 @media (max-width: 480px) {
+
   .cuenta-item h3,
   .cuenta-total h3 {
     font-size: 15px;

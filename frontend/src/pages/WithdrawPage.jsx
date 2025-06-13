@@ -73,13 +73,14 @@ export default function WithdrawPage() {
             user.name,
             user.phone,
             "new-account",
+            newAccount,
             (res) => {
                 if (res.ok) {
                     toast.success(res.msg);
                 } else {
                     toast.error(res.msg);
                 }
-            }
+            },
         );
     };
 

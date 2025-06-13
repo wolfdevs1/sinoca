@@ -16,6 +16,9 @@ export default function AdminPage() {
                 <Link to="/admin/users" className="action-button withdraw-button">
                     <span className="button-text">👤 Usuarios</span>
                 </Link>
+                <Link to="/admin/transferencias" className="action-button withdraw-button">
+                    <span className="button-text">💸 Transferencias</span>
+                </Link>
                 <Link to="/admin/retiros" className="action-button withdraw-button">
                     <span className="button-text">💸 Retiros</span>
                 </Link>
@@ -25,7 +28,7 @@ export default function AdminPage() {
                 <Link to="/admin/caja" className="action-button withdraw-button">
                     <span className="button-text">🏧 Caja</span>
                 </Link>
-                                <Link to="/admin/config" className="action-button withdraw-button">
+                <Link to="/admin/config" className="action-button withdraw-button">
                     <span className="button-text">⚙️ Configuración</span>
                 </Link>
             </div>

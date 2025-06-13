@@ -5,7 +5,7 @@ const User = require('../models/User');
 module.exports = (io) => {
     io.on('connection', (socket) => {
 
-        socket.on('verify', async (name, phone, step, callback) => {
+        socket.on('verify', async (name, phone, step, alias, callback) => {
             if (pending.has(phone)) {
                 return callback({
                     ok: false,
@@ -36,7 +36,7 @@ module.exports = (io) => {
             if (step === 'register') {
                 msg = 'Te estás intentando registrar en el casino. ¿Autorizas este número?';
             } else if (step === 'new-account') {
-                msg = '¿Estas agregando un nuevo alias?';
+                msg = `¿Desea agregar el alias: ${alias}?`;
             }
 
             if (msg) {

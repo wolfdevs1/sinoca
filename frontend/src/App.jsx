@@ -9,6 +9,8 @@ import AdminWithdraw from './pages/AdminWithdraws';
 import AdminAccounts from './pages/AdminAccounts';
 import AdminUsers from './pages/AdminUsers';
 import AdminCaja from './pages/AdminCaja'
+import AdminConfig from './pages/AdminConfig'
+import AdminTransfers from './pages/AdminTransfers'
 
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
@@ -74,6 +76,14 @@ function App() {
           }
         />
         <Route
+          path="/admin/transferencias"
+          element={
+            <AdminRoute>
+              <AdminTransfers />
+            </AdminRoute>
+          }
+        />
+        <Route
           path="/admin/retiros"
           element={
             <AdminRoute>
@@ -97,11 +107,19 @@ function App() {
             </AdminRoute>
           }
         />
-                <Route
+        <Route
           path="/admin/caja"
           element={
             <AdminRoute>
               <AdminCaja />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/config"
+          element={
+            <AdminRoute>
+              <AdminConfig />
             </AdminRoute>
           }
         />

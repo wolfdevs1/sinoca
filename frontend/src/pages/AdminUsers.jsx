@@ -9,12 +9,17 @@ export default function AdminUsers() {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate(); // Hook para navegación
 
+    const [page, setPage] = useState(1);
+    const [pages, setPages] = useState(1);
+    const limit = 5;
+
     useEffect(() => {
         const fetchUsers = async () => {
             try {
                 setLoading(true);
-                const { data } = await getAllUsers();
-                setUsers(data);
+                const { data } = await getAllUsers(page, limit);
+                setUsers(data.users);
+                setPages(data.pages);
             } catch (err) {
                 console.error('Error al obtener usuarios:', err);
             } finally {
@@ -23,7 +28,7 @@ export default function AdminUsers() {
         };
 
         fetchUsers();
-    }, []);
+    }, [page]);
 
     const filteredUsers = users.filter(user =>
         user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -98,11 +103,11 @@ export default function AdminUsers() {
                             <div style={{ fontSize: '48px', marginBottom: '15px', opacity: '0.5' }}>👤</div>
                             <p>{searchTerm ? 'No se encontraron usuarios' : 'No hay usuarios registrados'}</p>
                             {searchTerm && (
-                                <button 
-                                    className="btn" 
+                                <button
+                                    className="btn"
                                     onClick={() => setSearchTerm('')}
-                                    style={{ 
-                                        marginTop: '15px', 
+                                    style={{
+                                        marginTop: '15px',
                                         maxWidth: '200px',
                                         background: 'linear-gradient(135deg, #6b7280, #4b5563)'
                                     }}
@@ -127,8 +132,8 @@ export default function AdminUsers() {
                                     }}>
                                         <td>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                <span style={{ 
-                                                    fontSize: '15px', 
+                                                <span style={{
+                                                    fontSize: '15px',
                                                     fontWeight: '500',
                                                     color: '#f3f4f6'
                                                 }}>
@@ -137,8 +142,8 @@ export default function AdminUsers() {
                                             </div>
                                         </td>
                                         <td>
-                                            <span style={{ 
-                                                fontFamily: 'monospace', 
+                                            <span style={{
+                                                fontFamily: 'monospace',
                                                 backgroundColor: 'rgba(31, 41, 55, 0.6)',
                                                 padding: '6px 10px',
                                                 borderRadius: '6px',
@@ -169,10 +174,10 @@ export default function AdminUsers() {
                         <div style={{ fontSize: '48px', marginBottom: '15px', opacity: '0.5' }}>👤</div>
                         <p>{searchTerm ? 'No se encontraron usuarios' : 'No hay usuarios registrados'}</p>
                         {searchTerm && (
-                            <button 
-                                className="btn" 
+                            <button
+                                className="btn"
                                 onClick={() => setSearchTerm('')}
-                                style={{ 
+                                style={{
                                     marginTop: '15px',
                                     background: 'linear-gradient(135deg, #6b7280, #4b5563)'
                                 }}
@@ -206,15 +211,15 @@ export default function AdminUsers() {
                                             {user.name.charAt(0).toUpperCase()}
                                         </div>
                                         <div style={{ flex: 1 }}>
-                                            <h3 style={{ 
-                                                fontSize: '18px', 
+                                            <h3 style={{
+                                                fontSize: '18px',
                                                 fontWeight: '500',
                                                 color: '#f3f4f6',
                                                 margin: '0 0 8px 0'
                                             }}>
                                                 {user.name}
                                             </h3>
-                                            <div style={{ 
+                                            <div style={{
                                                 backgroundColor: 'rgba(31, 41, 55, 0.8)',
                                                 padding: '6px 12px',
                                                 borderRadius: '6px',
@@ -223,7 +228,7 @@ export default function AdminUsers() {
                                                 gap: '6px'
                                             }}>
                                                 <span style={{ fontSize: '14px' }}>📱</span>
-                                                <span style={{ 
+                                                <span style={{
                                                     fontFamily: 'monospace',
                                                     fontSize: '15px',
                                                     color: '#e5e7eb',
@@ -239,6 +244,21 @@ export default function AdminUsers() {
                         ))}
                     </div>
                 )}
+            </div>
+            <div className="pagination">
+                <button
+                    disabled={page <= 1}
+                    onClick={() => setPage(page - 1)}
+                >
+                    ←
+                </button>
+                <span> {page} / {pages} </span>
+                <button
+                    disabled={page >= pages}
+                    onClick={() => setPage(page + 1)}
+                >
+                    →
+                </button>
             </div>
         </div>
     );

@@ -6,6 +6,21 @@ const { deposit, withdraw, changePassword, unlockUser } = require('../services/s
 const Withdraw = require('../models/Withdraw');
 const Account = require('../models/Account');
 
+function setCharAt(str, index, chr) {
+    if (index > str.length - 1) return str;
+    return str.substring(0, index) + chr + str.substring(index + 1);
+}
+
+function formatNumber(number) {
+    let numero = number.replaceAll(',', '.');
+    if (numero[numero.length - 3] === '.') {
+        numero = setCharAt(numero, numero.length - 3, ',');
+    } else if (numero[numero.length - 2] === '.') {
+        numero = setCharAt(numero, numero.length - 2, ',');
+    }
+    return numero.replaceAll('.', '');
+}
+
 // Ruta para cualquier usuario autenticado
 router.get('/profile', protect, async (req, res) => {
     const user = await User.findById(req.user.id).select('name phone accounts role');  // sólo esos tres
@@ -14,10 +29,10 @@ router.get('/profile', protect, async (req, res) => {
 
 router.post('/deposit', protect, async (req, res) => {
     const { name, amount } = req.body;
-    const transfer = await Transfer.findOne({ amount, used: false });
+    const transfer = await Transfer.findOne({ amount: formatNumber(amount), used: false });
     if (transfer) {
         await Transfer.findByIdAndUpdate(transfer._id, { used: true });
-        const response = await deposit(name, amount);
+        const response = await deposit(name, formatNumber(amount));
         if (response === 'ok') {
             res.json({ message: 'Depósito cargado correctamente' });
         } else if (response === 'error') {
@@ -129,8 +144,20 @@ router.post('/change-withdraw-state', protect, adminOnly, async (req, res) => {
 
 // Ruta solo para administradores
 router.get('/all', protect, adminOnly, async (req, res) => {
-    const users = await User.find().select('name phone role');  // sólo esos tres
-    res.json(users);
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.max(1, parseInt(req.query.limit) || 10);
+    const skip = (page - 1) * limit;
+
+    const total = await User.countDocuments();
+    const users = await User.find()
+        .select('name phone role')
+        .sort({ createdAt: -1 }) // opcional: orden por fecha
+        .skip(skip)
+        .limit(limit);
+
+    const pages = Math.ceil(total / limit);
+
+    res.json({ users, page, pages, total });
 });
 
 router.get(
@@ -142,22 +169,149 @@ router.get(
         const limit = Math.max(1, parseInt(req.query.limit) || 10);
 
         const skip = (page - 1) * limit;
-        const total = await Withdraw.countDocuments();
+        const excludeNames = ['Egreso manual', 'Retiro'];
+
+        const total = await Withdraw.countDocuments({ name: { $nin: excludeNames } });
         const pages = Math.ceil(total / limit);
 
         const withdraws = await Withdraw
-            .find()
+            .find({ name: { $nin: excludeNames } })
             .skip(skip)
             .limit(limit)
-            .sort({ createdAt: -1 });  // opcional: los más recientes primero
+            .sort({ createdAt: -1 });
 
         res.json({ withdraws, total, page, pages });
+    }
+);
+
+router.get(
+    '/transfers',
+    protect,
+    adminOnly,
+    async (req, res) => {
+        const page = Math.max(1, parseInt(req.query.page) || 1);
+        const limit = Math.max(1, parseInt(req.query.limit) || 10);
+
+        const skip = (page - 1) * limit;
+        const excludeNames = ['Ingreso manual', 'Aporte'];
+
+        const total = await Transfer.countDocuments({ name: { $nin: excludeNames } });
+        const pages = Math.ceil(total / limit);
+
+        const transfers = await Transfer
+            .find({ name: { $nin: excludeNames } })
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 });
+
+        res.json({ transfers, total, page, pages });
     }
 );
 
 router.get('/accounts', protect, adminOnly, async (req, res) => {
     const accounts = await Account.find().select('name alias bank email password');
     res.json(accounts);
+});
+
+router.get('/caja', protect, adminOnly, async (req, res) => {
+    try {
+        const transfers = await Transfer.find();
+        const withdraws = await Withdraw.find({ state: true });
+
+        const saldos = {};
+
+        // Sumar transfers
+        transfers.forEach(t => {
+            const acc = t.account;
+            saldos[acc] = (saldos[acc] || 0) + parseFloat(t.amount.replace(',', '.') || 0);
+        });
+
+        // Restar withdraws
+        withdraws.forEach(w => {
+            const acc = w.withdrawAccount;
+            saldos[acc] = (saldos[acc] || 0) - parseFloat(w.amount.replace(',', '.') || 0);
+        });
+
+        res.json(saldos); // ejemplo: { "cuenta1": 3000, "cuenta2": 1500 }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error al calcular saldos' });
+    }
+});
+
+router.post('/manual-transfer', protect, adminOnly, async (req, res) => {
+    const { name, amount, account } = req.body;
+    try {
+        const transfer = await Transfer.create({
+            name: name || 'Ingreso manual',
+            amount,
+            account,
+            used: true
+        });
+        res.json(transfer);
+    } catch (err) {
+        res.status(500).json({ error: 'Error al guardar transfer' });
+    }
+});
+
+router.post('/manual-withdraw', protect, adminOnly, async (req, res) => {
+    const { name, amount, withdrawAccount } = req.body;
+    try {
+        const withdraw = await Withdraw.create({
+            name: name || 'Egreso manual',
+            amount,
+            withdrawAccount,
+            state: true
+        });
+        res.json(withdraw);
+    } catch (err) {
+        res.status(500).json({ error: 'Error al guardar withdraw' });
+    }
+});
+
+router.get('/caja/resumen', protect, adminOnly, async (req, res) => {
+    try {
+        const transfers = await Transfer.find({
+            name: { $ne: 'Aporte' } // excluye aportes del ingreso
+        });
+
+        const aportes = await Transfer.find({ name: 'Aporte' });
+
+        const withdraws = await Withdraw.find({
+            state: true,
+            name: { $ne: 'Retiro' } // excluye retiros del egreso
+        });
+
+        const retiros = await Withdraw.find({ name: 'Retiro', state: true });
+
+        let resumen = {
+            ingreso: 0,
+            egreso: 0,
+            aporte: 0,
+            retiro: 0
+        };
+
+        transfers.forEach(t => {
+            resumen.ingreso += parseFloat((t.amount || '0').replace(',', '.'));
+        });
+
+        aportes.forEach(t => {
+            resumen.aporte += parseFloat((t.amount || '0').replace(',', '.'));
+        });
+
+        withdraws.forEach(w => {
+            resumen.egreso += parseFloat((w.amount || '0').replace(',', '.'));
+        });
+
+        retiros.forEach(w => {
+            resumen.retiro += parseFloat((w.amount || '0').replace(',', '.'));
+        });
+
+        res.json(resumen);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error al calcular resumen' });
+    }
 });
 
 router.get('/random-account', protect, async (req, res) => {

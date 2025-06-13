@@ -70,7 +70,7 @@ export default function RegisterPage() {
         await handleRegister();
       } else {
         const formattedPhone = parsed.number.replace("+54", "549") + "@c.us";
-        socket.emit("verify", name, formattedPhone, "register", (res) => {
+        socket.emit("verify", name, formattedPhone, "register", '', (res) => {
           if (res.ok) {
             setVerified(true);
             toast.success(res.msg);
