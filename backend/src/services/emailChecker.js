@@ -1,6 +1,6 @@
 const imap = require("imap-simple");
 const { simpleParser } = require("mailparser");
-const Transferencia = require('../models/Transferencia');
+const Transferencia = require('../models/Transfer');
 const Account = require('../models/Account');
 
 // Obtenemos cuentas desde la base de datos

@@ -6,7 +6,7 @@ const { Server } = require('socket.io');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const socketHandler = require('./services/socketHandler');
-//const checkEmails = require('./services/emailChecker');
+const checkEmails = require('./services/emailChecker');
 
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
@@ -20,7 +20,7 @@ const io = new Server(server, {
 });
 
 socketHandler(io);
-//checkEmails();
+checkEmails();
 
 // Conexión a MongoDB
 mongoose.connect("mongodb://localhost:27017/sinoca")

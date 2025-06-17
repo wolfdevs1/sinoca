@@ -62,7 +62,6 @@ function LoginPage() {
         <div className="branding">
           <div className="branding-icon">🎲</div>
           <h1 className="titulo-profesional">¡Bienvenido!</h1>
-          <p className="subtitulo-profesional">Casino Joyita</p>
         </div>
 
         <input
