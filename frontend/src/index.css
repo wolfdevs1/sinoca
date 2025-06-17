@@ -1849,6 +1849,7 @@ select:focus {
 
 /* Responsive behavior */
 @media (max-width: 480px) {
+
   .withdraw-table th,
   .withdraw-table td {
     padding: 10px 12px;

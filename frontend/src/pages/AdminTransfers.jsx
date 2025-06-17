@@ -16,7 +16,7 @@ export default function AdminTransfers() {
     useEffect(() => {
         const loadData = async () => {
             try {
-                const res = await getTransfers(page, limit);
+                const res = await getTransfers(page, limit, searchTerm, filterStatus);
                 const { transfers, page: curr, pages: totalPages } = res.data;
                 setTransfers(transfers);
                 setPages(totalPages);
@@ -26,19 +26,11 @@ export default function AdminTransfers() {
             }
         };
         loadData();
-    }, [page]);
+    }, [page, searchTerm, filterStatus]);
 
-    const filtered = transfers?.filter(t => {
-        const matchesSearch =
-            t.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            t.amount?.toLowerCase().includes(searchTerm.toLowerCase());
-
-        const matchesFilter =
-            (filterStatus === 'unused' && !t.used) ||
-            (filterStatus === 'used' && t.used);
-
-        return matchesSearch && matchesFilter;
-    });
+    useEffect(() => {
+        setPage(1);
+    }, [searchTerm, filterStatus]);
 
     const handleGoBack = () => {
         navigate('/admin');
@@ -46,7 +38,8 @@ export default function AdminTransfers() {
 
     return (
         <div className="admin-container">
-            <div className='admin-header'>
+            {/* Header */}
+            <div className="admin-header">
                 <button
                     onClick={handleGoBack}
                     style={{
@@ -67,9 +60,10 @@ export default function AdminTransfers() {
                     <span style={{ fontSize: '16px' }}>←</span>
                     <span>Volver</span>
                 </button>
-                <div className='titulo-profesional'>Transferencias</div>
+                <div className="titulo-profesional">Transferencias</div>
             </div>
 
+            {/* Controles */}
             <div className="admin-controls">
                 <div className="search-container">
                     <input
@@ -97,8 +91,9 @@ export default function AdminTransfers() {
                 </div>
             </div>
 
+            {/* Vista escritorio */}
             <div className="table-container desktop-view">
-                {filtered?.length === 0 ? (
+                {transfers.length === 0 ? (
                     <div className="empty-state">
                         <p>No hay transferencias que coincidan con los filtros</p>
                     </div>
@@ -114,14 +109,16 @@ export default function AdminTransfers() {
                             </tr>
                         </thead>
                         <tbody>
-                            {filtered?.map(transfer => (
+                            {transfers.map(transfer => (
                                 <tr key={transfer._id} className={transfer.used ? 'completed' : 'pending'}>
                                     <td className="user-name">{transfer.name}</td>
                                     <td className="user-name">{transfer.account}</td>
                                     <td className="amount">${transfer.amount}</td>
                                     <td>{new Date(transfer.createdAt).toLocaleString('es-AR')}</td>
                                     <td>
-                                        {transfer.used ? new Date(transfer.updatedAt).toLocaleString('es-AR') : '-'}
+                                        {transfer.used
+                                            ? new Date(transfer.updatedAt).toLocaleString('es-AR')
+                                            : '-'}
                                     </td>
                                 </tr>
                             ))}
@@ -130,15 +127,19 @@ export default function AdminTransfers() {
                 )}
             </div>
 
+            {/* Vista móvil */}
             <div className="mobile-view">
-                {filtered?.length === 0 ? (
+                {transfers.length === 0 ? (
                     <div className="empty-state">
                         <p>No hay transferencias que coincidan con los filtros</p>
                     </div>
                 ) : (
                     <div className="cards-container">
-                        {filtered?.map(transfer => (
-                            <div key={transfer._id} className={`withdraw-card ${transfer.used ? 'completed' : 'pending'}`}>
+                        {transfers.map(transfer => (
+                            <div
+                                key={transfer._id}
+                                className={`withdraw-card ${transfer.used ? 'completed' : 'pending'}`}
+                            >
                                 <div className="card-header">
                                     <div className="user-info">
                                         <h3 className="card-user-name">{transfer.name}</h3>
@@ -146,9 +147,15 @@ export default function AdminTransfers() {
                                     </div>
                                     <div className="card-amount">${transfer.amount}</div>
                                     <div className="card-dates">
-                                        <p><strong>Ingreso:</strong> {new Date(transfer.createdAt).toLocaleString('es-AR')}</p>
+                                        <p>
+                                            <strong>Ingreso:</strong>{' '}
+                                            {new Date(transfer.createdAt).toLocaleString('es-AR')}
+                                        </p>
                                         {transfer.used && (
-                                            <p><strong>Reclamado:</strong> {new Date(transfer.updatedAt).toLocaleString('es-AR')}</p>
+                                            <p>
+                                                <strong>Reclamado:</strong>{' '}
+                                                {new Date(transfer.updatedAt).toLocaleString('es-AR')}
+                                            </p>
                                         )}
                                     </div>
                                 </div>
@@ -158,18 +165,13 @@ export default function AdminTransfers() {
                 )}
             </div>
 
+            {/* Paginación */}
             <div className="pagination">
-                <button
-                    disabled={page <= 1}
-                    onClick={() => setPage(page - 1)}
-                >
+                <button disabled={page <= 1} onClick={() => setPage(page - 1)}>
                     ←
                 </button>
                 <span> {page} / {pages} </span>
-                <button
-                    disabled={page >= pages}
-                    onClick={() => setPage(page + 1)}
-                >
+                <button disabled={page >= pages} onClick={() => setPage(page + 1)}>
                     →
                 </button>
             </div>

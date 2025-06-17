@@ -1,48 +1,38 @@
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState } from 'react';
 import { getAllUsers } from '../services/auth';
-import { AuthContext } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom'; // Asegúrate de importar useNavigate
+import { useNavigate } from 'react-router-dom';
 
 export default function AdminUsers() {
     const [users, setUsers] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
-    const [loading, setLoading] = useState(true);
-    const navigate = useNavigate(); // Hook para navegación
-
     const [page, setPage] = useState(1);
     const [pages, setPages] = useState(1);
     const limit = 5;
 
+    const navigate = useNavigate();
+
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                setLoading(true);
-                const { data } = await getAllUsers(page, limit);
+                const { data } = await getAllUsers(page, limit, searchTerm);
                 setUsers(data.users);
                 setPages(data.pages);
             } catch (err) {
                 console.error('Error al obtener usuarios:', err);
-            } finally {
-                setLoading(false);
             }
         };
 
         fetchUsers();
-    }, [page]);
-
-    const filteredUsers = users.filter(user =>
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.phone.includes(searchTerm)
-    );
+    }, [page, searchTerm]);
 
     const handleGoBack = () => {
-        navigate('/admin'); // Ajusta la ruta según tu estructura
+        navigate('/admin');
     };
 
     return (
         <div className="admin-container">
-            {/* Header con botón de regreso */}
-            <div className='admin-header'>
+            {/* Header */}
+            <div className="admin-header">
                 <button
                     onClick={handleGoBack}
                     style={{
@@ -59,19 +49,11 @@ export default function AdminUsers() {
                         fontWeight: '500',
                         transition: 'all 0.2s ease'
                     }}
-                    onMouseEnter={(e) => {
-                        e.target.style.background = 'rgba(55, 65, 81, 0.9)';
-                        e.target.style.borderColor = 'rgba(156, 163, 175, 0.7)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.target.style.background = 'rgba(31, 41, 55, 0.8)';
-                        e.target.style.borderColor = 'rgba(75, 85, 99, 0.5)';
-                    }}
                 >
                     <span style={{ fontSize: '16px' }}>←</span>
                     <span>Volver</span>
                 </button>
-                <div className='titulo-profesional'>Usuarios</div>
+                <div className="titulo-profesional">Usuarios</div>
             </div>
 
             {/* Búsqueda */}
@@ -90,15 +72,10 @@ export default function AdminUsers() {
                 </div>
             </div>
 
-            {/* Vista de escritorio - Tabla */}
+            {/* Vista escritorio */}
             <div className="desktop-view">
-                <div className="table-container">
-                    {loading ? (
-                        <div className="empty-state">
-                            <div style={{ fontSize: '24px', marginBottom: '10px' }}>⏳</div>
-                            <p>Cargando usuarios...</p>
-                        </div>
-                    ) : filteredUsers.length === 0 ? (
+                <div className="table-container" style={{ minHeight: '180px' }}>
+                    {users.length === 0 ? (
                         <div className="empty-state">
                             <div style={{ fontSize: '48px', marginBottom: '15px', opacity: '0.5' }}>👤</div>
                             <p>{searchTerm ? 'No se encontraron usuarios' : 'No hay usuarios registrados'}</p>
@@ -125,21 +102,18 @@ export default function AdminUsers() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredUsers.map((user, index) => (
+                                {users.map((user, index) => (
                                     <tr key={user._id} style={{
                                         backgroundColor: index % 2 === 0 ? 'rgba(31, 41, 55, 0.3)' : 'rgba(17, 24, 39, 0.3)',
                                         transition: 'all 0.2s ease'
                                     }}>
                                         <td>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                <span style={{
-                                                    fontSize: '15px',
-                                                    fontWeight: '500',
-                                                    color: '#f3f4f6'
-                                                }}>
-                                                    {user.name}
-                                                </span>
-                                            </div>
+                                            <span style={{
+                                                fontWeight: '500',
+                                                color: '#f3f4f6'
+                                            }}>
+                                                {user.name}
+                                            </span>
                                         </td>
                                         <td>
                                             <span style={{
@@ -162,33 +136,28 @@ export default function AdminUsers() {
                 </div>
             </div>
 
-            {/* Vista móvil - Cards */}
+            {/* Vista móvil */}
             <div className="mobile-view">
-                {loading ? (
-                    <div className="empty-state">
-                        <div style={{ fontSize: '24px', marginBottom: '10px' }}>⏳</div>
-                        <p>Cargando usuarios...</p>
-                    </div>
-                ) : filteredUsers.length === 0 ? (
-                    <div className="empty-state">
-                        <div style={{ fontSize: '48px', marginBottom: '15px', opacity: '0.5' }}>👤</div>
-                        <p>{searchTerm ? 'No se encontraron usuarios' : 'No hay usuarios registrados'}</p>
-                        {searchTerm && (
-                            <button
-                                className="btn"
-                                onClick={() => setSearchTerm('')}
-                                style={{
-                                    marginTop: '15px',
-                                    background: 'linear-gradient(135deg, #6b7280, #4b5563)'
-                                }}
-                            >
-                                Limpiar búsqueda
-                            </button>
-                        )}
-                    </div>
-                ) : (
-                    <div className="cards-container">
-                        {filteredUsers.map((user, index) => (
+                <div className="cards-container" style={{ minHeight: '180px' }}>
+                    {users.length === 0 ? (
+                        <div className="empty-state">
+                            <div style={{ fontSize: '48px', marginBottom: '15px', opacity: '0.5' }}>👤</div>
+                            <p>{searchTerm ? 'No se encontraron usuarios' : 'No hay usuarios registrados'}</p>
+                            {searchTerm && (
+                                <button
+                                    className="btn"
+                                    onClick={() => setSearchTerm('')}
+                                    style={{
+                                        marginTop: '15px',
+                                        background: 'linear-gradient(135deg, #6b7280, #4b5563)'
+                                    }}
+                                >
+                                    Limpiar búsqueda
+                                </button>
+                            )}
+                        </div>
+                    ) : (
+                        users.map((user) => (
                             <div key={user._id} className="withdraw-card" style={{
                                 background: 'rgba(17, 24, 39, 0.8)',
                                 borderLeft: '4px solid #3b82f6'
@@ -241,24 +210,16 @@ export default function AdminUsers() {
                                     </div>
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                )}
+                        ))
+                    )}
+                </div>
             </div>
+
+            {/* Paginación */}
             <div className="pagination">
-                <button
-                    disabled={page <= 1}
-                    onClick={() => setPage(page - 1)}
-                >
-                    ←
-                </button>
-                <span> {page} / {pages} </span>
-                <button
-                    disabled={page >= pages}
-                    onClick={() => setPage(page + 1)}
-                >
-                    →
-                </button>
+                <button disabled={page <= 1} onClick={() => setPage(page - 1)}>←</button>
+                <span>{page} / {pages}</span>
+                <button disabled={page >= pages} onClick={() => setPage(page + 1)}>→</button>
             </div>
         </div>
     );

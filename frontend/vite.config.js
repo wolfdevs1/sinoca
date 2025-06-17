@@ -11,5 +11,5 @@ export default defineConfig({
     outDir: path.resolve(__dirname, '../backend/public'),
     emptyOutDir: true,
   },
-  base: './',   // relativo para que los assets funcionen sobre Express
+  base: '/',   // relativo para que los assets funcionen sobre Express
 });

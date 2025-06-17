@@ -1,11 +1,11 @@
 import { useState, useContext, useEffect, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { withdraw as withdrawAPI } from "../services/auth";
+import { withdraw as withdrawAPI, getMyWithdraws, deleteMyWithdraw } from "../services/auth";
 import { AuthContext } from '../context/AuthContext';
 import { SocketContext } from "../context/SocketContext";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { FaArrowLeft, FaPlus, FaTimes, FaWallet } from 'react-icons/fa';
+import { FaArrowLeft, FaPlus, FaTimes } from 'react-icons/fa';
 
 export default function WithdrawPage() {
     const { user, newUserAccount } = useContext(AuthContext);
@@ -17,6 +17,9 @@ export default function WithdrawPage() {
     const [newAccount, setNewAccount] = useState("");
     const [showAddAlias, setShowAddAlias] = useState(false);
 
+    const [cancelingIds, setCancelingIds] = useState(new Set());
+    const [myWithdraws, setMyWithdraws] = useState([]);
+
     const reversedAccounts = useMemo(() => {
         return [...user.accounts].reverse();
     }, [user.accounts]);
@@ -26,6 +29,18 @@ export default function WithdrawPage() {
             setAccount(reversedAccounts[0].name);
         }
     }, [reversedAccounts, account]);
+
+    useEffect(() => {
+        const fetchMyWithdraws = async () => {
+            try {
+                const res = await getMyWithdraws(user.name);
+                setMyWithdraws(res.data.withdraws);
+            } catch (err) {
+                console.error('Error al cargar retiros del usuario:', err);
+            }
+        };
+        fetchMyWithdraws();
+    }, [user.name]);
 
     const handleWithdraw = async (e) => {
         e.preventDefault();
@@ -102,6 +117,31 @@ export default function WithdrawPage() {
         setShowAddAlias(!showAddAlias);
         if (!showAddAlias) {
             setNewAccount("");
+        }
+    };
+
+    const handleCancel = async (withdrawId) => {
+        if (!window.confirm("¿Estás seguro de que querés cancelar este retiro?")) return;
+
+        setCancelingIds(prev => new Set(prev).add(withdrawId));
+
+        try {
+            const res = await deleteMyWithdraw(withdrawId);
+            toast.success(res.data.message || "Retiro cancelado correctamente");
+
+            // Recargar retiros actualizados
+            const updated = await getMyWithdraws(user.name);
+            setMyWithdraws(updated.data.withdraws);
+        } catch (err) {
+            const msg = err.response?.data?.error || "Error al cancelar el retiro";
+            toast.error(msg);
+            console.error("Error en handleCancel:", err);
+        } finally {
+            setCancelingIds(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(withdrawId);
+                return newSet;
+            });
         }
     };
 
@@ -190,30 +230,47 @@ export default function WithdrawPage() {
             </form>
 
             <table className="withdraw-table">
-  <thead>
-    <tr>
-      <th>CUENTA</th>
-      <th>IMPORTE</th>
-      <th>ACCIÓN</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Alias123</td>
-      <td>$1000</td>
-      <td>
-        <button className="btn-cancelar">Cancelar</button>
-      </td>
-    </tr>
-    <tr>
-      <td>Cuenta456</td>
-      <td>$500</td>
-      <td>
-        <button className="btn-cancelar">Cancelar</button>
-      </td>
-    </tr>
-  </tbody>
-</table>
+                <thead>
+                    <tr>
+                        <th>CUENTA</th>
+                        <th>IMPORTE</th>
+                        <th>ACCIÓN</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {myWithdraws.length === 0 ? (
+                        <tr>
+                            <td colSpan="3" style={{ textAlign: 'center', padding: '10px' }}>
+                                No tenés retiros realizados aún.
+                            </td>
+                        </tr>
+                    ) : (
+                        myWithdraws.map((w, idx) => (
+                            <tr key={idx}>
+                                <td>{w.account}</td>
+                                <td>${w.amount}</td>
+                                <td>
+                                    {!w.state ? (
+                                        <button
+                                            className="btn-cancelar"
+                                            onClick={() => handleCancel(w._id)}
+                                            disabled={cancelingIds.has(w._id)}
+                                            style={{
+                                                opacity: cancelingIds.has(w._id) ? 0.6 : 1,
+                                                cursor: cancelingIds.has(w._id) ? 'not-allowed' : 'pointer'
+                                            }}
+                                        >
+                                            {cancelingIds.has(w._id) ? "Cancelando..." : "Cancelar"}
+                                        </button>
+                                    ) : (
+                                        <span style={{ opacity: 0.6 }}>Completado</span>
+                                    )}
+                                </td>
+                            </tr>
+                        ))
+                    )}
+                </tbody>
+            </table>
 
 
             <ToastContainer />

@@ -24,7 +24,7 @@ export default function AdminWithdraw() {
         const loadData = async () => {
             try {
                 const [{ data: wResp }, { data: bResp }] = await Promise.all([
-                    getWithdraws(page, limit),
+                    getWithdraws(page, limit, searchTerm),
                     getAccountsAPI()
                 ]);
 
@@ -34,7 +34,6 @@ export default function AdminWithdraw() {
                 setPage(curr);
 
                 setBankList(bResp);
-                // inicializar selección
                 const initBanks = {};
                 withdraws.forEach(w => {
                     initBanks[w._id] = w.withdrawAccount || (bResp[0]?.name || '');
@@ -45,19 +44,12 @@ export default function AdminWithdraw() {
             }
         };
         loadData();
-    }, [page]);
+    }, [page, searchTerm]);
 
-    // filtrado cliente (sobre la página actual)
-    const filtered = withdraws.filter(w => {
-        const matchesSearch =
-            w.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            w.phone.includes(searchTerm) ||
-            w.account.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesFilter =
-            (filterStatus === 'pending' && !w.state) ||
-            (filterStatus === 'completed' && w.state);
-        return matchesSearch && matchesFilter;
-    });
+    const filtered = withdraws.filter(w =>
+        (filterStatus === 'pending' && !w.state) ||
+        (filterStatus === 'completed' && w.state)
+    );
 
     const handleSend = async (withdrawId) => {
         const selectedBank = selectedBanks[withdrawId];
@@ -83,6 +75,10 @@ export default function AdminWithdraw() {
     const handleGoBack = () => {
         navigate('/admin');
     };
+
+    useEffect(() => {
+        setPage(1);
+    }, [searchTerm]);
 
     return (
         <div className="admin-container">

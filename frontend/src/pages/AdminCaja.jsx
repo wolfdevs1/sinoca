@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getAccounts, getSaldos, crearTransferManual, crearWithdrawManual, getResumen } from '../services/auth';
 
 export default function AdminCaja() {
-    const [saldos, setSaldos] = useState({ cuenta1: 0, cuenta2: 0, cuenta3: 0 });
+    const [saldos, setSaldos] = useState({ cuenta1: 0 });
     const [resumen, setResumen] = useState({ ingreso: 0, egreso: 0, retiro: 0, aporte: 0 });
     const [formularioActivo, setFormularioActivo] = useState('');
     const [formData, setFormData] = useState({ cuenta: '', importe: '', descripcion: '' });

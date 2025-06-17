@@ -9,11 +9,17 @@ export default function AdminConfig() {
     const [authorized, setAuthorized] = useState(false);
 
     useEffect(() => {
-        const pass = window.prompt("🔐 Ingresá la clave de administrador");
-        if (pass === "admin123") {
+        const storedAccess = localStorage.getItem("adminAccess");
+        if (storedAccess === "true") {
             setAuthorized(true);
         } else {
-            setStatus("❌ Acceso denegado");
+            const pass = window.prompt("🔐 Ingresá la clave de administrador");
+            if (pass === "admin123") {
+                localStorage.setItem("adminAccess", "true");
+                setAuthorized(true);
+            } else {
+                setStatus("❌ Acceso denegado");
+            }
         }
     }, []);
 

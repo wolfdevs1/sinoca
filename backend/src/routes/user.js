@@ -111,6 +111,54 @@ router.post('/new-account', protect, async (req, res) => {
     }
 });
 
+// Obtener últimos 5 retiros del usuario autenticado
+router.get('/my-withdraws', protect, async (req, res) => {
+    const { name } = req.query;
+
+    if (!name) {
+        return res.status(400).json({ error: 'Falta el nombre del usuario' });
+    }
+
+    try {
+        const withdraws = await Withdraw
+            .find({ name })
+            .sort({ createdAt: -1 }) // Más nuevos primero
+            .limit(5);               // Solo los últimos 5
+
+        res.json({ withdraws });
+    } catch (err) {
+        console.error('Error al obtener retiros del usuario:', err);
+        res.status(500).json({ error: 'Error al obtener los retiros' });
+    }
+});
+
+router.delete('/withdraw/:id', protect, async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const withdraw = await Withdraw.findById(id);
+        if (!withdraw) return res.status(404).json({ error: "Retiro no encontrado" });
+
+        if (withdraw.state) {
+            return res.status(400).json({ error: "Este retiro ya fue procesado y no se puede cancelar" });
+        }
+
+        const response = await deposit(withdraw.name, formatNumber(withdraw.amount));
+        if (response === 'ok') {
+            await Withdraw.findByIdAndDelete(id);
+            res.json({ message: "Retiro cancelado correctamente" });
+        } else if (response === 'error') {
+            res.status(400).json({ error: 'Error al cargar el depósito' });
+        } else {
+            res.status(500).json({ error: 'Error interno del servidor' });
+        }
+
+    } catch (err) {
+        console.error('Error al cancelar retiro:', err);
+        res.status(500).json({ error: "Error interno al cancelar retiro" });
+    }
+});
+
 router.post('/add-new-account', protect, adminOnly, async (req, res) => {
     try {
         const { name, alias, bank, email, password } = req.body;
@@ -142,16 +190,23 @@ router.post('/change-withdraw-state', protect, adminOnly, async (req, res) => {
     }
 });
 
-// Ruta solo para administradores
 router.get('/all', protect, adminOnly, async (req, res) => {
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.max(1, parseInt(req.query.limit) || 10);
     const skip = (page - 1) * limit;
+    const search = req.query.search || '';
 
-    const total = await User.countDocuments();
-    const users = await User.find()
+    const query = {
+        $or: [
+            { name: { $regex: search, $options: 'i' } },
+            { phone: { $regex: search, $options: 'i' } }
+        ]
+    };
+
+    const total = await User.countDocuments(query);
+    const users = await User.find(query)
         .select('name phone role')
-        .sort({ createdAt: -1 }) // opcional: orden por fecha
+        .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
 
@@ -160,53 +215,70 @@ router.get('/all', protect, adminOnly, async (req, res) => {
     res.json({ users, page, pages, total });
 });
 
-router.get(
-    '/withdraws',
-    protect,
-    adminOnly,
-    async (req, res) => {
-        const page = Math.max(1, parseInt(req.query.page) || 1);
-        const limit = Math.max(1, parseInt(req.query.limit) || 10);
+router.get('/withdraws', protect, adminOnly, async (req, res) => {
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.max(1, parseInt(req.query.limit) || 10);
+    const search = req.query.search || '';
+    const skip = (page - 1) * limit;
 
-        const skip = (page - 1) * limit;
-        const excludeNames = ['Egreso manual', 'Retiro'];
+    const excludeNames = ['Egreso manual', 'Retiro'];
 
-        const total = await Withdraw.countDocuments({ name: { $nin: excludeNames } });
-        const pages = Math.ceil(total / limit);
+    const query = {
+        name: { $nin: excludeNames },
+        ...(search && {
+            $or: [
+                { name: { $regex: search, $options: 'i' } },
+                { phone: { $regex: search, $options: 'i' } },
+                { account: { $regex: search, $options: 'i' } },
+                { amount: { $regex: search, $options: 'i' } },
+            ]
+        })
+    };
 
-        const withdraws = await Withdraw
-            .find({ name: { $nin: excludeNames } })
-            .skip(skip)
-            .limit(limit)
-            .sort({ createdAt: -1 });
+    const total = await Withdraw.countDocuments(query);
+    const pages = Math.ceil(total / limit);
 
-        res.json({ withdraws, total, page, pages });
-    }
-);
+    const withdraws = await Withdraw
+        .find(query)
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: -1 });
 
-router.get(
-    '/transfers',
-    protect,
-    adminOnly,
-    async (req, res) => {
-        const page = Math.max(1, parseInt(req.query.page) || 1);
-        const limit = Math.max(1, parseInt(req.query.limit) || 10);
+    res.json({ withdraws, total, page, pages });
+});
 
-        const skip = (page - 1) * limit;
-        const excludeNames = ['Ingreso manual', 'Aporte'];
+router.get('/transfers', protect, adminOnly, async (req, res) => {
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.max(1, parseInt(req.query.limit) || 10);
+    const search = req.query.search || '';
+    const state = req.query.state; // 'used' o 'unused'
+    const skip = (page - 1) * limit;
 
-        const total = await Transfer.countDocuments({ name: { $nin: excludeNames } });
-        const pages = Math.ceil(total / limit);
+    const excludeNames = ['Ingreso manual', 'Aporte'];
 
-        const transfers = await Transfer
-            .find({ name: { $nin: excludeNames } })
-            .skip(skip)
-            .limit(limit)
-            .sort({ createdAt: -1 });
+    const query = {
+        name: { $nin: excludeNames },
+        ...(search && {
+            $or: [
+                { name: { $regex: search, $options: 'i' } },
+                { amount: { $regex: search, $options: 'i' } }
+            ]
+        }),
+        ...(state === 'used' && { used: true }),
+        ...(state === 'unused' && { used: false }),
+    };
 
-        res.json({ transfers, total, page, pages });
-    }
-);
+    const total = await Transfer.countDocuments(query);
+    const pages = Math.ceil(total / limit);
+
+    const transfers = await Transfer
+        .find(query)
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: -1 });
+
+    res.json({ transfers, total, page, pages });
+});
 
 router.get('/accounts', protect, adminOnly, async (req, res) => {
     const accounts = await Account.find().select('name alias bank email password');

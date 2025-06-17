@@ -37,7 +37,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 
 // 3) Catch-all para React Router: **sólo** después de las APIs
-app.get(/(.*)/, (req, res) => {
+app.get(/.*/, (req, res) => {
     res.sendFile(path.join(publicDir, 'index.html'));
 });
 
