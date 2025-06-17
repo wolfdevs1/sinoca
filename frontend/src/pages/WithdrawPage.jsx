@@ -189,6 +189,33 @@ export default function WithdrawPage() {
                 </div>
             </form>
 
+            <table className="withdraw-table">
+  <thead>
+    <tr>
+      <th>CUENTA</th>
+      <th>IMPORTE</th>
+      <th>ACCIÓN</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Alias123</td>
+      <td>$1000</td>
+      <td>
+        <button className="btn-cancelar">Cancelar</button>
+      </td>
+    </tr>
+    <tr>
+      <td>Cuenta456</td>
+      <td>$500</td>
+      <td>
+        <button className="btn-cancelar">Cancelar</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
             <ToastContainer />
         </>
     );
