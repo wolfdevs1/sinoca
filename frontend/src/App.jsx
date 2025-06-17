@@ -118,9 +118,7 @@ function App() {
         <Route
           path="/admin/config"
           element={
-            <AdminRoute>
-              <AdminConfig />
-            </AdminRoute>
+            <AdminConfig />
           }
         />
 

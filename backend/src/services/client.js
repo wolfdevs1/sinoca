@@ -1,44 +1,128 @@
+const fs = require('fs');
+const path = require('path');
 const { Client, LocalAuth } = require('whatsapp-web.js');
-const qrcode = require('qrcode-terminal');
 const pending = require('./pendingPhones');
 
-const client = new Client({
-    authStrategy: new LocalAuth()
-});
+let client = null;
+let latestQr = null;
+let isClientInitializing = false;
+let isClientReady = false;
 
-client.on('ready', () => {
-    console.log('Cliente de WhatsApp listo!');
-});
+const initClient = (io) => {
+    if (isClientInitializing || isClientReady) return;
 
-client.on('qr', qr => {
-    qrcode.generate(qr, { small: true });
-});
+    isClientInitializing = true;
 
-client.on('message', async message => {
-    const from = message.from;
-    if (pending.has(from)) {
-        const { socket, step } = pending.get(from);
-        const isRegisterStep = step === 'register' || step === 'new-account' || step === 'login';
-        const isNegativeResponse = message.body.trim().toLowerCase() === 'no';
-        if (isRegisterStep) {
-            if (isNegativeResponse) {
-                await message.reply('Acción denegada');
+    client = new Client({
+        authStrategy: new LocalAuth(),
+        puppeteer: { headless: true, args: ['--no-sandbox'] }
+    });
+
+    client.on('qr', (qr) => {
+        latestQr = qr;
+        io.emit('qr', qr);
+    });
+
+    client.on('ready', () => {
+        latestQr = null;
+        isClientInitializing = false;
+        isClientReady = true;
+        io.emit('ready');
+    });
+
+    client.on('disconnected', (reason) => {
+        console.log('WhatsApp desconectado:', reason);
+        cleanup(io, `⚠️ Desconectado: ${reason}`);
+    });
+
+    client.on('message', async (message) => {
+        const from = message.from;
+        if (pending.has(from)) {
+            const { socket, step } = pending.get(from);
+            const isRegisterStep = ['register', 'new-account', 'login'].includes(step);
+            const isNegative = message.body.trim().toLowerCase() === 'no';
+            if (isRegisterStep) {
+                if (isNegative) {
+                    await message.reply('Acción denegada');
+                    pending.remove(from);
+                    return;
+                }
+                let msg = '¡Número verificado! 🎉';
+                if (step === 'new-account') msg = 'Alias registrado con éxito';
+                else if (step === 'login') msg = 'Acceso verificado';
+
+                await message.reply(msg);
                 pending.remove(from);
-                return;
+                socket.emit('verified', { ok: true, msg });
             }
-            let successMessage = '¡Número verificado! 🎉';
-            if (step === 'new-account') {
-                successMessage = 'Alias registrado con éxito';
-            } else if (step === 'login') {
-                successMessage = 'Acceso verificado';
-            }
-            await message.reply(successMessage);
-            pending.remove(from);
-            socket.emit('verified', { ok: true, msg: successMessage });
+        }
+    });
+
+    client.initialize().catch(err => {
+        console.error('Error al iniciar WhatsApp:', err);
+        cleanup(io, '❌ Error al iniciar WhatsApp');
+    });
+};
+
+const stopClient = async (io) => {
+    if (isClientInitializing && !latestQr) {
+        return;
+    }
+
+    if (client) {
+        try {
+            await client.destroy();
+        } catch (err) {
+            console.warn('Error al detener WhatsApp:', err.message);
         }
     }
+
+    cleanup(io, '⛔ WhatsApp detenido por el usuario');
+};
+
+const clearSession = async (io) => {
+    if (isClientInitializing && !latestQr) {
+        return;
+    }
+
+    await stopClient(io);
+
+    const deleteFolder = (folderPath) => {
+        if (fs.existsSync(folderPath)) {
+            fs.rmSync(folderPath, { recursive: true, force: true });
+        }
+    };
+
+    deleteFolder(path.join(__dirname, '.wwebjs_auth'));
+    deleteFolder(path.join(__dirname, '.wwebjs_cache'));
+
+    if (io) io.emit('disconnected', '🗑 Sesión de WhatsApp eliminada');
+};
+
+const cleanup = (io, msg) => {
+    client = null;
+    isClientInitializing = false;
+    isClientReady = false;
+    latestQr = null;
+    if (io) io.emit('disconnected', msg);
+};
+
+const getClientStatus = () => ({
+    client,
+    isClientReady,
+    isClientInitializing,
+    latestQr
 });
 
-client.initialize();
+const sendMessage = async (phone, text) => {
+    if (!client || !isClientReady) throw new Error('WhatsApp no está listo');
+    return client.sendMessage(phone, text);
+};
 
-module.exports = client;
+module.exports = {
+    initClient,
+    stopClient,
+    clearSession,
+    getClientStatus,
+    sendMessage
+};
