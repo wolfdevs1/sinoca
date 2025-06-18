@@ -93,8 +93,8 @@ const clearSession = async (io) => {
         }
     };
 
-    deleteFolder(path.join(__dirname, '.wwebjs_auth'));
-    deleteFolder(path.join(__dirname, '.wwebjs_cache'));
+    deleteFolder(path.join(__dirname, '..', '..', '.wwebjs_auth'));
+    deleteFolder(path.join(__dirname, '..', '..', '.wwebjs_cache'));
 
     if (io) io.emit('disconnected', '🗑 Sesión de WhatsApp eliminada');
 };
