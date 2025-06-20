@@ -30,7 +30,10 @@ router.get('/profile', protect, async (req, res) => {
 router.post('/deposit', protect, async (req, res) => {
     let { user, amount } = req.body;
 
+    const usuario = await User.findById(user._id);
+
     const transfer = await Transfer.findOne({ amount: formatNumber(amount), used: false });
+
     if (!transfer) {
         return res.status(400).json({ error: 'No se encontró ningún depósito con esa información' });
     }
@@ -38,14 +41,14 @@ router.post('/deposit', protect, async (req, res) => {
     await Transfer.findByIdAndUpdate(transfer._id, { used: true });
 
     // Aplica el bonus si corresponde
-    if (user.firstBonus?.state) {
-        const bonusPercent = user.firstBonus.amount || 0; // Usa el valor del bonus (ej: 20)
+    if (usuario.firstBonus?.state) {
+        const bonusPercent = usuario.firstBonus.amount || 0; // Usa el valor del bonus (ej: 20)
         const bonus = parseFloat(amount) * (bonusPercent / 100);      // Calcula el bonus como porcentaje
-        amount += parseFloat(bonus);
+        amount = parseFloat(parseFloat(amount) + bonus).toFixed(2);
         await User.findByIdAndUpdate(user._id, { 'firstBonus.state': false });
     }
 
-    const response = await deposit(user.name, formatNumber(amount));
+    const response = await deposit(user.name, formatNumber(amount.toString()));
     if (response === 'ok') {
         return res.json({ message: 'Depósito cargado correctamente' });
     } else if (response === 'error') {
@@ -57,7 +60,7 @@ router.post('/deposit', protect, async (req, res) => {
 
 router.post('/withdraw', protect, async (req, res) => {
     const { name, amount, account, phone } = req.body;
-    const response = await withdraw(name, amount);
+    const response = await withdraw(name, amount.toString());
     if (response === 'ok') {
         await Withdraw.create({ account, amount, name, phone });
         res.json({ message: 'Retiro cargado correctamente' });

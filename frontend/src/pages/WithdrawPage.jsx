@@ -157,7 +157,7 @@ export default function WithdrawPage() {
                 </div>
                 <NumericFormat
                     value={amount}
-                    onValueChange={(values) => setAmount(values.floatValue)}
+                    onValueChange={(values) => setAmount(values.value)}
                     thousandSeparator="."
                     decimalSeparator=","
                     allowNegative={false}

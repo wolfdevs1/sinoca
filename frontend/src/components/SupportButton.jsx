@@ -5,7 +5,7 @@ const SupportButton = () => {
   return (
     <div className="support-button-container">
       <a
-        href="https://wa.me/5491171128088"
+        href="https://wa.me/5491157430301"
         target="_blank"
         rel="noopener noreferrer"
         className="support-button"

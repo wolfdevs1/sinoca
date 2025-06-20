@@ -16,30 +16,29 @@ export default function RegisterPage() {
   const [isValidPhone, setIsValidPhone] = useState(null);
 
   const [tokenTrigger, setTokenTrigger] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [status, setStatus] = useState("idle"); // "idle" | "validating" | "creating"
 
   const socket = useContext(SocketContext);
   const { login } = useContext(AuthContext);
 
   const handleRegister = useCallback(async () => {
     try {
-      setIsSubmitting(true);
-
+      toast.success('Creando usuario...');
+      setStatus("creating");
       const parsed = parsePhoneNumberFromString("+54" + phoneRaw, "AR");
       if (!parsed?.isValid()) {
         toast.error("El número de teléfono no es válido.");
-        setIsSubmitting(false);
+        setStatus("idle");
         return;
       }
 
       const formattedPhone = parsed.number.replace("+54", "549") + "@c.us";
-
       const res = await registerAPI({ name, phone: formattedPhone });
       const { token } = res.data;
       setTokenTrigger(token);
     } catch (error) {
       toast.error("Error al registrarse: " + (error.response?.data?.error || error.message));
-      setIsSubmitting(false);
+      setStatus("idle");
     }
   }, [name, phoneRaw]);
 
@@ -50,12 +49,10 @@ export default function RegisterPage() {
 
   const ingresar = async (e) => {
     e.preventDefault();
-    if (isSubmitting) return;
-    setIsSubmitting(true);
+    if (status !== "idle") return;
 
     if (!isValidUsername(name)) {
       toast.error("El nombre de usuario debe comenzar con una letra, ser alfanumérico y tener entre 4 y 15 caracteres.");
-      setIsSubmitting(false);
       return;
     }
 
@@ -63,14 +60,13 @@ export default function RegisterPage() {
       const parsed = parsePhoneNumberFromString("+54" + phoneRaw, "AR");
       if (!parsed?.isValid()) {
         toast.error("El número de teléfono no es válido.");
-        setIsSubmitting(false);
         return;
       }
 
       if (verified) {
-        toast.success('Creando usuario...');
         await handleRegister();
       } else {
+        setStatus("validating");
         const formattedPhone = parsed.number.replace("+54", "549") + "@c.us";
         socket.emit("verify", name, formattedPhone, "register", '', (res) => {
           if (res.ok) {
@@ -78,13 +74,14 @@ export default function RegisterPage() {
             toast.success(res.msg);
           } else {
             toast.error(res.msg);
+            setStatus("idle");
           }
         });
       }
     } catch (err) {
       console.error("Error al registrar:", err);
       toast.error("Ocurrió un error.");
-      setIsSubmitting(false);
+      setStatus("idle");
     }
   };
 
@@ -162,11 +159,13 @@ export default function RegisterPage() {
 
         <div className="btn-group">
           <button
-            className={`btn ${isSubmitting ? "gray" : ""}`}
+            className={`btn ${status !== "idle" ? "gray" : ""}`}
             type="submit"
-            disabled={isSubmitting}
+            disabled={status !== "idle"}
           >
-            {isSubmitting ? "Registrando..." : "Registrarse"}
+            {status === "validating" && "Validando..."}
+            {status === "creating" && "Creando usuario..."}
+            {status === "idle" && "Registrarse"}
           </button>
           <div className="link-group">
             <span>¿Tienes una cuenta? </span>

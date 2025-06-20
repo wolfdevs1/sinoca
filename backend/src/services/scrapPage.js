@@ -117,7 +117,7 @@ async function adjustBalance(name, amount, action) {
                 el => el.textContent
             );
             const saldo = parseFloat(formatNumber(saldoText));
-            const retiro = parseFloat(amount.replace(',', '.'));
+            const retiro = parseFloat(amount.toString().replace(',', '.'));
             if (retiro > saldo) {
                 await browser.close();
                 return 'insufficient';
