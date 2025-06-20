@@ -2,6 +2,7 @@ import { useState, useContext, useEffect, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { withdraw as withdrawAPI, getMyWithdraws, deleteMyWithdraw } from "../services/auth";
 import { AuthContext } from '../context/AuthContext';
+import { NumericFormat } from 'react-number-format';
 import { SocketContext } from "../context/SocketContext";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -154,19 +155,19 @@ export default function WithdrawPage() {
                     </Link>
                     <h1 className="page-title">RETIRO</h1>
                 </div>
-
-                <input
-                    type="number"
-                    min="1"
-                    step="1"
+                <NumericFormat
+                    value={amount}
+                    onValueChange={(values) => setAmount(values.floatValue)}
+                    thousandSeparator="."
+                    decimalSeparator=","
+                    allowNegative={false}
                     placeholder="Importe a retirar"
                     className="input"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === '.' || e.key === ',') {
-                            e.preventDefault();
-                        }
+                    prefix="$"
+                    allowLeadingZeros={false}
+                    isAllowed={(values) => {
+                        const { floatValue } = values;
+                        return floatValue === undefined || floatValue > 0;
                     }}
                     required
                 />
@@ -248,7 +249,15 @@ export default function WithdrawPage() {
                         myWithdraws.map((w, idx) => (
                             <tr key={idx}>
                                 <td>{w.account}</td>
-                                <td>${w.amount}</td>
+                                <td>
+                                    <NumericFormat
+                                        value={w.amount}
+                                        displayType="text"
+                                        thousandSeparator="."
+                                        decimalSeparator=","
+                                        prefix="$"
+                                    />
+                                </td>
                                 <td>
                                     {!w.state ? (
                                         <button

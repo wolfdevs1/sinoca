@@ -48,7 +48,7 @@ const initClient = (io) => {
                 }
                 let msg = `✅ ¡Número verificado!
 
-📲 Volvé a la web y completá el registro.`;
+📲 Volvé a la web.`;
                 if (step === 'new-account') {
                     msg = `✅ ¡Alias registrado con éxito! 
 

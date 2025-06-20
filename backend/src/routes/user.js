@@ -40,8 +40,8 @@ router.post('/deposit', protect, async (req, res) => {
     // Aplica el bonus si corresponde
     if (user.firstBonus?.state) {
         const bonusPercent = user.firstBonus.amount || 0; // Usa el valor del bonus (ej: 20)
-        const bonus = amount * (bonusPercent / 100);      // Calcula el bonus como porcentaje
-        amount += bonus;
+        const bonus = parseFloat(amount) * (bonusPercent / 100);      // Calcula el bonus como porcentaje
+        amount += parseFloat(bonus);
         await User.findByIdAndUpdate(user._id, { 'firstBonus.state': false });
     }
 
