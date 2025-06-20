@@ -2,6 +2,7 @@ import React from 'react';
 import { useContext, useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { SocketContext } from "../context/SocketContext";
+import { AuthContext } from '../context/AuthContext';
 import { register as registerAPI } from "../services/auth";
 import { parsePhoneNumberFromString, AsYouType } from "libphonenumber-js";
 import { ToastContainer, toast } from 'react-toastify';
@@ -18,6 +19,7 @@ export default function RegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const socket = useContext(SocketContext);
+  const { login } = useContext(AuthContext);
 
   const handleRegister = useCallback(async () => {
     try {
@@ -80,6 +82,7 @@ export default function RegisterPage() {
         });
       }
     } catch (err) {
+      console.error("Error al registrar:", err);
       toast.error("Ocurrió un error.");
       setIsSubmitting(false);
     }
@@ -102,10 +105,14 @@ export default function RegisterPage() {
     };
 
     socket.on("verified", onVerified);
+    socket.on("user-exists", async (name) => {
+      await login(name);
+    });
     return () => {
       socket.off("verified", onVerified);
+      socket.off("user-exists");
     };
-  }, [socket, handleRegister]);
+  }, [socket, handleRegister, login]);
 
   const handlePhoneChange = (e) => {
     const rawDigits = e.target.value.replace(/\D/g, "");
@@ -123,7 +130,7 @@ export default function RegisterPage() {
     <React.Fragment>
       <form onSubmit={ingresar}>
         <h1>Registro</h1>
-
+        <div style={{ textAlign: 'center', fontWeight: 'bold' }}>🎁 ¡Bonus 20% en tu primera carga!</div>
         <input
           className="input"
           type="text"

@@ -24,7 +24,7 @@ function DepositPage() {
             // Convertir a número limpio (sin comas)
             const numericAmount = parseFloat(amount.toString().replace(/,/g, "")).toString();
 
-            const res = await depositAPI({ name: user.name, amount: numericAmount });
+            const res = await depositAPI({ user, amount: numericAmount });
             toast.success(res.data.message);
             setName("");
             setAmount("");

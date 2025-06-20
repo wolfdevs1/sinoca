@@ -54,7 +54,7 @@ function LoginPage() {
       socket.off('verified');
       clearTimeout(timeoutRef.current); // limpiar timeout si el componente se desmonta
     }
-  }, [socket, name]);
+  }, [socket, name, login]);
 
   return (
     <>
@@ -62,6 +62,7 @@ function LoginPage() {
         <div className="branding">
           <div className="branding-icon">🎲</div>
           <h1 className="titulo-profesional">¡Bienvenido!</h1>
+          <div style={{ textAlign: 'center', fontWeight: 'bold' }}>🎁 ¡Bonus 20% en tu primera carga!</div>
         </div>
 
         <input

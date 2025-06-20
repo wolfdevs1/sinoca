@@ -1,6 +1,6 @@
 const imap = require("imap-simple");
 const { simpleParser } = require("mailparser");
-const Transferencia = require('../models/Transfer');
+const Transfer = require('../models/Transfer');
 const Account = require('../models/Account');
 
 // Obtenemos cuentas desde la base de datos
@@ -71,13 +71,14 @@ async function checkEmail(account) {
         if (match) {
             const monto = match[1];
             let data = {
-                cantidad: formatNumber(monto),
-                nombre: "claropay",
-                account: account.name
+                amount: formatNumber(monto),
+                name: "claropay",
+                account: account.name,
+                used: false
             };
             console.log(`[${account.name}] Se detectó nueva acreditación:`, data);
 
-            await Transferencia.create(data);
+            await Transfer.create(data);
 
             try {
                 await connection.deleteMessage(latestEmail.attributes.uid);

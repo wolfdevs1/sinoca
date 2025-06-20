@@ -15,7 +15,6 @@ const initClient = (io) => {
 
     client = new Client({
         authStrategy: new LocalAuth(),
-        puppeteer: { headless: true, args: ['--no-sandbox'] }
     });
 
     client.on('qr', (qr) => {
@@ -38,8 +37,8 @@ const initClient = (io) => {
     client.on('message', async (message) => {
         const from = message.from;
         if (pending.has(from)) {
-            const { socket, step } = pending.get(from);
-            const isRegisterStep = ['register', 'new-account', 'login'].includes(step);
+            const { socket, step, name } = pending.get(from);
+            const isRegisterStep = ['register', 'new-account', 'login', 'user-exists'].includes(step);
             const isNegative = message.body.trim().toLowerCase() === 'no';
             if (isRegisterStep) {
                 if (isNegative) {
@@ -47,13 +46,22 @@ const initClient = (io) => {
                     pending.remove(from);
                     return;
                 }
-                let msg = '¡Número verificado! 🎉';
-                if (step === 'new-account') msg = 'Alias registrado con éxito';
-                else if (step === 'login') msg = 'Acceso verificado';
+                let msg = `✅ ¡Número verificado!
 
+📲 Volvé a la web y completá el registro.`;
+                if (step === 'new-account') {
+                    msg = `✅ ¡Alias registrado con éxito! 
+
+📲 Volvé a la web.`;
+                } else if (step === 'login') {
+                    msg = `✅ ¡Acceso verificado!
+
+📲 Volvé a la web.`;
+                }
                 await message.reply(msg);
                 pending.remove(from);
-                socket.emit('verified', { ok: true, msg });
+                if (step === 'user-exists') socket.emit('user-exists', name)
+                else socket.emit('verified', { ok: true, msg });
             }
         }
     });

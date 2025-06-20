@@ -34,17 +34,27 @@ module.exports = (io) => {
                 pending.remove(phone);
                 console.log(`Pendiente de ${phone} eliminado tras 5 min sin verificar.`);
                 try {
-                    await client.sendMessage(phone, 'Expiró el tiempo de validación. Vuelve a solicitarla si lo deseas.');
+                    await client.sendMessage(phone, '⏰ Tiempo expirado. Volvé a solicitar la validación.');
                 } catch (err) {
                     console.error('Error enviando mensaje de expiración:', err);
                 }
             }, 5 * 60 * 1000);
 
-            pending.add(phone, name, socket, step, timeoutId);
-
             let msg = '';
-            if (step === 'register') msg = 'Te estás intentando registrar en el casino. ¿Autorizas este número?';
-            else if (step === 'new-account') msg = `¿Desea agregar el alias: ${alias}?`;
+            if (step === 'register') {
+                const user = await User.findOne({ phone });
+                if (user) {
+                    msg = `⚠️ Ya existe un usuario: ${user.name}\n¿Querés iniciar sesión?`;
+                    step = 'user-exists';
+                    name = user.name;
+                } else {
+                    msg = '🎰 Registro en el casino\n¿Autorizás este número?';
+                }
+            } else if (step === 'new-account') {
+                msg = `🆕 ¿Agregar el alias *${alias}*?`;
+            }
+
+            pending.add(phone, name, socket, step, timeoutId);
 
             if (msg) await client.sendMessage(phone, msg);
 
@@ -66,14 +76,14 @@ module.exports = (io) => {
                 pending.remove(user.phone);
                 console.log(`Pendiente de ${user.phone} eliminado tras 5 min sin verificar.`);
                 try {
-                    await client.sendMessage(user.phone, 'Expiró el tiempo de validación. Vuelve a solicitarla si lo deseas.');
+                    await client.sendMessage(user.phone, '⏰ Tiempo expirado. Volvé a solicitar la validación.');
                 } catch (err) {
                     console.error('Error enviando mensaje de expiración:', err);
                 }
             }, 5 * 60 * 1000);
 
             pending.add(user.phone, user.name, socket, 'login', timeoutId);
-            await client.sendMessage(user.phone, '¿Estas intentando iniciar sesión?');
+            await client.sendMessage(user.phone, '🔐 ¿Estás intentando iniciar sesión?');
 
             callback({ ok: true, msg: 'Mensaje de validación enviado. Revisa tu Whatsapp' });
         });

@@ -23,25 +23,35 @@ function formatNumber(number) {
 
 // Ruta para cualquier usuario autenticado
 router.get('/profile', protect, async (req, res) => {
-    const user = await User.findById(req.user.id).select('name phone accounts role');  // sólo esos tres
+    const user = await User.findById(req.user.id);
     res.json(user);
 });
 
 router.post('/deposit', protect, async (req, res) => {
-    const { name, amount } = req.body;
+    let { user, amount } = req.body;
+
     const transfer = await Transfer.findOne({ amount: formatNumber(amount), used: false });
-    if (transfer) {
-        await Transfer.findByIdAndUpdate(transfer._id, { used: true });
-        const response = await deposit(name, formatNumber(amount));
-        if (response === 'ok') {
-            res.json({ message: 'Depósito cargado correctamente' });
-        } else if (response === 'error') {
-            res.status(400).json({ error: 'Error al cargar el depósito' });
-        } else {
-            res.status(500).json({ error: 'Error interno del servidor' });
-        }
+    if (!transfer) {
+        return res.status(400).json({ error: 'No se encontró ningún depósito con esa información' });
+    }
+
+    await Transfer.findByIdAndUpdate(transfer._id, { used: true });
+
+    // Aplica el bonus si corresponde
+    if (user.firstBonus?.state) {
+        const bonusPercent = user.firstBonus.amount || 0; // Usa el valor del bonus (ej: 20)
+        const bonus = amount * (bonusPercent / 100);      // Calcula el bonus como porcentaje
+        amount += bonus;
+        await User.findByIdAndUpdate(user._id, { 'firstBonus.state': false });
+    }
+
+    const response = await deposit(user.name, formatNumber(amount));
+    if (response === 'ok') {
+        return res.json({ message: 'Depósito cargado correctamente' });
+    } else if (response === 'error') {
+        return res.status(400).json({ error: 'Error al cargar el depósito' });
     } else {
-        res.status(400).json({ error: 'No se encontro ningun deposito con esa información' });
+        return res.status(500).json({ error: 'Error interno del servidor' });
     }
 });
 
