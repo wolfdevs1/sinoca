@@ -274,7 +274,8 @@ router.get('/transfers', protect, adminOnly, async (req, res) => {
         ...(search && {
             $or: [
                 { name: { $regex: search, $options: 'i' } },
-                { amount: { $regex: search, $options: 'i' } }
+                { amount: { $regex: search, $options: 'i' } },
+                { user: { $regex: search, $options: 'i' } },
             ]
         }),
         ...(state === 'used' && { used: true }),
