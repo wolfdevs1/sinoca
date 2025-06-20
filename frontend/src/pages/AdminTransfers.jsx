@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getTransfers } from '../services/auth';
 import { useNavigate } from 'react-router-dom';
+import { NumericFormat } from 'react-number-format';
 
 export default function AdminTransfers() {
     const [transfers, setTransfers] = useState([]);
@@ -111,9 +112,17 @@ export default function AdminTransfers() {
                         <tbody>
                             {transfers.map(transfer => (
                                 <tr key={transfer._id} className={transfer.used ? 'completed' : 'pending'}>
-                                    <td className="user-name">{transfer.name}</td>
+                                    <td className="user-name">{transfer.user}</td>
                                     <td className="user-name">{transfer.account}</td>
-                                    <td className="amount">${transfer.amount}</td>
+                                    <td className="amount">
+                                        <NumericFormat
+                                            value={transfer.amount}
+                                            displayType="text"
+                                            thousandSeparator="."
+                                            decimalSeparator=","
+                                            prefix="$"
+                                        />
+                                    </td>
                                     <td>{new Date(transfer.createdAt).toLocaleString('es-AR')}</td>
                                     <td>
                                         {transfer.used
@@ -145,7 +154,15 @@ export default function AdminTransfers() {
                                         <h3 className="card-user-name">{transfer.name}</h3>
                                         <p className="card-user-alias">{transfer.account}</p>
                                     </div>
-                                    <div className="card-amount">${transfer.amount}</div>
+                                    <div className="card-amount">
+                                        <NumericFormat
+                                            value={transfer.amount}
+                                            displayType="text"
+                                            thousandSeparator="."
+                                            decimalSeparator=","
+                                            prefix="$"
+                                        />
+                                    </div>
                                     <div className="card-dates">
                                         <p>
                                             <strong>Ingreso:</strong>{' '}

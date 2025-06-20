@@ -5,6 +5,7 @@ import {
     getAccounts as getAccountsAPI
 } from '../services/auth';
 import { useNavigate } from 'react-router-dom';
+import { NumericFormat } from 'react-number-format';
 
 export default function AdminWithdraw() {
     const [selectedBanks, setSelectedBanks] = useState({});
@@ -163,7 +164,15 @@ export default function AdminWithdraw() {
                                 <tr key={withdraw._id} className={withdraw.state ? 'completed' : 'pending'}>
                                     <td className="user-name">{withdraw.name}</td>
                                     <td className="user-name">{withdraw.account}</td>
-                                    <td className="amount">${withdraw.amount}</td>
+                                    <td className="amount">
+                                        <NumericFormat
+                                            value={withdraw.amount}
+                                            displayType="text"
+                                            thousandSeparator="."
+                                            decimalSeparator=","
+                                            prefix="$"
+                                        />
+                                    </td>
                                     <td className="user-name">{withdraw.withdrawAccount}</td>
                                     <td className="bank-select-cell">
                                         <select
@@ -208,7 +217,15 @@ export default function AdminWithdraw() {
                                         <h3 className="card-user-name">{withdraw.name}</h3>
                                         <p className="card-user-alias">{withdraw.phone.replace('549', '').replace('@c.us', '')}</p>
                                     </div>
-                                    <div className="card-amount">${withdraw.amount}</div>
+                                    <div className="card-amount">
+                                        <NumericFormat
+                                            value={withdraw.amount}
+                                            displayType="text"
+                                            thousandSeparator="."
+                                            decimalSeparator=","
+                                            prefix="$"
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="card-body">

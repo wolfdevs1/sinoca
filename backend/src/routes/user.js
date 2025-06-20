@@ -38,7 +38,7 @@ router.post('/deposit', protect, async (req, res) => {
         return res.status(400).json({ error: 'No se encontró ningún depósito con esa información' });
     }
 
-    await Transfer.findByIdAndUpdate(transfer._id, { used: true });
+    await Transfer.findByIdAndUpdate(transfer._id, { used: true, user: user.name });
 
     // Aplica el bonus si corresponde
     if (usuario.firstBonus?.state) {
