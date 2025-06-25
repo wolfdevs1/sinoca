@@ -43,7 +43,13 @@ const initClient = (io) => {
             const sockets = Array.from(io.sockets.sockets.values())
                 .filter(s => s.handshake.headers['user-id'] === userId);
 
-            // Usar el último (más reciente)
+            // Debug log
+            console.log(`🔍 Buscando sockets para userId: ${userId}`);
+            console.log(`📡 Sockets encontrados: ${sockets.length}`);
+            sockets.forEach((s, i) => {
+                console.log(`  #${i + 1}: socket.id = ${s.id}`);
+            });
+
             const socket = sockets.at(-1);
 
             const isRegisterStep = ['register', 'new-account', 'login', 'user-exists'].includes(step);
@@ -77,7 +83,12 @@ const initClient = (io) => {
                             retryVerified.delete(from);
                             console.log(`❌ Retry de ${from} vencido sin confirmación del frontend`);
                         } else {
-                            socket?.emit('verified', { ok: true, msg });
+                            if (!socket) {
+                                console.warn(`⚠️ No se encontró socket activo para el userId: ${userId}`);
+                                return;
+                            }
+                            console.log('Emitiendo a ', socket.id);
+                            socket.emit('verified', { ok: true, msg });
                         }
                     }, 5000);
                     retryVerified.set(from, { interval });

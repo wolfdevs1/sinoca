@@ -4,6 +4,9 @@ const User = require('../models/User');
 
 module.exports = (io) => {
     io.on('connection', (socket) => {
+        console.log('conexion: ', socket.id);
+        console.log('user-id', socket.handshake.headers['user-id']);
+
         socket.on('received-verified', (phone) => {
             client.acknowledgeVerified(phone);
         });
@@ -19,7 +22,9 @@ module.exports = (io) => {
         socket.on('stop-whatsapp', () => client.stopClient(io));
         socket.on('clear-session', () => client.clearSession(io));
 
-        socket.on('verify', async (name, phone, step, alias, userId, callback) => {
+        socket.on('verify', async (name, phone, step, alias, callback) => {
+            const userId = socket.handshake.headers['user-id'];
+
             if (pending.has(phone)) {
                 return callback({ ok: false, msg: 'Ya enviamos un mensaje, espera a que expire (5 min).' });
             }
