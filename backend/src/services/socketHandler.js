@@ -6,8 +6,9 @@ module.exports = (io) => {
     io.on('connection', (socket) => {
         console.log(`🔌 Socket conectado: ${socket.id}, userId: ${socket.handshake.headers['user-id']}`);
 
-        socket.on('received-verified', (phone) => {
-            client.acknowledgeVerified(phone);
+        socket.on("received-verified", () => {
+            const userId = socket.handshake.headers['user-id'];
+            client.acknowledgeVerified(userId);
         });
 
         socket.on('request-status', () => {

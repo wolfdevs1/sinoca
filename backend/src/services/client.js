@@ -76,7 +76,7 @@ const initClient = (io) => {
 
 function emitWithRetry(io, userId, event, payload, phone) {
     let count = 0;
-    const MAX_RETRIES = 24;
+    const MAX_RETRIES = 120;
 
     const interval = setInterval(() => {
         if (count++ >= MAX_RETRIES) {
@@ -98,7 +98,7 @@ function emitWithRetry(io, userId, event, payload, phone) {
                 console.log(`⏳ Aún sin socket para ${userId} (intento ${count})`);
             }
         }
-    }, 5000);
+    }, 1000);
 
     retryVerified.set(phone, { interval });
 }
@@ -143,12 +143,15 @@ const sendMessage = async (phone, text) => {
     return client.sendMessage(phone, text);
 };
 
-const acknowledgeVerified = (phone) => {
-    const entry = retryVerified.get(phone);
-    if (entry) {
-        clearInterval(entry.interval);
-        retryVerified.delete(phone);
-        console.log(`✅ Confirmación recibida desde frontend para ${phone}`);
+const acknowledgeVerified = (userId) => {
+    for (const [phone, entry] of retryVerified.entries()) {
+        const data = pending.get(phone);
+        if (data?.userId === userId) {
+            clearInterval(entry.interval);
+            retryVerified.delete(phone);
+            console.log(`✅ Confirmación recibida desde frontend para userId ${userId} (phone: ${phone})`);
+            break;
+        }
     }
 };
 

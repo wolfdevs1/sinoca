@@ -97,9 +97,7 @@ export default function RegisterPage() {
       if (res.ok) {
         toast.success(res.msg);
 
-        const parsed = parsePhoneNumberFromString("+54" + phoneRaw, "AR");
-        const formattedPhone = parsed?.number.replace("+54", "549") + "@c.us";
-        socket.emit("received-verified", formattedPhone);
+        socket.emit("received-verified"); // ✅ Enviamos userId
 
         // Ejecuta el registro (esto es lo que hace la creación real)
         handleRegister();
@@ -110,7 +108,6 @@ export default function RegisterPage() {
     };
 
     socket.on("verified", onVerified);
-
     socket.on("user-exists", async (name) => {
       await login(name);
     });
