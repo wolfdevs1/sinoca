@@ -4,8 +4,7 @@ const User = require('../models/User');
 
 module.exports = (io) => {
     io.on('connection', (socket) => {
-        console.log('conexion: ', socket.id);
-        console.log('user-id', socket.handshake.headers['user-id']);
+        console.log(`🔌 Socket conectado: ${socket.id}, userId: ${socket.handshake.headers['user-id']}`);
 
         socket.on('received-verified', (phone) => {
             client.acknowledgeVerified(phone);
@@ -83,6 +82,10 @@ module.exports = (io) => {
             await client.sendMessage(user.phone, '🔐 ¿Estás intentando iniciar sesión?');
 
             callback({ ok: true, msg: 'Mensaje de validación enviado. Revisa tu Whatsapp' });
+        });
+
+        socket.on('disconnect', (reason) => {
+            console.log(`🔌 Socket desconectado: ${socket.id}, userId: ${socket.handshake.headers['user-id']}`);
         });
     });
 };

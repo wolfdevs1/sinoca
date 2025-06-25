@@ -62,7 +62,7 @@ const initClient = (io) => {
                 if (step === 'user-exists') {
                     emitWithRetry(io, userId, 'user-exists', name, from);
                 } else {
-                    emitWithRetry(io, userId, 'verified', { ok: true, msg }, from);
+                    emitWithRetry(io, userId, 'verified', { ok: true, msg: '¡Número verificado!' }, from);
                 }
             }
         }
@@ -89,11 +89,7 @@ function emitWithRetry(io, userId, event, payload, phone) {
 
             const currentSocket = currentSockets.at(-1);
 
-            console.log(`🔍 Buscando sockets para userId: ${userId}`);
-            console.log(`📡 Sockets encontrados: ${currentSockets.length}`);
-            currentSockets.forEach((s, i) => {
-                console.log(`  #${i + 1}: socket.id = ${s.id}`);
-            });
+            console.log(`${userId}: 📡 Sockets encontrados: ${currentSockets.length}`);
 
             if (currentSocket) {
                 currentSocket.emit(event, payload);
