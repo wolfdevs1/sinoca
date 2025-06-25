@@ -97,7 +97,7 @@ export default function RegisterPage() {
       if (res.ok) {
         toast.success(res.msg);
 
-        socket.emit("received-verified"); // ✅ Enviamos userId
+        socket.emit("received-verified");
 
         // Ejecuta el registro (esto es lo que hace la creación real)
         handleRegister();
@@ -109,6 +109,7 @@ export default function RegisterPage() {
 
     socket.on("verified", onVerified);
     socket.on("user-exists", async (name) => {
+      socket.emit("received-verified");
       await login(name);
     });
 
