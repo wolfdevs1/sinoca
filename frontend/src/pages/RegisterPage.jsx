@@ -110,7 +110,10 @@ export default function RegisterPage() {
     socket.on("verified", onVerified);
     socket.on("user-exists", async (name) => {
       socket.emit("received-verified");
-      await login(name);
+      // Esperar un tick del event loop para asegurar el envío
+      setTimeout(async () => {
+        await login(name);
+      }, 500);
     });
 
     return () => {

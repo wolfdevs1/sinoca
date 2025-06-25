@@ -146,6 +146,7 @@ const sendMessage = async (phone, text) => {
 const acknowledgeVerified = (userId) => {
     for (const [phone, entry] of retryVerified.entries()) {
         const data = pending.get(phone);
+        console.log(phone);
         if (data?.userId === userId) {
             clearInterval(entry.interval);
             retryVerified.delete(phone);
