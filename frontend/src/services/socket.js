@@ -1,8 +1,17 @@
-// src/socket.js
 import { io } from 'socket.io-client';
-//export const IP = 'https://dalejuga.com'; // Cambia esto por la URL de tu servidor
-export const IP = 'http://192.168.0.10:4000'; // Cambia esto por la URL de tu servidor
 
-const socket = io(IP);
+export const IP = 'http://192.168.0.10:4000';
+
+let userId = localStorage.getItem("userId");
+if (!userId) {
+    userId = crypto.randomUUID();
+    localStorage.setItem("userId", userId);
+}
+
+const socket = io(IP, {
+    extraHeaders: {
+        'user-id': userId
+    }
+});
 
 export default socket;

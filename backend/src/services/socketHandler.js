@@ -4,31 +4,22 @@ const User = require('../models/User');
 
 module.exports = (io) => {
     io.on('connection', (socket) => {
-
         socket.on('received-verified', (phone) => {
             client.acknowledgeVerified(phone);
         });
 
         socket.on('request-status', () => {
-
             const { isClientReady, latestQr } = client.getClientStatus();
-
-            if (isClientReady) {
-                socket.emit('ready');
-            } else if (latestQr) {
-                socket.emit('qr', latestQr);
-            } else {
-                socket.emit('disconnected', '❌ WhatsApp está apagado o desconectado');
-            }
+            if (isClientReady) socket.emit('ready');
+            else if (latestQr) socket.emit('qr', latestQr);
+            else socket.emit('disconnected', '❌ WhatsApp está apagado o desconectado');
         });
 
-        // Nueva lógica: Control manual de WhatsApp desde frontend
         socket.on('start-whatsapp', () => client.initClient(io));
         socket.on('stop-whatsapp', () => client.stopClient(io));
         socket.on('clear-session', () => client.clearSession(io));
 
-        // Lógica original de verificación
-        socket.on('verify', async (name, phone, step, alias, callback) => {
+        socket.on('verify', async (name, phone, step, alias, userId, callback) => {
             if (pending.has(phone)) {
                 return callback({ ok: false, msg: 'Ya enviamos un mensaje, espera a que expire (5 min).' });
             }
@@ -58,8 +49,7 @@ module.exports = (io) => {
                 msg = `🆕 ¿Agregar el alias *${alias}*?`;
             }
 
-            pending.add(phone, name, socket, step, timeoutId);
-
+            pending.add(phone, name, userId, step, timeoutId);
             if (msg) await client.sendMessage(phone, msg);
 
             callback({ ok: true, msg: 'Mensaje de validación enviado. Revisa tu Whatsapp' });
@@ -67,9 +57,7 @@ module.exports = (io) => {
 
         socket.on('login', async (name, callback) => {
             const user = await User.findOne({ name: new RegExp(`^${name}$`, 'i') });
-            if (!user) {
-                return callback({ ok: false, msg: 'Usuario inexistente' });
-            }
+            if (!user) return callback({ ok: false, msg: 'Usuario inexistente' });
 
             if (pending.has(user.phone)) {
                 return callback({ ok: false, msg: 'Ya enviamos un mensaje, espera a que expire (5 min).' });
@@ -86,7 +74,7 @@ module.exports = (io) => {
                 }
             }, 5 * 60 * 1000);
 
-            pending.add(user.phone, user.name, socket, 'login', timeoutId);
+            pending.add(user.phone, user.name, socket.handshake.headers['user-id'], 'login', timeoutId);
             await client.sendMessage(user.phone, '🔐 ¿Estás intentando iniciar sesión?');
 
             callback({ ok: true, msg: 'Mensaje de validación enviado. Revisa tu Whatsapp' });
