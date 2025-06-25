@@ -5,6 +5,10 @@ const User = require('../models/User');
 module.exports = (io) => {
     io.on('connection', (socket) => {
 
+        socket.on('received-verified', (phone) => {
+            client.acknowledgeVerified(phone);
+        });
+
         socket.on('request-status', () => {
 
             const { isClientReady, latestQr } = client.getClientStatus();

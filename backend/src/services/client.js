@@ -8,6 +8,8 @@ let latestQr = null;
 let isClientInitializing = false;
 let isClientReady = false;
 
+const retryVerified = new Map(); // Map<phone, { interval }>
+
 const initClient = (io) => {
     if (isClientInitializing || isClientReady) return;
 
@@ -60,8 +62,24 @@ const initClient = (io) => {
                 }
                 await message.reply(msg);
                 pending.remove(from);
-                if (step === 'user-exists') socket.emit('user-exists', name)
-                else socket.emit('verified', { ok: true, msg });
+                if (step === 'user-exists') {
+                    socket.emit('user-exists', name)
+                } else {
+                    // Emitimos en loop
+                    let count = 0;
+                    const MAX_RETRIES = 24; // 2 minutos (24 x 5 segundos)
+                    const interval = setInterval(() => {
+                        if (count++ >= MAX_RETRIES) {
+                            clearInterval(interval);
+                            retryVerified.delete(from);
+                            console.log(`❌ Retry de ${from} vencido sin confirmación del frontend`);
+                        } else {
+                            socket.emit('verified', { ok: true, msg });
+                        }
+                    }, 5000);
+
+                    retryVerified.set(from, { interval });
+                }
             }
         }
     });
@@ -127,10 +145,20 @@ const sendMessage = async (phone, text) => {
     return client.sendMessage(phone, text);
 };
 
+const acknowledgeVerified = (phone) => {
+    const entry = retryVerified.get(phone);
+    if (entry) {
+        clearInterval(entry.interval);
+        retryVerified.delete(phone);
+        console.log(`✅ Confirmación recibida desde frontend para ${phone}`);
+    }
+};
+
 module.exports = {
     initClient,
     stopClient,
     clearSession,
     getClientStatus,
-    sendMessage
+    sendMessage,
+    acknowledgeVerified // <--- nuevo
 };

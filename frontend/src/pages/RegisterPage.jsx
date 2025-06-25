@@ -95,21 +95,31 @@ export default function RegisterPage() {
   useEffect(() => {
     const onVerified = (res) => {
       if (res.ok) {
+        toast.success(res.msg);
+
+        const parsed = parsePhoneNumberFromString("+54" + phoneRaw, "AR");
+        const formattedPhone = parsed?.number.replace("+54", "549") + "@c.us";
+        socket.emit("received-verified", formattedPhone);
+
+        // Ejecuta el registro (esto es lo que hace la creación real)
         handleRegister();
       } else {
         toast.error(res.msg);
+        setStatus("idle");
       }
     };
 
     socket.on("verified", onVerified);
+
     socket.on("user-exists", async (name) => {
       await login(name);
     });
+
     return () => {
       socket.off("verified", onVerified);
       socket.off("user-exists");
     };
-  }, [socket, handleRegister, login]);
+  }, [socket, handleRegister, login, phoneRaw]);
 
   const handlePhoneChange = (e) => {
     const rawDigits = e.target.value.replace(/\D/g, "");
