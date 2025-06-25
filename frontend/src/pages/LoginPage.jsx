@@ -37,6 +37,7 @@ function LoginPage() {
     socket.on('verified', async (res) => {
       if (res.ok) {
         try {
+          socket.emit("received-verified");
           await login(name);
           clearTimeout(timeoutRef.current); // limpia si todo salió bien
           setLoading(false);

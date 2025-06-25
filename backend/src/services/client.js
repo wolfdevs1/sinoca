@@ -100,7 +100,7 @@ function emitWithRetry(io, userId, event, payload, phone) {
         }
     }, 1000);
 
-    retryVerified.set(phone, { interval });
+    retryVerified.set(phone, { interval, userId });
 }
 
 const stopClient = async (io) => {
@@ -145,9 +145,7 @@ const sendMessage = async (phone, text) => {
 
 const acknowledgeVerified = (userId) => {
     for (const [phone, entry] of retryVerified.entries()) {
-        const data = pending.get(phone);
-        console.log(phone);
-        if (data?.userId === userId) {
+        if (entry.userId === userId) {
             clearInterval(entry.interval);
             retryVerified.delete(phone);
             console.log(`✅ Confirmación recibida desde frontend para userId ${userId} (phone: ${phone})`);
