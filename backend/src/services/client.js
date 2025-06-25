@@ -1,4 +1,3 @@
-// client.js
 const fs = require('fs');
 const path = require('path');
 const { Client, LocalAuth } = require('whatsapp-web.js');
@@ -40,18 +39,6 @@ const initClient = (io) => {
         if (pending.has(from)) {
             const { userId, step, name } = pending.get(from);
 
-            const sockets = Array.from(io.sockets.sockets.values())
-                .filter(s => s.handshake.headers['user-id'] === userId);
-
-            // Debug log
-            console.log(`🔍 Buscando sockets para userId: ${userId}`);
-            console.log(`📡 Sockets encontrados: ${sockets.length}`);
-            sockets.forEach((s, i) => {
-                console.log(`  #${i + 1}: socket.id = ${s.id}`);
-            });
-
-            const socket = sockets.at(-1);
-
             const isRegisterStep = ['register', 'new-account', 'login', 'user-exists'].includes(step);
             const isNegative = message.body.trim().toLowerCase() === 'no';
 
@@ -73,25 +60,9 @@ const initClient = (io) => {
                 pending.remove(from);
 
                 if (step === 'user-exists') {
-                    socket?.emit('user-exists', name);
+                    emitWithRetry(io, userId, 'user-exists', name, from);
                 } else {
-                    let count = 0;
-                    const MAX_RETRIES = 24;
-                    const interval = setInterval(() => {
-                        if (count++ >= MAX_RETRIES) {
-                            clearInterval(interval);
-                            retryVerified.delete(from);
-                            console.log(`❌ Retry de ${from} vencido sin confirmación del frontend`);
-                        } else {
-                            if (!socket) {
-                                console.warn(`⚠️ No se encontró socket activo para el userId: ${userId}`);
-                                return;
-                            }
-                            console.log('Emitiendo a ', socket.id);
-                            socket.emit('verified', { ok: true, msg });
-                        }
-                    }, 5000);
-                    retryVerified.set(from, { interval });
+                    emitWithRetry(io, userId, 'verified', { ok: true, msg }, from);
                 }
             }
         }
@@ -102,6 +73,39 @@ const initClient = (io) => {
         cleanup(io, '❌ Error al iniciar WhatsApp');
     });
 };
+
+function emitWithRetry(io, userId, event, payload, phone) {
+    let count = 0;
+    const MAX_RETRIES = 24;
+
+    const interval = setInterval(() => {
+        if (count++ >= MAX_RETRIES) {
+            clearInterval(interval);
+            retryVerified.delete(phone);
+            console.log(`❌ Retry de ${phone} vencido sin confirmación del frontend`);
+        } else {
+            const currentSockets = Array.from(io.sockets.sockets.values())
+                .filter(s => s.handshake.headers['user-id'] === userId);
+
+            const currentSocket = currentSockets.at(-1);
+
+            console.log(`🔍 Buscando sockets para userId: ${userId}`);
+            console.log(`📡 Sockets encontrados: ${currentSockets.length}`);
+            currentSockets.forEach((s, i) => {
+                console.log(`  #${i + 1}: socket.id = ${s.id}`);
+            });
+
+            if (currentSocket) {
+                currentSocket.emit(event, payload);
+                console.log(`✅ Evento '${event}' emitido a ${userId}`);
+            } else {
+                console.log(`⏳ Aún sin socket para ${userId} (intento ${count})`);
+            }
+        }
+    }, 5000);
+
+    retryVerified.set(phone, { interval });
+}
 
 const stopClient = async (io) => {
     if (isClientInitializing && !latestQr) return;

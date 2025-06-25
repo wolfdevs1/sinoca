@@ -86,7 +86,7 @@ async function checkEmail(account) {
                 console.error(`[${account.name}] Error al borrar correo:`, err);
             }
         } else {
-            console.log(`[${account.name}] No se encontró coincidencia con la regex.`);
+            //console.log(`[${account.name}] No se encontró coincidencia con la regex.`);
         }
 
     } catch (error) {
