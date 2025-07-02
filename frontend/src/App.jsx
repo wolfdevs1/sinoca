@@ -11,6 +11,8 @@ import AdminUsers from './pages/AdminUsers';
 import AdminCaja from './pages/AdminCaja'
 import AdminConfig from './pages/AdminConfig'
 import AdminTransfers from './pages/AdminTransfers'
+import AdminVariables from './pages/AdminVariables';
+
 
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
@@ -115,6 +117,13 @@ function App() {
             </AdminRoute>
           }
         />
+        <Route
+          path="/admin/variables"
+          element={
+            <AdminRoute>
+              <AdminVariables />
+            </AdminRoute>
+          }/>
         <Route
           path="/admin/config"
           element={

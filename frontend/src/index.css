@@ -1856,3 +1856,18 @@ select:focus {
     font-size: 14px;
   }
 }
+
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.input-label {
+  flex-shrink: 0;
+  width: 140px;
+  font-weight: 600;
+  color: #d1d5db;
+  font-size: 15px;
+}
