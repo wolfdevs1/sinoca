@@ -93,9 +93,9 @@ function emitWithRetry(io, userId, event, payload, phone) {
 
             if (currentSocket) {
                 currentSocket.emit(event, payload);
-                console.log(`✅ Evento '${event}' emitido a ${userId}`);
+                //console.log(`✅ Evento '${event}' emitido a ${userId}`);
             } else {
-                console.log(`⏳ Aún sin socket para ${userId} (intento ${count})`);
+                //console.log(`⏳ Aún sin socket para ${userId} (intento ${count})`);
             }
         }
     }, 1000);

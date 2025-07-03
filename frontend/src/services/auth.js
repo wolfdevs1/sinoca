@@ -27,6 +27,8 @@ export const crearTransferManual = (data) => API.post('/user/manual-transfer', d
 export const crearWithdrawManual = (data) => API.post('/user/manual-withdraw', data);
 export const getRandomAccount = () => API.get('/user/random-account');
 export const getResumen = () => API.get('/user/caja/resumen');
+export const getVariables = () => API.get('/user/variables');
+export const updateVariables = (data) => API.post('/user/variables', data);
 
 export const setToken = token => {
     if (token) API.defaults.headers.common['Authorization'] = `Bearer ${token}`;

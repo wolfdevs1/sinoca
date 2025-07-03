@@ -1,11 +1,29 @@
+import { useEffect, useState } from 'react';
 import './SupportButton.css';
 import { FaHeadset } from 'react-icons/fa';
+import { getVariables } from '../services/auth'; // Importa la función para obtener las variables
 
 const SupportButton = () => {
+
+  const [supportNumber, setSupportNumber] = useState('');
+
+  useEffect(() => {
+    const fetchVariables = async () => {
+      try {
+        const response = await getVariables();
+        setSupportNumber(response.data.supportNumber);
+      } catch (error) {
+        console.error('Error fetching variables:', error);
+      }
+    };
+
+    fetchVariables();
+  }, []);
+
   return (
     <div className="support-button-container">
       <a
-        href="https://wa.me/5491157430301"
+        href={`https://wa.me/${supportNumber}`}
         target="_blank"
         rel="noopener noreferrer"
         className="support-button"

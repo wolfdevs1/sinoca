@@ -7,6 +7,7 @@ import { register as registerAPI } from "../services/auth";
 import { parsePhoneNumberFromString, AsYouType } from "libphonenumber-js";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { getVariables } from '../services/auth';
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -14,6 +15,7 @@ export default function RegisterPage() {
   const [phoneFormatted, setPhoneFormatted] = useState(""); // lo que se ve en el input
   const [verified, setVerified] = useState(false);
   const [isValidPhone, setIsValidPhone] = useState(null);
+  const [firstBonus, setFirstBonus] = useState(0);
 
   const [tokenTrigger, setTokenTrigger] = useState(null);
   const [status, setStatus] = useState("idle"); // "idle" | "validating" | "creating"
@@ -131,11 +133,23 @@ export default function RegisterPage() {
     setIsValidPhone(parsed?.isValid() ?? false);
   };
 
+  useEffect(() => {
+    const fetchVariables = async () => {
+      try {
+        const response = await getVariables();
+        setFirstBonus(response.data.firstBonus);
+      } catch (error) {
+        console.error('Error fetching variables:', error);
+      }
+    };
+    fetchVariables();
+  }, []);
+
   return (
     <React.Fragment>
       <form onSubmit={ingresar}>
         <h1>Registro</h1>
-        <div style={{ textAlign: 'center', fontWeight: 'bold' }}>🎁 ¡Bonus 20% en tu primera carga!</div>
+        <div style={{ textAlign: 'center', fontWeight: 'bold' }}>🎁 ¡Bonus {firstBonus}% en tu primera carga!</div>
         <input
           className="input"
           type="text"

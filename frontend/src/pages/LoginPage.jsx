@@ -4,6 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { SocketContext } from "../context/SocketContext";
+import { getVariables } from "../services/auth";
 
 function LoginPage() {
   const [name, setName] = useState('');
@@ -11,6 +12,7 @@ function LoginPage() {
   const socket = useContext(SocketContext);
   const [loading, setLoading] = useState(false);
   const timeoutRef = useRef(null); // referencia para limpiar el timeout
+  const [firstBonus, setFirstBonus] = useState(0);
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -57,13 +59,25 @@ function LoginPage() {
     }
   }, [socket, name, login]);
 
+  useEffect(() => {
+    const fetchVariables = async () => {
+      try {
+        const response = await getVariables();
+        setFirstBonus(response.data.firstBonus);
+      } catch (error) {
+        console.error('Error fetching variables:', error);
+      }
+    };
+    fetchVariables();
+  }, []);
+
   return (
     <>
       <form onSubmit={handleSubmit}>
         <div className="branding">
           <div className="branding-icon">🎲</div>
           <h1 className="titulo-profesional">¡Bienvenido!</h1>
-          <div style={{ textAlign: 'center', fontWeight: 'bold' }}>🎁 ¡Bonus 20% en tu primera carga!</div>
+          <div style={{ textAlign: 'center', fontWeight: 'bold' }}>🎁 ¡Bonus {firstBonus}% en tu primera carga!</div>
         </div>
 
         <input

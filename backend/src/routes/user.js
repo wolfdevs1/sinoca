@@ -5,6 +5,7 @@ const Transfer = require('../models/Transfer');
 const { deposit, withdraw, changePassword, unlockUser } = require('../services/scrapPage');
 const Withdraw = require('../models/Withdraw');
 const Account = require('../models/Account');
+const CONSTANTE = require('../services/constants');
 
 function setCharAt(str, index, chr) {
     if (index > str.length - 1) return str;
@@ -28,34 +29,74 @@ router.get('/profile', protect, async (req, res) => {
 });
 
 router.post('/deposit', protect, async (req, res) => {
-    let { user, amount } = req.body;
+    try {
+        let { user, amount } = req.body;
+        const usuario = await User.findById(user._id);
 
-    const usuario = await User.findById(user._id);
+        // 1) Buscamos el transfer no usado
+        const transfer = await Transfer.findOne({
+            amount: formatNumber(amount),
+            used: false
+        });
+        if (!transfer) {
+            return res.status(400).json({ error: 'No se encontró ningún depósito con esa información' });
+        }
 
-    const transfer = await Transfer.findOne({ amount: formatNumber(amount), used: false });
+        // Marcamos el transfer como usado
+        await Transfer.findByIdAndUpdate(transfer._id, {
+            used: true,
+            user: user.name
+        });
 
-    if (!transfer) {
-        return res.status(400).json({ error: 'No se encontró ningún depósito con esa información' });
-    }
+        // 2) Calculamos el bonus si corresponde
+        let bonusPercent = 0;
 
-    await Transfer.findByIdAndUpdate(transfer._id, { used: true, user: user.name });
+        if (usuario.firstBonus?.state) {
+            // Si tiene firstBonus activo
+            bonusPercent = CONSTANTE.getFirstBonus();          // ej. 20
+            // Desactivamos el bonus en la base
+            await User.findByIdAndUpdate(usuario._id, {
+                'firstBonus.state': false
+            });
+        } else if (usuario.specialBonus?.state) {
+            // Si tiene specialBonus activo
+            bonusPercent = CONSTANTE.getSpecialBonus();        // ej. 10
+            await User.findByIdAndUpdate(usuario._id, {
+                'specialBonus.state': false
+            });
+        }
 
-    // Aplica el bonus si corresponde
-    if (usuario.firstBonus?.state) {
-        const bonusPercent = usuario.firstBonus.amount || 0; // Usa el valor del bonus (ej: 20)
-        const bonus = parseFloat(amount) * (bonusPercent / 100);      // Calcula el bonus como porcentaje
-        amount = parseFloat(parseFloat(amount) + bonus).toFixed(2);
-        await User.findByIdAndUpdate(user._id, { 'firstBonus.state': false });
-    }
+        // Si hubo algún bonus, lo aplicamos
+        if (bonusPercent > 0) {
+            const monto = parseFloat(amount);
+            const bonusValue = monto * (bonusPercent / 100);
+            const totalConBonus = monto + bonusValue;
+            amount = totalConBonus.toFixed(2); // string con 2 decimales
+        }
 
-    const response = await deposit(user.name, formatNumber(amount.toString()));
-    if (response === 'ok') {
-        return res.json({ message: 'Depósito cargado correctamente' });
-    } else if (response === 'error') {
-        return res.status(400).json({ error: 'Error al cargar el depósito' });
-    } else {
+        // 3) Hacemos el depósito real
+        const response = await deposit(user.name, formatNumber(amount));
+
+        if (response === 'ok') {
+            return res.json({ message: 'Depósito cargado correctamente', amountConBonus: amount });
+        } else if (response === 'error') {
+            return res.status(400).json({ error: 'Error al cargar el depósito' });
+        } else {
+            return res.status(500).json({ error: 'Error interno del servidor' });
+        }
+
+    } catch (err) {
+        console.error('Error en /deposit:', err);
         return res.status(500).json({ error: 'Error interno del servidor' });
     }
+});
+
+router.get('/random-account', protect, async (req, res) => {
+    const account = await Account.aggregate([
+        { $sample: { size: 1 } },  // Selecciona un documento aleatorio
+        { $project: { name: 1, alias: 1 } }  // Proyecta solo los campos name y alias
+    ]);
+    res.json(account[0]);  // Dado que $sample devuelve un array, accedemos al primer elemento
 });
 
 router.post('/withdraw', protect, async (req, res) => {
@@ -400,12 +441,34 @@ router.get('/caja/resumen', protect, adminOnly, async (req, res) => {
     }
 });
 
-router.get('/random-account', protect, async (req, res) => {
-    const account = await Account.aggregate([
-        { $sample: { size: 1 } },  // Selecciona un documento aleatorio
-        { $project: { name: 1, alias: 1 } }  // Proyecta solo los campos name y alias
-    ]);
-    res.json(account[0]);  // Dado que $sample devuelve un array, accedemos al primer elemento
+router.get('/variables', async (req, res) => {
+    try {
+        const firstBonus = CONSTANTE.getFirstBonus();
+        const specialBonus = CONSTANTE.getSpecialBonus();
+        const casinoName = CONSTANTE.getCasinoName();
+        const supportNumber = CONSTANTE.getSupportNumber();
+
+        res.json({ firstBonus, specialBonus, casinoName, supportNumber });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error al obtener variables' });
+    }
+});
+
+router.post('/variables', protect, adminOnly, async (req, res) => {
+    try {
+        const { firstBonus, specialBonus, casinoName, supportNumber } = req.body;
+
+        CONSTANTE.setFirstBonus(firstBonus);
+        CONSTANTE.setSpecialBonus(specialBonus);
+        CONSTANTE.setCasinoName(casinoName);
+        CONSTANTE.setSupportNumber(supportNumber);
+
+        res.json({ message: 'Variables actualizadas correctamente' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error al actualizar variables' });
+    }
 });
 
 module.exports = router;

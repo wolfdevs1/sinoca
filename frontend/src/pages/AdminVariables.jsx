@@ -1,15 +1,59 @@
 import { useNavigate } from 'react-router-dom';
+import { getVariables, updateVariables } from '../services/auth'; // Asegúrate de que la ruta sea correcta
+import { useEffect, useState } from 'react';
 
 export default function AdminVariables() {
-    const navigate = useNavigate(); // ✅ ahora sí, adentro del componente
+    const [firstBonus, setFirstBonus] = useState(0);
+    const [specialBonus, setSpecialBonus] = useState(0);
+    const [casinoName, setCasinoName] = useState('');
+    const [supportNumber, setSupportNumber] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
+
+    const navigate = useNavigate();
 
     const handleGoBack = () => {
         navigate('/admin');
     };
 
+    useEffect(() => {
+        const fetchVariables = async () => {
+            try {
+                const response = await getVariables();
+                setFirstBonus(response.data.firstBonus);
+                setSpecialBonus(response.data.specialBonus);
+                setCasinoName(response.data.casinoName);
+                setSupportNumber(response.data.supportNumber);
+            } catch (error) {
+                console.error('Error fetching variables:', error);
+            }
+        };
+        fetchVariables();
+    }, []);
+
+    const handleSave = async () => {
+        setIsSaving(true);
+        const payload = {
+            firstBonus,
+            specialBonus,
+            casinoName,
+            supportNumber,
+        };
+
+        try {
+            const response = await updateVariables(payload);
+            console.log('Variables updated:', response.data);
+            // opcional: mostrar toast o mensaje al usuario
+        } catch (error) {
+            console.error('Error updating variables:', error);
+            // opcional: mostrar feedback de error
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     return (
         <div className="admin-container">
-            <div className='admin-header'>
+            <div className="admin-header">
                 <button
                     onClick={handleGoBack}
                     style={{
@@ -24,7 +68,7 @@ export default function AdminVariables() {
                         gap: '6px',
                         fontSize: '14px',
                         fontWeight: '500',
-                        transition: 'all 0.2s ease'
+                        transition: 'all 0.2s ease',
                     }}
                     onMouseEnter={(e) => {
                         e.target.style.background = 'rgba(55, 65, 81, 0.9)';
@@ -38,26 +82,74 @@ export default function AdminVariables() {
                     <span style={{ fontSize: '16px' }}>←</span>
                     <span>Volver</span>
                 </button>
-                <div className='titulo-profesional'>Variables</div>
+                <div className="titulo-profesional">Variables</div>
             </div>
 
             <div className="card">
                 <div className="input-row">
                     <label className="input-label">BONUS INICIAL:</label>
-                    <input type="number" className="input" />
+                    <input
+                        type="number"
+                        className="input"
+                        value={firstBonus}
+                        onChange={(e) => setFirstBonus(Number(e.target.value))}
+                    />
                 </div>
 
                 <div className="input-row">
                     <label className="input-label">BONUS EXTRA:</label>
-                    <input type="number" className="input" />
+                    <input
+                        type="number"
+                        className="input"
+                        value={specialBonus}
+                        onChange={(e) => setSpecialBonus(Number(e.target.value))}
+                    />
                 </div>
+
                 <div className="input-row">
                     <label className="input-label">NOMBRE CASINO:</label>
-                    <input type="text" className="input" />
+                    <input
+                        type="text"
+                        className="input"
+                        value={casinoName}
+                        onChange={(e) => setCasinoName(e.target.value)}
+                    />
                 </div>
+
                 <div className="input-row">
-                    <label className="input-label">NUMERO SOPORTE:</label>
-                    <input type="text" className="input" />
+                    <label className="input-label">NÚMERO SOPORTE:</label>
+                    <input
+                        type="text"
+                        className="input"
+                        value={supportNumber}
+                        onChange={(e) => setSupportNumber(e.target.value)}
+                    />
+                </div>
+
+                <div className="button-row" style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>
+                    <button
+                        onClick={handleSave}
+                        disabled={isSaving}
+                        style={{
+                            background: 'rgba(34, 197, 94, 0.9)',
+                            border: 'none',
+                            borderRadius: '8px',
+                            padding: '10px 16px',
+                            color: '#fff',
+                            cursor: isSaving ? 'not-allowed' : 'pointer',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            transition: 'background 0.2s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                            if (!isSaving) e.target.style.background = 'rgba(34, 197, 94, 1)';
+                        }}
+                        onMouseLeave={(e) => {
+                            if (!isSaving) e.target.style.background = 'rgba(34, 197, 94, 0.9)';
+                        }}
+                    >
+                        {isSaving ? 'Guardando...' : 'Guardar'}
+                    </button>
                 </div>
             </div>
         </div>
