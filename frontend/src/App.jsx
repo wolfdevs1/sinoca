@@ -1,5 +1,6 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
-import React from 'react';
+import { useEffect } from 'react';
+import { getVariables } from './services/auth';
 
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -13,7 +14,6 @@ import AdminConfig from './pages/AdminConfig'
 import AdminTransfers from './pages/AdminTransfers'
 import AdminVariables from './pages/AdminVariables';
 
-
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import PublicRoute from './components/PublicRoute';
@@ -24,6 +24,24 @@ import WhatsAppButton from './components/SupportButton';
 
 function App() {
   const location = useLocation();
+
+  // Fetch variables on app load
+  useEffect(() => {
+    const fetchVariables = async () => {
+      try {
+        const response = await getVariables();
+        if (response && response.data) {
+          document.title = response.data.casinoName || 'Casino';
+        } else {
+          console.error('No data received from getVariables');
+        }
+      } catch (error) {
+        console.error('Error fetching variables:', error);
+      }
+    };
+
+    fetchVariables();
+  }, []);
 
   return (
     <React.Fragment>
@@ -123,7 +141,7 @@ function App() {
             <AdminRoute>
               <AdminVariables />
             </AdminRoute>
-          }/>
+          } />
         <Route
           path="/admin/config"
           element={
