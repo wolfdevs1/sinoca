@@ -61,9 +61,6 @@ router.post('/deposit', protect, async (req, res) => {
         } else if (usuario.specialBonus?.state) {
             // Si tiene specialBonus activo
             bonusPercent = CONSTANTE.getSpecialBonus();        // ej. 10
-            await User.findByIdAndUpdate(usuario._id, {
-                'specialBonus.state': false
-            });
         }
 
         // Si hubo algún bonus, lo aplicamos
