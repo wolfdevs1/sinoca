@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
         state: { type: Boolean, default: true },
     },
     specialBonus: {
-        state: { type: Boolean, default: false },
+        state: { type: Boolean, default: true },
     }
 }, { timestamps: true });
 
