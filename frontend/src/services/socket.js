@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
 
-export const IP = 'http://192.168.0.10:4000';
+export const IP = 'http://192.168.1.66:4000';
 
 let userId = localStorage.getItem("userId");
 if (!userId) {

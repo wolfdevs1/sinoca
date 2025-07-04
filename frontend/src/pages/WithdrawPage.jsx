@@ -103,6 +103,7 @@ export default function WithdrawPage() {
     useEffect(() => {
         const onVerified = (res) => {
             if (res.ok) {
+                socket.emit("received-verified");
                 handleNewAccount();
             } else {
                 toast.error(res.msg);
