@@ -187,6 +187,70 @@ export default function RegisterPage() {
           </div>
         </div>
       </form>
+      <style>{`
+        .phone-input-container {
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .phone-input-wrapper {
+          position: relative;
+          display: flex;
+          align-items: center;
+          width: 100%;
+        }
+
+        .phone-prefix {
+          position: absolute;
+          left: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #9ca3af;
+          font-weight: 500;
+          font-size: 16px;
+          z-index: 2;
+          pointer-events: none;
+          user-select: none;
+        }
+
+        .phone-input {
+          padding-left: 50px !important;
+          padding-right: 40px !important;
+          width: 100%;
+        }
+
+        .phone-validation-icon {
+          position: absolute;
+          right: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          font-size: 16px;
+          font-weight: bold;
+          z-index: 2;
+          pointer-events: none;
+          color: ${isValidPhone ? '#10b981' : '#ef4444'};
+        }
+
+        .phone-hint {
+          font-size: 12px;
+          color: #9ca3af;
+          margin: 0;
+          padding-left: 4px;
+          font-style: italic;
+        }
+
+        @media (min-width: 768px) {
+          .phone-hint {
+            font-size: 13px;
+          }
+
+          .phone-prefix {
+            font-size: 17px;
+          }
+        }
+      `}</style>
     </React.Fragment>
   );
 }
