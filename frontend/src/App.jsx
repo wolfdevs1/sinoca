@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import React, { Suspense, lazy } from 'react';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
@@ -44,6 +44,7 @@ function App() {
           <Route path="/admin/caja" element={<AdminRoute><AdminCaja /></AdminRoute>} />
           <Route path="/admin/variables" element={<AdminRoute><AdminVariables /></AdminRoute>} />
           <Route path="/admin/config" element={<AdminConfig />} />
+          <Route path="*" element={<Navigate to="/register" />} />
         </Routes>
       </Suspense>
 
