@@ -13,7 +13,7 @@
 /* ---------- BODY ---------- */
 body {
   min-height: 100dvh;
-  background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(15, 15, 30, 0.6)), url('/casino.png');
+  background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(15, 15, 30, 0.6)), url('/casino.webp');
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
@@ -27,7 +27,7 @@ body {
 
 @media (min-width: 768px) {
   body {
-    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(15, 15, 30, 0.7)), url('/casino.png');
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(15, 15, 30, 0.7)), url('/casino.webp');
   }
 }
 

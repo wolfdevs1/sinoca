@@ -1,24 +1,21 @@
-import React from 'react';
-import { useContext, useState, useEffect, useCallback } from "react";
+import React, { useContext, useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { SocketContext } from "../context/SocketContext";
 import { AuthContext } from '../context/AuthContext';
 import { register as registerAPI } from "../services/auth";
-import { parsePhoneNumberFromString, AsYouType } from "libphonenumber-js";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { parsePhoneNumberFromString, AsYouType } from 'libphonenumber-js/min';
+import { toast } from 'react-toastify';
 import { getVariables } from '../services/auth';
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
-  const [phoneRaw, setPhoneRaw] = useState(""); // solo dígitos
-  const [phoneFormatted, setPhoneFormatted] = useState(""); // lo que se ve en el input
+  const [phoneRaw, setPhoneRaw] = useState("");
+  const [phoneFormatted, setPhoneFormatted] = useState("");
   const [verified, setVerified] = useState(false);
   const [isValidPhone, setIsValidPhone] = useState(null);
   const [firstBonus, setFirstBonus] = useState(0);
-
-  const [tokenTrigger, setTokenTrigger] = useState(null);
-  const [status, setStatus] = useState("idle"); // "idle" | "validating" | "creating"
+  const [tokenTrigger, setTokenTrigger] = useState('');
+  const [status, setStatus] = useState("idle");
 
   const socket = useContext(SocketContext);
   const { login } = useContext(AuthContext);
@@ -98,10 +95,7 @@ export default function RegisterPage() {
     const onVerified = (res) => {
       if (res.ok) {
         toast.success(res.msg);
-
         socket.emit("received-verified");
-
-        // Ejecuta el registro (esto es lo que hace la creación real)
         handleRegister();
       } else {
         toast.error(res.msg);
@@ -158,7 +152,6 @@ export default function RegisterPage() {
           onChange={(e) => setName(e.target.value)}
           required
         />
-
         <div className="phone-input-container">
           <div className="phone-input-wrapper">
             <div className="phone-prefix">+54</div>
@@ -178,7 +171,6 @@ export default function RegisterPage() {
           </div>
           <p className="phone-hint">Cód. área sin el 0 y celular sin el 15</p>
         </div>
-
         <div className="btn-group">
           <button
             className={`btn ${status !== "idle" ? "gray" : ""}`}
@@ -195,73 +187,6 @@ export default function RegisterPage() {
           </div>
         </div>
       </form>
-
-      <ToastContainer />
-
-      <style>{`
-        .phone-input-container {
-          width: 100%;
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-
-        .phone-input-wrapper {
-          position: relative;
-          display: flex;
-          align-items: center;
-          width: 100%;
-        }
-
-        .phone-prefix {
-          position: absolute;
-          left: 12px;
-          top: 50%;
-          transform: translateY(-50%);
-          color: #9ca3af;
-          font-weight: 500;
-          font-size: 16px;
-          z-index: 2;
-          pointer-events: none;
-          user-select: none;
-        }
-
-        .phone-input {
-          padding-left: 50px !important;
-          padding-right: 40px !important;
-          width: 100%;
-        }
-
-        .phone-validation-icon {
-          position: absolute;
-          right: 12px;
-          top: 50%;
-          transform: translateY(-50%);
-          font-size: 16px;
-          font-weight: bold;
-          z-index: 2;
-          pointer-events: none;
-          color: ${isValidPhone ? '#10b981' : '#ef4444'};
-        }
-
-        .phone-hint {
-          font-size: 12px;
-          color: #9ca3af;
-          margin: 0;
-          padding-left: 4px;
-          font-style: italic;
-        }
-
-        @media (min-width: 768px) {
-          .phone-hint {
-            font-size: 13px;
-          }
-
-          .phone-prefix {
-            font-size: 17px;
-          }
-        }
-      `}</style>
     </React.Fragment>
   );
 }
