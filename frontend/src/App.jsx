@@ -4,7 +4,6 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import PublicRoute from './components/PublicRoute';
 import WhatsAppButton from './components/SupportButton';
-import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 // Lazy Load
@@ -47,8 +46,6 @@ function App() {
           <Route path="*" element={<Navigate to="/register" />} />
         </Routes>
       </Suspense>
-
-      <ToastContainer />
     </React.Fragment>
   );
 }

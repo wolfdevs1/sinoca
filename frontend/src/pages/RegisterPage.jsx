@@ -4,7 +4,7 @@ import { SocketContext } from "../context/SocketContext";
 import { AuthContext } from '../context/AuthContext';
 import { register as registerAPI } from "../services/auth";
 import { parsePhoneNumberFromString, AsYouType } from 'libphonenumber-js/min';
-import { toast } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import { getVariables } from '../services/auth';
 
 export default function RegisterPage() {
@@ -187,6 +187,9 @@ export default function RegisterPage() {
           </div>
         </div>
       </form>
+
+      <ToastContainer />
+
       <style>{`
         .phone-input-container {
           width: 100%;
