@@ -215,7 +215,6 @@ export default function AdminWithdraw() {
                                 <div className="card-header">
                                     <div className="user-info">
                                         <h3 className="card-user-name">{withdraw.name}</h3>
-                                        <p className="card-user-alias">{withdraw.phone.replace('549', '').replace('@c.us', '')}</p>
                                     </div>
                                     <div className="card-amount">
                                         <NumericFormat

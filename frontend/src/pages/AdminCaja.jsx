@@ -110,8 +110,6 @@ export default function AdminCaja() {
         }
     };
 
-    const total = Object.values(saldos).reduce((sum, val) => sum + val, 0);
-
     const formatMoney = (amount) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(amount);
 
     return (
