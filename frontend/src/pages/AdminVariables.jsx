@@ -8,6 +8,8 @@ export default function AdminVariables() {
     const [casinoName, setCasinoName] = useState('');
     const [supportNumber, setSupportNumber] = useState('');
     const [isSaving, setIsSaving] = useState(false);
+    const [panelUser, setPanelUser] = useState('');
+    const [panelPassword, setPanelPassword] = useState('');
 
     const navigate = useNavigate();
 
@@ -23,6 +25,8 @@ export default function AdminVariables() {
                 setSpecialBonus(response.data.specialBonus);
                 setCasinoName(response.data.casinoName);
                 setSupportNumber(response.data.supportNumber);
+                setPanelUser(response.data.panelUser);
+                setPanelPassword(response.data.panelPassword);
             } catch (error) {
                 console.error('Error fetching variables:', error);
             }
@@ -37,6 +41,8 @@ export default function AdminVariables() {
             specialBonus,
             casinoName,
             supportNumber,
+            panelUser,
+            panelPassword
         };
 
         try {
@@ -123,6 +129,26 @@ export default function AdminVariables() {
                         className="input"
                         value={supportNumber}
                         onChange={(e) => setSupportNumber(e.target.value)}
+                    />
+                </div>
+
+                <div className="input-row">
+                    <label className="input-label">PANEL USUARIO:</label>
+                    <input
+                        type="text"
+                        className="input"
+                        value={panelUser}
+                        onChange={(e) => setPanelUser(e.target.value)}
+                    />
+                </div>
+
+                <div className="input-row">
+                    <label className="input-label">PANEL CONTRASEÑA:</label>
+                    <input
+                        type="text"
+                        className="input"
+                        value={panelPassword}
+                        onChange={(e) => setPanelPassword(e.target.value)}
                     />
                 </div>
 

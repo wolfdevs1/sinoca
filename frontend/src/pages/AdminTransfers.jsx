@@ -5,33 +5,58 @@ import { NumericFormat } from 'react-number-format';
 
 export default function AdminTransfers() {
     const [transfers, setTransfers] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filterStatus, setFilterStatus] = useState('unused'); // 'unused' o 'used'
-
-    const [page, setPage] = useState(1);
     const [pages, setPages] = useState(1);
     const limit = 10;
+
+    const [filters, setFilters] = useState({
+        searchTerm: '',
+        filterStatus: 'unused',
+        page: 1,
+    });
 
     const navigate = useNavigate();
 
     useEffect(() => {
         const loadData = async () => {
             try {
-                const res = await getTransfers(page, limit, searchTerm, filterStatus);
-                const { transfers, page: curr, pages: totalPages } = res.data;
+                const res = await getTransfers(
+                    filters.page,
+                    limit,
+                    filters.searchTerm,
+                    filters.filterStatus
+                );
+                const { transfers, pages: totalPages } = res.data;
                 setTransfers(transfers);
                 setPages(totalPages);
-                setPage(curr);
             } catch (err) {
                 console.error(err);
             }
         };
         loadData();
-    }, [page, searchTerm, filterStatus]);
+    }, [filters]);
 
-    useEffect(() => {
-        setPage(1);
-    }, [searchTerm, filterStatus]);
+    const handleSearch = (value) => {
+        setFilters((prev) => ({
+            ...prev,
+            searchTerm: value,
+            page: 1,
+        }));
+    };
+
+    const handleFilterStatus = (status) => {
+        setFilters((prev) => ({
+            ...prev,
+            filterStatus: status,
+            page: 1,
+        }));
+    };
+
+    const handlePageChange = (newPage) => {
+        setFilters((prev) => ({
+            ...prev,
+            page: newPage,
+        }));
+    };
 
     const handleGoBack = () => {
         navigate('/admin');
@@ -71,21 +96,21 @@ export default function AdminTransfers() {
                         type="text"
                         className="search-input"
                         placeholder="Buscar..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        value={filters.searchTerm}
+                        onChange={(e) => handleSearch(e.target.value)}
                     />
                 </div>
 
                 <div className="filter-container">
                     <button
-                        className={`filter-btn ${filterStatus === 'unused' ? 'active' : ''}`}
-                        onClick={() => setFilterStatus('unused')}
+                        className={`filter-btn ${filters.filterStatus === 'unused' ? 'active' : ''}`}
+                        onClick={() => handleFilterStatus('unused')}
                     >
                         Sin usar
                     </button>
                     <button
-                        className={`filter-btn ${filterStatus === 'used' ? 'active' : ''}`}
-                        onClick={() => setFilterStatus('used')}
+                        className={`filter-btn ${filters.filterStatus === 'used' ? 'active' : ''}`}
+                        onClick={() => handleFilterStatus('used')}
                     >
                         Usadas
                     </button>
@@ -123,10 +148,10 @@ export default function AdminTransfers() {
                                             prefix="$"
                                         />
                                     </td>
-                                    <td>{new Date(transfer.createdAt).toLocaleString('es-AR')}</td>
+                                    <td>{new Date(transfer.createdAt).toLocaleString('es-AR', { hour12: false })}</td>
                                     <td>
                                         {transfer.used
-                                            ? new Date(transfer.updatedAt).toLocaleString('es-AR')
+                                            ? new Date(transfer.updatedAt).toLocaleString('es-AR', { hour12: false })
                                             : '-'}
                                     </td>
                                 </tr>
@@ -151,7 +176,7 @@ export default function AdminTransfers() {
                             >
                                 <div className="card-header">
                                     <div className="user-info">
-                                        <h3 className="card-user-name">{transfer.name}</h3>
+                                        <h3 className="card-user-name">{transfer.user}</h3>
                                         <p className="card-user-alias">{transfer.account}</p>
                                     </div>
                                     <div className="card-amount">
@@ -166,12 +191,12 @@ export default function AdminTransfers() {
                                     <div className="card-dates">
                                         <p>
                                             <strong>Ingreso:</strong>{' '}
-                                            {new Date(transfer.createdAt).toLocaleString('es-AR')}
+                                            {new Date(transfer.createdAt).toLocaleString('es-AR', { hour12: false })}
                                         </p>
                                         {transfer.used && (
                                             <p>
                                                 <strong>Reclamado:</strong>{' '}
-                                                {new Date(transfer.updatedAt).toLocaleString('es-AR')}
+                                                {new Date(transfer.updatedAt).toLocaleString('es-AR', { hour12: false })}
                                             </p>
                                         )}
                                     </div>
@@ -184,11 +209,17 @@ export default function AdminTransfers() {
 
             {/* Paginación */}
             <div className="pagination">
-                <button disabled={page <= 1} onClick={() => setPage(page - 1)}>
+                <button
+                    disabled={filters.page <= 1}
+                    onClick={() => handlePageChange(filters.page - 1)}
+                >
                     ←
                 </button>
-                <span> {page} / {pages} </span>
-                <button disabled={page >= pages} onClick={() => setPage(page + 1)}>
+                <span> {filters.page} / {pages} </span>
+                <button
+                    disabled={filters.page >= pages}
+                    onClick={() => handlePageChange(filters.page + 1)}
+                >
                     →
                 </button>
             </div>

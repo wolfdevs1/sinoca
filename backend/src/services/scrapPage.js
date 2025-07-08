@@ -2,8 +2,8 @@ const puppeteer = require('puppeteer');
 const {
     LAUNCH_OPTIONS,
     PAGINA_PANEL_ADMIN,
-    PAGINA_USER_ADMIN,
-    PAGINA_PASS_ADMIN,
+    getPanelUser,
+    getPanelPassword,
 } = require('./constants');
 
 // Utility: formats numbers like '1.234,56' to '1234.56'
@@ -44,8 +44,8 @@ async function initBrowser() {
 
     // Login en el panel
     await page.goto(PAGINA_PANEL_ADMIN, { waitUntil: 'load' });
-    await typeVisible(page, '#user', PAGINA_USER_ADMIN);
-    await typeVisible(page, '#passwd', PAGINA_PASS_ADMIN);
+    await typeVisible(page, '#user', getPanelUser());
+    await typeVisible(page, '#passwd', getPanelPassword());
     await Promise.all([
         clickVisible(page, '#dologin'),
         page.waitForNavigation({ waitUntil: 'load' }),

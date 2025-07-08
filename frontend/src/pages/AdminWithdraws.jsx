@@ -8,16 +8,17 @@ import { useNavigate } from 'react-router-dom';
 import { NumericFormat } from 'react-number-format';
 
 export default function AdminWithdraw() {
-    const [selectedBanks, setSelectedBanks] = useState({});
-    const [bankList, setBankList] = useState([]);
     const [withdraws, setWithdraws] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filterStatus, setFilterStatus] = useState('pending');
-
-    // estados de paginación
-    const [page, setPage] = useState(1);
+    const [bankList, setBankList] = useState([]);
+    const [selectedBanks, setSelectedBanks] = useState({});
     const [pages, setPages] = useState(1);
     const limit = 10;
+
+    const [filters, setFilters] = useState({
+        searchTerm: '',
+        filterStatus: 'pending',
+        page: 1,
+    });
 
     const navigate = useNavigate();
 
@@ -25,14 +26,13 @@ export default function AdminWithdraw() {
         const loadData = async () => {
             try {
                 const [{ data: wResp }, { data: bResp }] = await Promise.all([
-                    getWithdraws(page, limit, searchTerm),
+                    getWithdraws(filters.page, limit, filters.searchTerm),
                     getAccountsAPI()
                 ]);
 
-                const { withdraws, page: curr, pages: totalPages } = wResp;
+                const { withdraws, pages: totalPages } = wResp;
                 setWithdraws(withdraws);
                 setPages(totalPages);
-                setPage(curr);
 
                 setBankList(bResp);
                 const initBanks = {};
@@ -45,12 +45,34 @@ export default function AdminWithdraw() {
             }
         };
         loadData();
-    }, [page, searchTerm]);
+    }, [filters]);
 
-    const filtered = withdraws.filter(w =>
-        (filterStatus === 'pending' && !w.state) ||
-        (filterStatus === 'completed' && w.state)
-    );
+    const handleSearch = (value) => {
+        setFilters((prev) => ({
+            ...prev,
+            searchTerm: value,
+            page: 1,
+        }));
+    };
+
+    const handleFilterStatus = (status) => {
+        setFilters((prev) => ({
+            ...prev,
+            filterStatus: status,
+            page: 1,
+        }));
+    };
+
+    const handlePageChange = (newPage) => {
+        setFilters((prev) => ({
+            ...prev,
+            page: newPage,
+        }));
+    };
+
+    const handleBankChange = (withdrawId, bank) => {
+        setSelectedBanks(prev => ({ ...prev, [withdrawId]: bank }));
+    };
 
     const handleSend = async (withdrawId) => {
         const selectedBank = selectedBanks[withdrawId];
@@ -60,26 +82,20 @@ export default function AdminWithdraw() {
         }
         try {
             await changeWithdrawStateAPI({ withdrawId, withdrawAccount: selectedBank });
-            const { data } = await getWithdraws(page, limit);
-            setWithdraws(data.withdraws);
-            setPage(data.page);
-            setPages(data.pages);
+            setFilters((prev) => ({ ...prev }));  // Refresca datos
         } catch (error) {
             console.error("Error al cambiar estado del retiro:", error);
         }
     };
 
-    const handleBankChange = (withdrawId, bank) => {
-        setSelectedBanks(prev => ({ ...prev, [withdrawId]: bank }));
-    };
+    const filtered = withdraws.filter(w =>
+        (filters.filterStatus === 'pending' && !w.state) ||
+        (filters.filterStatus === 'completed' && w.state)
+    );
 
     const handleGoBack = () => {
         navigate('/admin');
     };
-
-    useEffect(() => {
-        setPage(1);
-    }, [searchTerm]);
 
     return (
         <div className="admin-container">
@@ -100,14 +116,6 @@ export default function AdminWithdraw() {
                         fontWeight: '500',
                         transition: 'all 0.2s ease'
                     }}
-                    onMouseEnter={(e) => {
-                        e.target.style.background = 'rgba(55, 65, 81, 0.9)';
-                        e.target.style.borderColor = 'rgba(156, 163, 175, 0.7)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.target.style.background = 'rgba(31, 41, 55, 0.8)';
-                        e.target.style.borderColor = 'rgba(75, 85, 99, 0.5)';
-                    }}
                 >
                     <span style={{ fontSize: '16px' }}>←</span>
                     <span>Volver</span>
@@ -121,21 +129,21 @@ export default function AdminWithdraw() {
                         type="text"
                         className="search-input"
                         placeholder="Buscar..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        value={filters.searchTerm}
+                        onChange={(e) => handleSearch(e.target.value)}
                     />
                 </div>
 
                 <div className="filter-container">
                     <button
-                        className={`filter-btn ${filterStatus === 'pending' ? 'active' : ''}`}
-                        onClick={() => setFilterStatus('pending')}
+                        className={`filter-btn ${filters.filterStatus === 'pending' ? 'active' : ''}`}
+                        onClick={() => handleFilterStatus('pending')}
                     >
                         Pendientes
                     </button>
                     <button
-                        className={`filter-btn ${filterStatus === 'completed' ? 'active' : ''}`}
-                        onClick={() => setFilterStatus('completed')}
+                        className={`filter-btn ${filters.filterStatus === 'completed' ? 'active' : ''}`}
+                        onClick={() => handleFilterStatus('completed')}
                     >
                         Completados
                     </button>
@@ -257,18 +265,18 @@ export default function AdminWithdraw() {
                     </div>
                 )}
             </div>
-            {/* CONTROLES DE PAGINACIÓN */}
+
             <div className="pagination">
                 <button
-                    disabled={page <= 1}
-                    onClick={() => setPage(page - 1)}
+                    disabled={filters.page <= 1}
+                    onClick={() => handlePageChange(filters.page - 1)}
                 >
                     ←
                 </button>
-                <span> {page} / {pages} </span>
+                <span> {filters.page} / {pages} </span>
                 <button
-                    disabled={page >= pages}
-                    onClick={() => setPage(page + 1)}
+                    disabled={filters.page >= pages}
+                    onClick={() => handlePageChange(filters.page + 1)}
                 >
                     →
                 </button>

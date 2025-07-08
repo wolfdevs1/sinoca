@@ -13,6 +13,14 @@ CONSTANTE.LAUNCH_OPTIONS = {
     args: ["--window-position=500,0", "--no-sandbox", "--disable-setuid-sandbox"],
 };
 
+CONSTANTE.getPanelUser = () => {
+    return fs.readFileSync('./src/services/variables/panelUser.txt', 'utf8').trim();
+};
+
+CONSTANTE.getPanelPassword = () => {
+    return fs.readFileSync('./src/services/variables/panelPassword.txt', 'utf8').trim();
+};
+
 CONSTANTE.getFirstBonus = () => {
     return parseInt(fs.readFileSync('./src/services/variables/firstBonus.txt', 'utf8'));
 };
@@ -23,10 +31,18 @@ CONSTANTE.getSpecialBonus = () => {
 
 CONSTANTE.getCasinoName = () => {
     return fs.readFileSync('./src/services/variables/casinoName.txt', 'utf8').trim();
-}
+};
 
 CONSTANTE.getSupportNumber = () => {
     return fs.readFileSync('./src/services/variables/supportNumber.txt', 'utf8').trim();
+};
+
+CONSTANTE.setPanelUser = (usuario) => {
+    fs.writeFileSync('./src/services/variables/panelUser.txt', usuario);
+};
+
+CONSTANTE.setPanelPassword = (password) => {
+    fs.writeFileSync('./src/services/variables/panelPassword.txt', password);
 };
 
 CONSTANTE.setFirstBonus = (amount) => {
@@ -35,7 +51,7 @@ CONSTANTE.setFirstBonus = (amount) => {
 
 CONSTANTE.setSpecialBonus = (amount) => {
     fs.writeFileSync('./src/services/variables/specialBonus.txt', amount.toString());
-}
+};
 
 CONSTANTE.setCasinoName = (nombre) => {
     fs.writeFileSync('./src/services/variables/casinoName.txt', nombre);

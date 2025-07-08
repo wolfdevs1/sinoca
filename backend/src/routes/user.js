@@ -446,8 +446,10 @@ router.get('/variables', async (req, res) => {
         const specialBonus = CONSTANTE.getSpecialBonus();
         const casinoName = CONSTANTE.getCasinoName();
         const supportNumber = CONSTANTE.getSupportNumber();
+        const panelUser = CONSTANTE.getPanelUser();
+        const panelPassword = CONSTANTE.getPanelPassword();
 
-        res.json({ firstBonus, specialBonus, casinoName, supportNumber });
+        res.json({ firstBonus, specialBonus, casinoName, supportNumber, panelUser, panelPassword });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Error al obtener variables' });
@@ -456,12 +458,14 @@ router.get('/variables', async (req, res) => {
 
 router.post('/variables', protect, adminOnly, async (req, res) => {
     try {
-        const { firstBonus, specialBonus, casinoName, supportNumber } = req.body;
+        const { firstBonus, specialBonus, casinoName, supportNumber, panelUser, panelPassword } = req.body;
 
         CONSTANTE.setFirstBonus(firstBonus);
         CONSTANTE.setSpecialBonus(specialBonus);
         CONSTANTE.setCasinoName(casinoName);
         CONSTANTE.setSupportNumber(supportNumber);
+        CONSTANTE.setPanelUser(panelUser);
+        CONSTANTE.setPanelPassword(panelPassword);
 
         res.json({ message: 'Variables actualizadas correctamente' });
     } catch (err) {
