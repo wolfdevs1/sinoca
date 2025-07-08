@@ -73,25 +73,29 @@ export default function AdminCaja() {
         try {
             if (tipo === 'ingreso') {
                 await crearTransferManual({
-                    name: descripcion || 'Ingreso manual',
+                    name: 'Ingreso',
+                    descripcion: descripcion,
                     amount: importe,
                     account: cuenta
                 });
             } else if (tipo === 'egreso') {
                 await crearWithdrawManual({
-                    name: descripcion || 'Egreso manual',
+                    name: 'Egreso',
+                    descripcion: descripcion,
                     amount: importe,
                     withdrawAccount: cuenta
                 });
             } else if (tipo === 'aporte') {
                 await crearTransferManual({
                     name: 'Aporte',
+                    descripcion: descripcion,
                     amount: importe,
                     account: cuenta
                 });
             } else if (tipo === 'retiro') {
                 await crearWithdrawManual({
                     name: 'Retiro',
+                    descripcion: descripcion,
                     amount: importe,
                     withdrawAccount: cuenta
                 });

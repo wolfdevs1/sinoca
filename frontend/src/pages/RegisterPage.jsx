@@ -154,7 +154,7 @@ export default function RegisterPage() {
         />
         <div className="phone-input-container">
           <div className="phone-input-wrapper">
-            <div className="phone-prefix">+54</div>
+            <div className="phone-prefix">+54 9</div>
             <input
               className="input phone-input"
               type="tel"
@@ -162,6 +162,7 @@ export default function RegisterPage() {
               onChange={handlePhoneChange}
               disabled={verified}
               required
+              maxLength={12}
             />
             {isValidPhone !== null && (
               <span className="phone-validation-icon">
@@ -219,7 +220,7 @@ export default function RegisterPage() {
         }
 
         .phone-input {
-          padding-left: 50px !important;
+          padding-left: 62px !important;
           padding-right: 40px !important;
           width: 100%;
         }

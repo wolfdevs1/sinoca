@@ -272,7 +272,7 @@ router.get('/withdraws', protect, adminOnly, async (req, res) => {
     const search = req.query.search || '';
     const skip = (page - 1) * limit;
 
-    const excludeNames = ['Egreso manual', 'Retiro'];
+    const excludeNames = ['Egreso', 'Retiro'];
 
     const query = {
         name: { $nin: excludeNames },
@@ -305,7 +305,7 @@ router.get('/transfers', protect, adminOnly, async (req, res) => {
     const state = req.query.state; // 'used' o 'unused'
     const skip = (page - 1) * limit;
 
-    const excludeNames = ['Ingreso manual', 'Aporte'];
+    const excludeNames = ['Ingreso', 'Aporte'];
 
     const query = {
         name: { $nin: excludeNames },
@@ -356,7 +356,7 @@ router.get('/caja', protect, adminOnly, async (req, res) => {
             saldos[acc] = (saldos[acc] || 0) - parseFloat(w.amount.replace(',', '.') || 0);
         });
 
-        res.json(saldos); // ejemplo: { "cuenta1": 3000, "cuenta2": 1500 }
+        res.json(saldos);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Error al calcular saldos' });
@@ -364,10 +364,11 @@ router.get('/caja', protect, adminOnly, async (req, res) => {
 });
 
 router.post('/manual-transfer', protect, adminOnly, async (req, res) => {
-    const { name, amount, account } = req.body;
+    const { name, amount, account, descripcion } = req.body;
     try {
         const transfer = await Transfer.create({
             name: name || 'Ingreso manual',
+            descripcion: descripcion || 'Sin descripción',
             amount,
             account,
             used: true
@@ -379,10 +380,11 @@ router.post('/manual-transfer', protect, adminOnly, async (req, res) => {
 });
 
 router.post('/manual-withdraw', protect, adminOnly, async (req, res) => {
-    const { name, amount, withdrawAccount } = req.body;
+    const { name, amount, withdrawAccount, descripcion } = req.body;
     try {
         const withdraw = await Withdraw.create({
             name: name || 'Egreso manual',
+            descripcion: descripcion || 'Sin descripción',
             amount,
             withdrawAccount,
             state: true
