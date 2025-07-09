@@ -62,6 +62,9 @@ export default function AdminPage() {
                 <Link to="/admin/caja" className="action-button withdraw-button">
                     <span className="button-text">🏧 Caja</span>
                 </Link>
+                <Link to="/admin/historial-caja" className="action-button withdraw-button">
+                    <span className="button-text">📋 Historial Caja</span>
+                </Link>
                 <Link to="/admin/variables" className="action-button withdraw-button">
                     <span className="button-text">🧮 Variables</span>
                 </Link>

@@ -20,6 +20,7 @@ const AdminTransfers = lazy(() => import('./pages/AdminTransfers'));
 const AdminVariables = lazy(() => import('./pages/AdminVariables'));
 const DepositPage = lazy(() => import('./pages/DepositPage'));
 const WithdrawPage = lazy(() => import('./pages/WithdrawPage'));
+const AdminHistorialCaja = lazy(() => import('./pages/AdminHistorialCaja'));
 
 function App() {
   const location = useLocation();
@@ -43,6 +44,7 @@ function App() {
           <Route path="/admin/caja" element={<AdminRoute><AdminCaja /></AdminRoute>} />
           <Route path="/admin/variables" element={<AdminRoute><AdminVariables /></AdminRoute>} />
           <Route path="/admin/config" element={<AdminConfig />} />
+          <Route path="/admin/historial-caja" element={<AdminRoute><AdminHistorialCaja /></AdminRoute>} />
           <Route path="*" element={<Navigate to="/register" />} />
         </Routes>
       </Suspense>
