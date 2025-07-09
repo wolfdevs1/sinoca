@@ -25,6 +25,7 @@ export const deleteMyWithdraw = (withdrawId) => API.delete(`/user/withdraw/${wit
 export const getSaldos = () => API.get('/user/caja');
 export const crearTransferManual = (data) => API.post('/user/manual-transfer', data);
 export const crearWithdrawManual = (data) => API.post('/user/manual-withdraw', data);
+export const getHistorialCaja = (page = 1, limit = 10, search = '', type) => API.get(`/user/caja/historial?page=${page}&limit=${limit}&search=${search}&type=${type}`);
 export const getRandomAccount = () => API.get('/user/random-account');
 export const getResumen = () => API.get('/user/caja/resumen');
 export const getVariables = () => API.get('/user/variables');

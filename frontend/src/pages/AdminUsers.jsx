@@ -4,26 +4,43 @@ import { useNavigate } from 'react-router-dom';
 
 export default function AdminUsers() {
     const [users, setUsers] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [page, setPage] = useState(1);
     const [pages, setPages] = useState(1);
     const limit = 5;
+
+    const [filters, setFilters] = useState({
+        searchTerm: '',
+        page: 1,
+    });
 
     const navigate = useNavigate();
 
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const { data } = await getAllUsers(page, limit, searchTerm);
+                const { data } = await getAllUsers(filters.page, limit, filters.searchTerm);
                 setUsers(data.users);
                 setPages(data.pages);
             } catch (err) {
                 console.error('Error al obtener usuarios:', err);
             }
         };
-
         fetchUsers();
-    }, [page, searchTerm]);
+    }, [filters]);
+
+    const handleSearch = (value) => {
+        setFilters((prev) => ({
+            ...prev,
+            searchTerm: value,
+            page: 1,
+        }));
+    };
+
+    const handlePageChange = (newPage) => {
+        setFilters((prev) => ({
+            ...prev,
+            page: newPage,
+        }));
+    };
 
     const handleGoBack = () => {
         navigate('/admin');
@@ -64,8 +81,8 @@ export default function AdminUsers() {
                             type="text"
                             className="input search-input"
                             placeholder="Buscar..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            value={filters.searchTerm}
+                            onChange={(e) => handleSearch(e.target.value)}
                         />
                         <span className="input-icon">🔍</span>
                     </div>
@@ -78,11 +95,11 @@ export default function AdminUsers() {
                     {users.length === 0 ? (
                         <div className="empty-state">
                             <div style={{ fontSize: '48px', marginBottom: '15px', opacity: '0.5' }}>👤</div>
-                            <p>{searchTerm ? 'No se encontraron usuarios' : 'No hay usuarios registrados'}</p>
-                            {searchTerm && (
+                            <p>{filters.searchTerm ? 'No se encontraron usuarios' : 'No hay usuarios registrados'}</p>
+                            {filters.searchTerm && (
                                 <button
                                     className="btn"
-                                    onClick={() => setSearchTerm('')}
+                                    onClick={() => handleSearch('')}
                                     style={{
                                         marginTop: '15px',
                                         maxWidth: '200px',
@@ -142,11 +159,11 @@ export default function AdminUsers() {
                     {users.length === 0 ? (
                         <div className="empty-state">
                             <div style={{ fontSize: '48px', marginBottom: '15px', opacity: '0.5' }}>👤</div>
-                            <p>{searchTerm ? 'No se encontraron usuarios' : 'No hay usuarios registrados'}</p>
-                            {searchTerm && (
+                            <p>{filters.searchTerm ? 'No se encontraron usuarios' : 'No hay usuarios registrados'}</p>
+                            {filters.searchTerm && (
                                 <button
                                     className="btn"
-                                    onClick={() => setSearchTerm('')}
+                                    onClick={() => handleSearch('')}
                                     style={{
                                         marginTop: '15px',
                                         background: 'linear-gradient(135deg, #6b7280, #4b5563)'
@@ -217,9 +234,19 @@ export default function AdminUsers() {
 
             {/* Paginación */}
             <div className="pagination">
-                <button disabled={page <= 1} onClick={() => setPage(page - 1)}>←</button>
-                <span>{page} / {pages}</span>
-                <button disabled={page >= pages} onClick={() => setPage(page + 1)}>→</button>
+                <button
+                    disabled={filters.page <= 1}
+                    onClick={() => handlePageChange(filters.page - 1)}
+                >
+                    ←
+                </button>
+                <span>{filters.page} / {pages}</span>
+                <button
+                    disabled={filters.page >= pages}
+                    onClick={() => handlePageChange(filters.page + 1)}
+                >
+                    →
+                </button>
             </div>
         </div>
     );

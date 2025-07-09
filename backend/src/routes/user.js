@@ -367,7 +367,7 @@ router.post('/manual-transfer', protect, adminOnly, async (req, res) => {
     const { name, amount, account, descripcion } = req.body;
     try {
         const transfer = await Transfer.create({
-            name: name || 'Ingreso manual',
+            name,
             descripcion: descripcion || 'Sin descripción',
             amount,
             account,
@@ -383,7 +383,7 @@ router.post('/manual-withdraw', protect, adminOnly, async (req, res) => {
     const { name, amount, withdrawAccount, descripcion } = req.body;
     try {
         const withdraw = await Withdraw.create({
-            name: name || 'Egreso manual',
+            name: name,
             descripcion: descripcion || 'Sin descripción',
             amount,
             withdrawAccount,
@@ -392,6 +392,57 @@ router.post('/manual-withdraw', protect, adminOnly, async (req, res) => {
         res.json(withdraw);
     } catch (err) {
         res.status(500).json({ error: 'Error al guardar withdraw' });
+    }
+});
+
+router.get('/caja/historial', protect, adminOnly, async (req, res) => {
+    const { page = 1, limit = 10, search = '', type } = req.query;
+    const skip = (Number(page) - 1) * Number(limit);
+
+    try {
+        let query = {};
+        let Model = null;
+
+        // Definir modelo y query según el tipo
+        if (type === 'ingreso') {
+            Model = Transfer;
+            query = { name: 'Ingreso' };
+        } else if (type === 'aporte') {
+            Model = Transfer;
+            query = { name: 'Aporte' };
+        } else if (type === 'egreso') {
+            Model = Withdraw;
+            query = { name: 'Egreso' };
+        } else if (type === 'retiro') {
+            Model = Withdraw;
+            query = { name: 'Retiro' };
+        } else {
+            return res.status(400).json({ error: 'Tipo de movimiento inválido' });
+        }
+
+        // Agregar búsqueda si hay término
+        if (search) {
+            query.$or = [
+                { descripcion: { $regex: search, $options: 'i' } },
+                { account: { $regex: search, $options: 'i' } },
+                { withdrawAccount: { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        // Obtener total
+        const total = await Model.countDocuments(query);
+        const pages = Math.ceil(total / limit);
+
+        // Obtener historial
+        const historial = await Model.find(query)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(Number(limit));
+
+        res.json({ historial, pages });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error al obtener historial' });
     }
 });
 
