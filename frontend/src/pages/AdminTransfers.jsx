@@ -128,7 +128,7 @@ export default function AdminTransfers() {
                         <thead>
                             <tr>
                                 <th>Usuario</th>
-                                <th>Alias</th>
+                                <th>Cuenta</th>
                                 <th>Cantidad</th>
                                 <th>Fecha ingreso</th>
                                 <th>Fecha reclamo</th>

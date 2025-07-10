@@ -129,14 +129,14 @@ export default function AdminHistorialCaja() {
                 </div>
             </div>
 
-            {/* Tabla */}
-            <div className="table-container">
+            {/* Vista escritorio */}
+            <div className="table-container desktop-view">
                 {historial.length === 0 ? (
                     <div className="empty-state">
                         <p>No hay movimientos que coincidan con los filtros</p>
                     </div>
                 ) : (
-                    <table className="historial-table">
+                    <table className="retiros-table">
                         <thead>
                             <tr>
                                 <th>Cuenta</th>
@@ -164,6 +164,45 @@ export default function AdminHistorialCaja() {
                             ))}
                         </tbody>
                     </table>
+                )}
+            </div>
+
+            {/* Vista móvil */}
+            <div className="mobile-view">
+                {historial.length === 0 ? (
+                    <div className="empty-state">
+                        <p>No hay movimientos que coincidan con los filtros</p>
+                    </div>
+                ) : (
+                    <div className="cards-container">
+                        {historial.map((mov) => (
+                            <div key={mov._id} className="withdraw-card">
+                                <div className="card-header">
+                                    <div className="user-info">
+                                        <h3 className="card-user-name">
+                                            {mov.account || mov.withdrawAccount}
+                                        </h3>
+                                        <p className="card-user-alias">{mov.descripcion}</p>
+                                    </div>
+                                    <div className="card-amount">
+                                        <NumericFormat
+                                            value={mov.amount}
+                                            displayType="text"
+                                            thousandSeparator="."
+                                            decimalSeparator=","
+                                            prefix="$"
+                                        />
+                                    </div>
+                                    <div className="card-dates">
+                                        <p>
+                                            <strong>Fecha:</strong>{' '}
+                                            {new Date(mov.createdAt).toLocaleString('es-AR', { hour12: false })}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 )}
             </div>
 

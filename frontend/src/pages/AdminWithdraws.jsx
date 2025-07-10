@@ -224,6 +224,9 @@ export default function AdminWithdraw() {
                                     <div className="user-info">
                                         <h3 className="card-user-name">{withdraw.name}</h3>
                                     </div>
+                                    <div className="user-info">
+                                        <h3 className="card-user-name">{withdraw.account}</h3>
+                                    </div>
                                     <div className="card-amount">
                                         <NumericFormat
                                             value={withdraw.amount}
