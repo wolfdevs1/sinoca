@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getAllUsers } from '../services/auth';
+import { getAllUsers, deleteUser } from '../services/auth';
 import { useNavigate } from 'react-router-dom';
 
 export default function AdminUsers() {
@@ -26,6 +26,18 @@ export default function AdminUsers() {
         };
         fetchUsers();
     }, [filters]);
+
+    const handleDeleteUser = async (id) => {
+        if (!window.confirm('¿Seguro que querés eliminar este usuario?')) return;
+
+        try {
+            await deleteUser(id);
+            setUsers((prev) => prev.filter((u) => u._id !== id));
+        } catch (err) {
+            console.error('Error al eliminar usuario:', err);
+            alert('No se pudo eliminar el usuario');
+        }
+    };
 
     const handleSearch = (value) => {
         setFilters((prev) => ({
@@ -116,6 +128,7 @@ export default function AdminUsers() {
                                 <tr>
                                     <th style={{ borderRadius: '8px 0 0 0' }}>Usuario</th>
                                     <th style={{ borderRadius: '0 8px 0 0' }}>Teléfono</th>
+                                    <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -144,6 +157,21 @@ export default function AdminUsers() {
                                             }}>
                                                 {user.phone.replace('549', '').replace('@c.us', '')}
                                             </span>
+                                        </td>
+                                        <td>
+                                            <button
+                                                onClick={() => handleDeleteUser(user._id)}
+                                                style={{
+                                                    background: '#dc2626',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    padding: '6px 12px',
+                                                    borderRadius: '6px',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                Eliminar
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
@@ -226,6 +254,22 @@ export default function AdminUsers() {
                                         </div>
                                     </div>
                                 </div>
+                                <button
+                                    onClick={() => handleDeleteUser(user._id)}
+                                    style={{
+                                        marginTop: '12px',
+                                        background: '#dc2626',
+                                        color: 'white',
+                                        border: 'none',
+                                        padding: '8px 14px',
+                                        borderRadius: '6px',
+                                        width: '100%',
+                                        fontWeight: 'bold',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Eliminar usuario
+                                </button>
                             </div>
                         ))
                     )}

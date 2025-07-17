@@ -10,7 +10,7 @@ const CONSTANTE = require('../services/constants');
 function setCharAt(str, index, chr) {
     if (index > str.length - 1) return str;
     return str.substring(0, index) + chr + str.substring(index + 1);
-}
+};
 
 function formatNumber(number) {
     let numero = number.replaceAll(',', '.');
@@ -20,7 +20,7 @@ function formatNumber(number) {
         numero = setCharAt(numero, numero.length - 2, ',');
     }
     return numero.replaceAll('.', '');
-}
+};
 
 // Ruta para cualquier usuario autenticado
 router.get('/profile', protect, async (req, res) => {
@@ -118,7 +118,7 @@ router.post('/change-password', protect, async (req, res) => {
         if (result !== 'ok') {
             return res.status(400).json({ error: 'Error al cambiar la contraseña' });
         }
-        return res.status(200).json({ message: 'Contraseña cambiada correctamente' });
+        return res.status(200).json({ message: 'Contraseña cambiada correctamente, su nueva contraseña es: cambiar123' });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ error: 'Error interno del servidor' });
@@ -223,8 +223,50 @@ router.post('/add-new-account', protect, adminOnly, async (req, res) => {
 
 router.post('/delete-account', protect, adminOnly, async (req, res) => {
     try {
-        await Account.findByIdAndDelete(req.body.id);
-        return res.status(200).json({ message: 'Cuenta borrada correctamente' });
+        const { id } = req.body;
+
+        // 1. Buscar la cuenta
+        const account = await Account.findById(id);
+        if (!account) {
+            return res.status(404).json({ error: 'Cuenta no encontrada' });
+        }
+
+        const accountName = account.name;
+
+        // 2. Obtener todos los ingresos y egresos asociados
+        const transfers = await Transfer.find({ account: accountName });
+        const withdraws = await Withdraw.find({ withdrawAccount: accountName, state: true });
+
+        // 3. Calcular saldo
+        let saldo = 0;
+
+        transfers.forEach(t => {
+            const valor = parseFloat(t.amount.replace(',', '.'));
+            if (!isNaN(valor)) saldo += valor;
+        });
+
+        withdraws.forEach(w => {
+            const valor = parseFloat(w.amount.replace(',', '.'));
+            if (!isNaN(valor)) saldo -= valor;
+        });
+
+        // 4. Si hay saldo, crear un retiro
+        if (saldo > 0) {
+            await Withdraw.create({
+                name: 'Retiro',
+                descripcion: "Retiro automático al eliminar",
+                amount: saldo.toFixed(2).replace('.', ','), // mismo formato que usás en tus registros
+                withdrawAccount: accountName,
+                state: true
+            });
+        }
+
+        // 5. Eliminar la cuenta
+        await Account.findByIdAndDelete(id);
+
+        return res.status(200).json({
+            message: `Cuenta borrada correctamente${saldo > 0 ? ` y se retiraron $${saldo.toFixed(2)}` : ''}`
+        });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ error: 'Error interno del servidor' });
@@ -337,20 +379,55 @@ router.get('/accounts', protect, adminOnly, async (req, res) => {
     res.json(accounts);
 });
 
+// router.get('/caja', protect, adminOnly, async (req, res) => {
+//     try {
+//         const transfers = await Transfer.find();
+//         const withdraws = await Withdraw.find({ state: true });
+
+//         const saldos = {};
+
+//         // Sumar transfers
+//         transfers.forEach(t => {
+//             const acc = t.account;
+//             saldos[acc] = (saldos[acc] || 0) + parseFloat(t.amount.replace(',', '.') || 0);
+//         });
+
+//         // Restar withdraws
+//         withdraws.forEach(w => {
+//             const acc = w.withdrawAccount;
+//             saldos[acc] = (saldos[acc] || 0) - parseFloat(w.amount.replace(',', '.') || 0);
+//         });
+
+//         res.json(saldos);
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).json({ error: 'Error al calcular saldos' });
+//     }
+// });
+
 router.get('/caja', protect, adminOnly, async (req, res) => {
     try {
-        const transfers = await Transfer.find();
-        const withdraws = await Withdraw.find({ state: true });
+        const monthParam = req.query.month;
+        const date = monthParam ? new Date(`${monthParam}-01`) : new Date();
+
+        const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+        const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59);
+
+        const transfers = await Transfer.find({
+            createdAt: { $gte: startOfMonth, $lte: endOfMonth }
+        });
+
+        const withdraws = await Withdraw.find({
+            createdAt: { $gte: startOfMonth, $lte: endOfMonth },
+            state: true
+        });
 
         const saldos = {};
-
-        // Sumar transfers
         transfers.forEach(t => {
             const acc = t.account;
             saldos[acc] = (saldos[acc] || 0) + parseFloat(t.amount.replace(',', '.') || 0);
         });
 
-        // Restar withdraws
         withdraws.forEach(w => {
             const acc = w.withdrawAccount;
             saldos[acc] = (saldos[acc] || 0) - parseFloat(w.amount.replace(',', '.') || 0);
@@ -499,8 +576,9 @@ router.get('/variables', async (req, res) => {
         const supportNumber = CONSTANTE.getSupportNumber();
         const panelUser = CONSTANTE.getPanelUser();
         const panelPassword = CONSTANTE.getPanelPassword();
+        const nombrePagina = CONSTANTE.getNombrePagina();
 
-        res.json({ firstBonus, specialBonus, casinoName, supportNumber, panelUser, panelPassword });
+        res.json({ firstBonus, specialBonus, casinoName, supportNumber, panelUser, panelPassword, nombrePagina });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Error al obtener variables' });
@@ -509,7 +587,7 @@ router.get('/variables', async (req, res) => {
 
 router.post('/variables', protect, adminOnly, async (req, res) => {
     try {
-        const { firstBonus, specialBonus, casinoName, supportNumber, panelUser, panelPassword } = req.body;
+        const { firstBonus, specialBonus, casinoName, supportNumber, panelUser, panelPassword, nombrePagina } = req.body;
 
         CONSTANTE.setFirstBonus(firstBonus);
         CONSTANTE.setSpecialBonus(specialBonus);
@@ -517,11 +595,46 @@ router.post('/variables', protect, adminOnly, async (req, res) => {
         CONSTANTE.setSupportNumber(supportNumber);
         CONSTANTE.setPanelUser(panelUser);
         CONSTANTE.setPanelPassword(panelPassword);
+        CONSTANTE.setNombrePagina(nombrePagina);
 
         res.json({ message: 'Variables actualizadas correctamente' });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Error al actualizar variables' });
+    }
+});
+
+router.delete('/user/:id', protect, adminOnly, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const user = await User.findById(id);
+        if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+        await User.findByIdAndDelete(id);
+        res.status(200).json({ message: 'Usuario eliminado correctamente' });
+    } catch (error) {
+        console.error('Error al eliminar usuario:', error);
+        res.status(500).json({ error: 'Error interno al eliminar usuario' });
+    }
+});
+
+router.delete('/transfer/:id', protect, adminOnly, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const transfer = await Transfer.findById(id);
+        if (!transfer) return res.status(404).json({ error: 'Transferencia no encontrada' });
+
+        if (transfer.used) {
+            return res.status(400).json({ error: 'No se puede borrar una transferencia ya reclamada' });
+        }
+
+        await Transfer.findByIdAndDelete(id);
+        return res.status(200).json({ message: 'Transferencia eliminada correctamente' });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Error al eliminar transferencia' });
     }
 });
 

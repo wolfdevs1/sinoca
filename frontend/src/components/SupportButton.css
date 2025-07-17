@@ -18,13 +18,15 @@
   transition: all 0.3s ease;
   overflow: hidden;
   white-space: nowrap;
-  max-width: 50px; /* solo icono al inicio */
+  max-width: 50px;
+  /* solo icono al inicio */
 }
 
-.support-button:hover {
+.support-button {
   background-color: #128c7e;
   transform: translateY(-2px);
-  max-width: 220px; /* se expande */
+  max-width: 220px;
+  /* se expande */
 }
 
 .icon {
@@ -39,6 +41,6 @@
 }
 
 /* Mostrar texto solo en hover */
-.support-button:hover .support-text {
+.support-button .support-text {
   opacity: 1;
 }

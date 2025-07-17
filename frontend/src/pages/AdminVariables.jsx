@@ -10,6 +10,7 @@ export default function AdminVariables() {
     const [isSaving, setIsSaving] = useState(false);
     const [panelUser, setPanelUser] = useState('');
     const [panelPassword, setPanelPassword] = useState('');
+    const [nombrePagina, setNombrePagina] = useState('');
 
     const navigate = useNavigate();
 
@@ -27,6 +28,7 @@ export default function AdminVariables() {
                 setSupportNumber(response.data.supportNumber);
                 setPanelUser(response.data.panelUser);
                 setPanelPassword(response.data.panelPassword);
+                setNombrePagina(response.data.nombrePagina);
             } catch (error) {
                 console.error('Error fetching variables:', error);
             }
@@ -42,7 +44,8 @@ export default function AdminVariables() {
             casinoName,
             supportNumber,
             panelUser,
-            panelPassword
+            panelPassword,
+            nombrePagina
         };
 
         try {
@@ -149,6 +152,16 @@ export default function AdminVariables() {
                         className="input"
                         value={panelPassword}
                         onChange={(e) => setPanelPassword(e.target.value)}
+                    />
+                </div>
+
+                <div className="input-row">
+                    <label className="input-label">NOMBRE PAGINA:</label>
+                    <input
+                        type="text"
+                        className="input"
+                        value={nombrePagina}
+                        onChange={(e) => setNombrePagina(e.target.value)}
                     />
                 </div>
 

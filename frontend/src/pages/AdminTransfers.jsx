@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getTransfers } from '../services/auth';
+import { getTransfers, deleteTransfer } from '../services/auth';
 import { useNavigate } from 'react-router-dom';
 import { NumericFormat } from 'react-number-format';
 
@@ -15,6 +15,18 @@ export default function AdminTransfers() {
     });
 
     const navigate = useNavigate();
+
+    const handleDeleteTransfer = async (id) => {
+        if (!window.confirm("¿Seguro que querés eliminar esta transferencia?")) return;
+
+        try {
+            await deleteTransfer(id);
+            setTransfers((prev) => prev.filter(t => t._id !== id));
+        } catch (err) {
+            console.error(err);
+            alert('Error al eliminar la transferencia');
+        }
+    };
 
     useEffect(() => {
         const loadData = async () => {
@@ -154,6 +166,13 @@ export default function AdminTransfers() {
                                             ? new Date(transfer.updatedAt).toLocaleString('es-AR', { hour12: false })
                                             : '-'}
                                     </td>
+                                    {!transfer.used && (
+                                        <td>
+                                            <button className='delete-transfer' onClick={() => handleDeleteTransfer(transfer._id)}>
+                                                🗑 Eliminar
+                                            </button>
+                                        </td>
+                                    )}
                                 </tr>
                             ))}
                         </tbody>
@@ -198,6 +217,14 @@ export default function AdminTransfers() {
                                                 <strong>Reclamado:</strong>{' '}
                                                 {new Date(transfer.updatedAt).toLocaleString('es-AR', { hour12: false })}
                                             </p>
+                                        )}
+                                        {!transfer.used && (
+                                            <button
+                                                onClick={() => handleDeleteTransfer(transfer._id)}
+                                                className="delete-button"
+                                            >
+                                                🗑 Eliminar
+                                            </button>
                                         )}
                                     </div>
                                 </div>

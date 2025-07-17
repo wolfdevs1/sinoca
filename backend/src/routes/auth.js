@@ -24,7 +24,7 @@ router.post('/register', async (req, res) => {
         const { name, phone } = req.body;
         const response = await createUser(name);
         if (response === 'error') return res.status(400).json({ error: 'Error al crear el usuario en la página de apuestas' });
-        if (response === 'taken') return res.status(400).json({ error: 'El usuario ya existe en la página de apuestas' });
+        if (response === 'taken') return res.status(400).json({ error: 'Este usuario ya existe, intente con otro nombre' });
         if (response === 'ok') {
             const bonus = { inicial: { state: true, amount: 10 } };
             const newUser = await User.create({ name, phone, role: 'user', bonus });

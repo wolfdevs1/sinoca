@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const pending = require('./pendingPhones');
+const CONSTANTE = require('../constants');
 
 let client = null;
 let latestQr = null;
@@ -49,11 +50,13 @@ const initClient = (io) => {
                     return;
                 }
 
+                const NOMBRE_PAGINA = CONSTANTE.getNombrePagina();
+
                 let msg = `✅ ¡Número verificado!\n\n📲 Volvé a la web.`;
                 if (step === 'new-account') {
-                    msg = `✅ ¡Alias registrado con éxito! \n\n📲 Volvé a la web.`;
+                    msg = `✅ ¡Alias registrado con éxito! \n\n📲 Volvé a la web.\n${NOMBRE_PAGINA}`;
                 } else if (step === 'login') {
-                    msg = `✅ ¡Acceso verificado!\n\n📲 Volvé a la web.`;
+                    msg = `✅ ¡Acceso verificado!\n\n📲 Volvé a la web.\n${NOMBRE_PAGINA}`;
                 }
 
                 await message.reply(msg);

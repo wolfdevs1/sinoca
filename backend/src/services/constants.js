@@ -13,6 +13,10 @@ CONSTANTE.LAUNCH_OPTIONS = {
     args: ["--window-position=500,0", "--no-sandbox", "--disable-setuid-sandbox"],
 };
 
+CONSTANTE.getNombrePagina = () => {
+    return fs.readFileSync('./src/services/variables/nombrePagina.txt', 'utf8').trim();
+};
+
 CONSTANTE.getPanelUser = () => {
     return fs.readFileSync('./src/services/variables/panelUser.txt', 'utf8').trim();
 };
@@ -35,6 +39,10 @@ CONSTANTE.getCasinoName = () => {
 
 CONSTANTE.getSupportNumber = () => {
     return fs.readFileSync('./src/services/variables/supportNumber.txt', 'utf8').trim();
+};
+
+CONSTANTE.setNombrePagina = (nombre) => {
+    fs.writeFileSync('./src/services/variables/nombrePagina.txt', nombre);
 };
 
 CONSTANTE.setPanelUser = (usuario) => {

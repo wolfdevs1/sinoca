@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAccounts, getSaldos, crearTransferManual, crearWithdrawManual, getResumen } from '../services/auth';
+import { useRef } from 'react';
 
 export default function AdminCaja() {
+    const [selectedMonth, setSelectedMonth] = useState(() => {
+        const now = new Date();
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    });
     const [saldos, setSaldos] = useState({ cuenta1: 0 });
     const [resumen, setResumen] = useState({ ingreso: 0, egreso: 0, retiro: 0, aporte: 0 });
     const [formularioActivo, setFormularioActivo] = useState('');
@@ -10,6 +15,8 @@ export default function AdminCaja() {
     const navigate = useNavigate();
 
     const [cuentas, setCuentas] = useState([]);
+
+    const monthInputRef = useRef(null);
 
     useEffect(() => {
         document.body.style.overflow = formularioActivo ? 'hidden' : 'auto';
@@ -24,13 +31,11 @@ export default function AdminCaja() {
                     { data: resumenData }
                 ] = await Promise.all([
                     getAccounts(),
-                    getSaldos(),
-                    getResumen()
+                    getSaldos(selectedMonth),
+                    getResumen(selectedMonth)
                 ]);
 
                 const saldosCompletos = { ...saldosData };
-
-                // Asegura que toda cuenta registrada en Accounts tenga un saldo, aunque sea 0
                 cuentasData.forEach(cuenta => {
                     if (!(cuenta.name in saldosCompletos)) {
                         saldosCompletos[cuenta.name] = 0;
@@ -44,8 +49,9 @@ export default function AdminCaja() {
                 console.error('Error al cargar datos de caja:', error);
             }
         };
+
         fetchData();
-    }, []);
+    }, [selectedMonth]);
 
     const handleGoBack = () => {
         navigate('/admin'); // Ajusta si tu ruta de admin es diferente
@@ -200,13 +206,42 @@ export default function AdminCaja() {
                 </div>
 
                 <div className="card">
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: 20, justifyContent: 'center' }}>
+                        <div
+                            onClick={() => monthInputRef.current?.showPicker?.() || monthInputRef.current?.focus()}
+                            style={{
+                                display: 'inline-block',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <input
+                                ref={monthInputRef}
+                                type="month"
+                                value={selectedMonth}
+                                onChange={(e) => setSelectedMonth(e.target.value)}
+                                style={{
+                                    pointerEvents: 'none', // evita doble clic accidental
+                                    width: '200px'
+                                }}
+                            />
+                        </div>
+                    </label>
                     <div>
-                        {Object.entries(saldos).map(([nombreCuenta, saldo]) => (
+                        {/* {Object.entries(saldos).map(([nombreCuenta, saldo]) => (
                             <div key={nombreCuenta} className="cuenta-item">
                                 <h3>{nombreCuenta.toUpperCase()}</h3>
                                 <div className="monto">{formatMoney(saldo)}</div>
                             </div>
-                        ))}
+                        ))} */}
+                        {cuentas.map((cuenta) => {
+                            const saldo = saldos[cuenta.name] || 0;
+                            return (
+                                <div key={cuenta._id} className="cuenta-item">
+                                    <h3>{cuenta.name.toUpperCase()}</h3>
+                                    <div className="monto">{formatMoney(saldo)}</div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
 

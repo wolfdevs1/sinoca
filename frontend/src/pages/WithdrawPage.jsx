@@ -54,8 +54,8 @@ export default function WithdrawPage() {
 
         setLoading(true);
         try {
-            const res = await withdrawAPI({ name: user.name, amount, account, phone: user.phone });
-            toast.success(res.data.message || "Retiro realizado correctamente");
+            await withdrawAPI({ name: user.name, amount, account, phone: user.phone });
+            toast.success("Solicitud de retiro realizada correctamente");
             setAmount("");
             setAccount("");
         } catch (error) {

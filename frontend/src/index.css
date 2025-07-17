@@ -149,7 +149,40 @@ input:focus {
   background-color: #273244;
 }
 
+input[type="month"] {
+  background-color: #1f2937;
+  /* gris oscuro */
+  color: #f3f4f6;
+  /* texto claro */
+  border: 1px solid #4b5563;
+  /* gris medio */
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 14px;
+  font-weight: 500;
+  outline: none;
+  transition: all 0.2s ease;
+}
 
+input[type="month"]::placeholder {
+  color: #9ca3af;
+}
+
+input[type="month"]:focus {
+  border-color: #818cf8;
+  /* azul suave al enfocar */
+  box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.3);
+}
+
+
+.delete-transfer {
+  background-color: transparent;
+  border: none;
+}
+
+.delete-transfer:hover {
+  cursor: pointer;
+}
 
 .input-icon-group {
   position: relative;
