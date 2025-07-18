@@ -31,7 +31,7 @@ export const getResumen = (month) => API.get(`/user/caja/resumen?month=${month}`
 export const getVariables = () => API.get('/user/variables');
 export const updateVariables = (data) => API.post('/user/variables', data);
 export const deleteTransfer = (transferId) => API.delete(`/user/transfer/${transferId}`);
-export const deleteUser = (id) => API.delete(`/delete/${id}`);
+export const deleteUser = (id) => API.delete(`/user/delete/${id}`);
 
 export const setToken = token => {
     if (token) API.defaults.headers.common['Authorization'] = `Bearer ${token}`;
