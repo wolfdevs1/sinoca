@@ -107,11 +107,12 @@ export default function AdminCaja() {
                 });
             }
 
-            // recargar saldos luego del ingreso o egreso
-            const { data: nuevosSaldos } = await getSaldos();
-            setSaldos(nuevosSaldos);
+            const { data: nuevosSaldos } = await getSaldos(selectedMonth);
+            const { data: nuevoResumen } = await getResumen(selectedMonth);
 
-            setResumen(prev => ({ ...prev, [tipo]: prev[tipo] + importeNum }));
+            setSaldos(nuevosSaldos);
+            setResumen(nuevoResumen);
+
             setFormData({ cuenta: '', importe: '', descripcion: '' });
             setFormularioActivo('');
         } catch (err) {

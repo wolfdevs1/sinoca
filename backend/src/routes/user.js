@@ -409,8 +409,7 @@ router.get('/caja', protect, adminOnly, async (req, res) => {
     try {
         const monthParam = req.query.month;
         const date = monthParam ? new Date(`${monthParam}-01`) : new Date();
-
-        const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+        const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0);
         const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59);
 
         const transfers = await Transfer.find({
@@ -525,18 +524,32 @@ router.get('/caja/historial', protect, adminOnly, async (req, res) => {
 
 router.get('/caja/resumen', protect, adminOnly, async (req, res) => {
     try {
+        const monthParam = req.query.month;
+        const date = monthParam ? new Date(`${monthParam}-01`) : new Date();
+        const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0);
+        const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59);
+
         const transfers = await Transfer.find({
-            name: { $ne: 'Aporte' } // excluye aportes del ingreso
+            createdAt: { $gte: startOfMonth, $lte: endOfMonth },
+            name: { $ne: 'Aporte' }
         });
 
-        const aportes = await Transfer.find({ name: 'Aporte' });
+        const aportes = await Transfer.find({
+            createdAt: { $gte: startOfMonth, $lte: endOfMonth },
+            name: 'Aporte'
+        });
 
         const withdraws = await Withdraw.find({
+            createdAt: { $gte: startOfMonth, $lte: endOfMonth },
             state: true,
-            name: { $ne: 'Retiro' } // excluye retiros del egreso
+            name: { $ne: 'Retiro' }
         });
 
-        const retiros = await Withdraw.find({ name: 'Retiro', state: true });
+        const retiros = await Withdraw.find({
+            createdAt: { $gte: startOfMonth, $lte: endOfMonth },
+            name: 'Retiro',
+            state: true
+        });
 
         let resumen = {
             ingreso: 0,
@@ -567,6 +580,7 @@ router.get('/caja/resumen', protect, adminOnly, async (req, res) => {
         res.status(500).json({ error: 'Error al calcular resumen' });
     }
 });
+
 
 router.get('/variables', async (req, res) => {
     try {

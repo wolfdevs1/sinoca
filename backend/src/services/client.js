@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const pending = require('./pendingPhones');
-const CONSTANTE = require('../constants');
+const CONSTANTE = require('./constants');
 
 let client = null;
 let latestQr = null;

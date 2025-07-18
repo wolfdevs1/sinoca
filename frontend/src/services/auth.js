@@ -22,18 +22,12 @@ export const getTransfers = (page = 1, limit = 10, search = '', state = '') => A
 export const getAccounts = () => API.get('/user/accounts');
 export const getMyWithdraws = (name) => API.get(`/user/my-withdraws?name=${encodeURIComponent(name)}`);
 export const deleteMyWithdraw = (withdrawId) => API.delete(`/user/withdraw/${withdrawId}`);
-export const getSaldos = (month) => {
-    const query = month ? `?month=${month}` : '';
-    return API.get(`/user/caja${query}`);
-};
 export const crearTransferManual = (data) => API.post('/user/manual-transfer', data);
 export const crearWithdrawManual = (data) => API.post('/user/manual-withdraw', data);
 export const getHistorialCaja = (page = 1, limit = 10, search = '', type) => API.get(`/user/caja/historial?page=${page}&limit=${limit}&search=${search}&type=${type}`);
 export const getRandomAccount = () => API.get('/user/random-account');
-export const getResumen = (month) => {
-    const query = month ? `?month=${month}` : '';
-    return API.get(`/user/caja/resumen${query}`);
-};
+export const getSaldos = (month) => API.get(`/user/caja?month=${month}`);
+export const getResumen = (month) => API.get(`/user/caja/resumen?month=${month}`);
 export const getVariables = () => API.get('/user/variables');
 export const updateVariables = (data) => API.post('/user/variables', data);
 export const deleteTransfer = (transferId) => API.delete(`/user/transfer/${transferId}`);
