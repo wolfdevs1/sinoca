@@ -409,8 +409,8 @@ router.get('/caja', protect, adminOnly, async (req, res) => {
     try {
         const monthParam = req.query.month;
         const date = monthParam ? new Date(`${monthParam}-01`) : new Date();
-        const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0);
-        const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59);
+        const startOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 1, 0, 0, 0);
+        const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 2, 0, 23, 59, 59);
 
         const transfers = await Transfer.find({
             createdAt: { $gte: startOfMonth, $lte: endOfMonth }
@@ -526,8 +526,8 @@ router.get('/caja/resumen', protect, adminOnly, async (req, res) => {
     try {
         const monthParam = req.query.month;
         const date = monthParam ? new Date(`${monthParam}-01`) : new Date();
-        const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0);
-        const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59);
+        const startOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 1, 0, 0, 0);
+        const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 2, 0, 23, 59, 59);
 
         const transfers = await Transfer.find({
             createdAt: { $gte: startOfMonth, $lte: endOfMonth },
