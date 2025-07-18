@@ -379,54 +379,20 @@ router.get('/accounts', protect, adminOnly, async (req, res) => {
     res.json(accounts);
 });
 
-// router.get('/caja', protect, adminOnly, async (req, res) => {
-//     try {
-//         const transfers = await Transfer.find();
-//         const withdraws = await Withdraw.find({ state: true });
-
-//         const saldos = {};
-
-//         // Sumar transfers
-//         transfers.forEach(t => {
-//             const acc = t.account;
-//             saldos[acc] = (saldos[acc] || 0) + parseFloat(t.amount.replace(',', '.') || 0);
-//         });
-
-//         // Restar withdraws
-//         withdraws.forEach(w => {
-//             const acc = w.withdrawAccount;
-//             saldos[acc] = (saldos[acc] || 0) - parseFloat(w.amount.replace(',', '.') || 0);
-//         });
-
-//         res.json(saldos);
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).json({ error: 'Error al calcular saldos' });
-//     }
-// });
-
 router.get('/caja', protect, adminOnly, async (req, res) => {
     try {
-        const monthParam = req.query.month;
-        const date = monthParam ? new Date(`${monthParam}-01`) : new Date();
-        const startOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 1, 0, 0, 0);
-        const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 2, 0, 23, 59, 59);
-
-        const transfers = await Transfer.find({
-            createdAt: { $gte: startOfMonth, $lte: endOfMonth }
-        });
-
-        const withdraws = await Withdraw.find({
-            createdAt: { $gte: startOfMonth, $lte: endOfMonth },
-            state: true
-        });
+        const transfers = await Transfer.find();
+        const withdraws = await Withdraw.find({ state: true });
 
         const saldos = {};
+
+        // Sumar transfers
         transfers.forEach(t => {
             const acc = t.account;
             saldos[acc] = (saldos[acc] || 0) + parseFloat(t.amount.replace(',', '.') || 0);
         });
 
+        // Restar withdraws
         withdraws.forEach(w => {
             const acc = w.withdrawAccount;
             saldos[acc] = (saldos[acc] || 0) - parseFloat(w.amount.replace(',', '.') || 0);
@@ -438,6 +404,40 @@ router.get('/caja', protect, adminOnly, async (req, res) => {
         res.status(500).json({ error: 'Error al calcular saldos' });
     }
 });
+
+// router.get('/caja', protect, adminOnly, async (req, res) => {
+//     try {
+//         const monthParam = req.query.month;
+//         const date = monthParam ? new Date(`${monthParam}-01`) : new Date();
+//         const startOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 1, 0, 0, 0);
+//         const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 2, 0, 23, 59, 59);
+
+//         const transfers = await Transfer.find({
+//             createdAt: { $gte: startOfMonth, $lte: endOfMonth }
+//         });
+
+//         const withdraws = await Withdraw.find({
+//             createdAt: { $gte: startOfMonth, $lte: endOfMonth },
+//             state: true
+//         });
+
+//         const saldos = {};
+//         transfers.forEach(t => {
+//             const acc = t.account;
+//             saldos[acc] = (saldos[acc] || 0) + parseFloat(t.amount.replace(',', '.') || 0);
+//         });
+
+//         withdraws.forEach(w => {
+//             const acc = w.withdrawAccount;
+//             saldos[acc] = (saldos[acc] || 0) - parseFloat(w.amount.replace(',', '.') || 0);
+//         });
+
+//         res.json(saldos);
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).json({ error: 'Error al calcular saldos' });
+//     }
+// });
 
 router.post('/manual-transfer', protect, adminOnly, async (req, res) => {
     const { name, amount, account, descripcion } = req.body;

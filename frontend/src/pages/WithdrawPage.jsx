@@ -123,6 +123,8 @@ export default function WithdrawPage() {
     };
 
     const handleCancel = async (withdrawId) => {
+        toast.info("Funcionalidad de cancelación de retiros aún no implementada");
+        /*
         if (!window.confirm("¿Estás seguro de que querés cancelar este retiro?")) return;
 
         setCancelingIds(prev => new Set(prev).add(withdrawId));
@@ -145,6 +147,7 @@ export default function WithdrawPage() {
                 return newSet;
             });
         }
+        */
     };
 
     return (
@@ -286,4 +289,4 @@ export default function WithdrawPage() {
             <ToastContainer />
         </>
     );
-}
+};
