@@ -170,12 +170,10 @@ async function adjustBalance(name, amount, action) {
 }
 
 async function deposit(name, amount) {
-    await unlockUser(name);
     return adjustBalance(name, amount, 'Cargar');
 }
 
 async function withdraw(name, amount) {
-    await unlockUser(name);
     return adjustBalance(name, amount, 'Descargar');
 }
 
@@ -201,7 +199,6 @@ async function unlockUser(name) {
  * Cambia la contraseña a "cambiar123".
  */
 async function changePassword(name) {
-    await unlockUser(name);
     const { browser, page } = await initBrowser();
     try {
         await goToUser(page, name);
