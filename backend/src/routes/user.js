@@ -618,7 +618,7 @@ router.post('/variables', protect, adminOnly, async (req, res) => {
     }
 });
 
-router.delete('/user/:id', protect, adminOnly, async (req, res) => {
+router.delete('/delete/:id', protect, adminOnly, async (req, res) => {
     try {
         const { id } = req.params;
 
