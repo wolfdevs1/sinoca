@@ -33,6 +33,12 @@ export default function RegisterPage() {
 
       const formattedPhone = parsed.number.replace("+54", "549") + "@c.us";
       const res = await registerAPI({ name, phone: formattedPhone });
+
+      // 1) disparás el evento CompleteRegistration
+      if (window.fbq) {
+        window.fbq('track', 'CompleteRegistration');
+      }
+
       const { token } = res.data;
       setTokenTrigger(token);
     } catch (error) {
