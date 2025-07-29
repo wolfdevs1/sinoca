@@ -20,6 +20,34 @@ export default function RegisterPage() {
   const socket = useContext(SocketContext);
   const { login } = useContext(AuthContext);
 
+  useEffect(() => {
+    // Evita cargarlo más de una vez
+    if (window.fbq) return;
+
+    // Inicializar Meta Pixel
+    !(function (f, b, e, v, n, t, s) {
+      if (f.fbq) return;
+      n = f.fbq = function () {
+        n.callMethod ?
+          n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+      };
+      if (!f._fbq) f._fbq = n;
+      n.push = n;
+      n.loaded = true;
+      n.version = '2.0';
+      n.queue = [];
+      t = b.createElement(e);
+      t.async = true;
+      t.src = v;
+      s = b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t, s);
+    })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+
+    // ID de tu pixel
+    window.fbq('init', '4131976883729228');
+    window.fbq('track', 'PageView');
+  }, []);
+
   const handleRegister = useCallback(async () => {
     try {
       toast.success('Creando usuario...');
@@ -33,11 +61,6 @@ export default function RegisterPage() {
 
       const formattedPhone = parsed.number.replace("+54", "549") + "@c.us";
       const res = await registerAPI({ name, phone: formattedPhone });
-
-      // 1) disparás el evento CompleteRegistration
-      if (window.fbq) {
-        window.fbq('track', 'CompleteRegistration');
-      }
 
       const { token } = res.data;
       setTokenTrigger(token);
@@ -92,8 +115,16 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (tokenTrigger) {
-      localStorage.setItem('token', tokenTrigger);
-      window.location.reload();
+
+      if (window.fbq) {
+        window.fbq('track', 'CompleteRegistration');
+      }
+
+      // Pequeño delay para asegurar que se registre antes del reload
+      setTimeout(() => {
+        localStorage.setItem('token', tokenTrigger);
+        window.location.reload();
+      }, 200); // 200 ms es suficiente
     }
   }, [tokenTrigger]);
 
