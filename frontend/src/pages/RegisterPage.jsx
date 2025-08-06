@@ -118,13 +118,14 @@ export default function RegisterPage() {
 
       if (window.fbq) {
         window.fbq('track', 'CompleteRegistration');
+        window.fbq('track', 'Lead');
       }
 
       // Pequeño delay para asegurar que se registre antes del reload
       setTimeout(() => {
         localStorage.setItem('token', tokenTrigger);
         window.location.reload();
-      }, 200); // 200 ms es suficiente
+      }, 1500); // 200 ms es suficiente
     }
   }, [tokenTrigger]);
 
