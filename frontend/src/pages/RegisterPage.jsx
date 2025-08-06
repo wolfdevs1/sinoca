@@ -115,17 +115,11 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (tokenTrigger) {
-
-      if (window.fbq) {
-        window.fbq('track', 'CompleteRegistration');
-        window.fbq('track', 'Lead');
-      }
-
       // Pequeño delay para asegurar que se registre antes del reload
       setTimeout(() => {
         localStorage.setItem('token', tokenTrigger);
         window.location.reload();
-      }, 1500); // 200 ms es suficiente
+      }, 300); // 200 ms es suficiente
     }
   }, [tokenTrigger]);
 

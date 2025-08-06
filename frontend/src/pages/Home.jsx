@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { changePassword as changePasswordAPI, unlockUser as unlockUserAPI } from '../services/auth';
@@ -37,6 +37,34 @@ export function Home() {
   }
 
   const handleLogout = () => logout();
+
+  useEffect(() => {
+    // Evita cargarlo más de una vez
+    if (window.fbq) return;
+
+    // Inicializar Meta Pixel
+    !(function (f, b, e, v, n, t, s) {
+      if (f.fbq) return;
+      n = f.fbq = function () {
+        n.callMethod ?
+          n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+      };
+      if (!f._fbq) f._fbq = n;
+      n.push = n;
+      n.loaded = true;
+      n.version = '2.0';
+      n.queue = [];
+      t = b.createElement(e);
+      t.async = true;
+      t.src = v;
+      s = b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t, s);
+    })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+
+    // ID de tu pixel
+    window.fbq('init', '4131976883729228');
+    window.fbq('track', 'Lead');
+  }, []);
 
   return (
     <>
