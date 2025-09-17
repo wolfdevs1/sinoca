@@ -85,7 +85,7 @@ async function createUser(name) {
         ]);
 
         const response = await creation;
-        return response.status() === 200 ? 'ok' : 'taken';
+        return response.status() === 200 ? name : 'taken';
     } catch (error) {
         console.error(error);
         return 'error';

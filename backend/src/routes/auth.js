@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const { createUser } = require('../services/scrapPage');
+const { createUser } = require('../services/scrapPageBirigol');
 
 // Login
 router.post('/login', async (req, res) => {
@@ -25,13 +25,11 @@ router.post('/register', async (req, res) => {
         const response = await createUser(name);
         if (response === 'error') return res.status(400).json({ error: 'Error al crear el usuario en la página de apuestas' });
         if (response === 'taken') return res.status(400).json({ error: 'Este usuario ya existe, intente con otro nombre' });
-        if (response === 'ok') {
-            const bonus = { inicial: { state: true, amount: 10 } };
-            const newUser = await User.create({ name, phone, role: 'user', bonus });
-            const payload = { id: newUser._id, role: newUser.role };
-            const token = jwt.sign(payload, process.env.JWT_SECRET);
-            res.json({ token });
-        }
+        const bonus = { inicial: { state: true, amount: 10 } };
+        const newUser = await User.create({ name: response, phone, role: 'user', bonus });
+        const payload = { id: newUser._id, role: newUser.role };
+        const token = jwt.sign(payload, process.env.JWT_SECRET);
+        res.json({ token });
     } catch (err) {
         console.log(err);
         res.status(500).json({ error: err.message });
