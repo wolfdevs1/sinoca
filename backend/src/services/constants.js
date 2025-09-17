@@ -1,10 +1,6 @@
 const fs = require('fs');
 const CONSTANTE = {};
 
-CONSTANTE.PAGINA = 'Birigol';
-CONSTANTE.PAGINA_WEB = 'birigol.com';
-CONSTANTE.PAGINA_PANEL_ADMIN = `https://admin.birigol.com`;
-
 CONSTANTE.LAUNCH_OPTIONS = {
     headless: false,
     executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',

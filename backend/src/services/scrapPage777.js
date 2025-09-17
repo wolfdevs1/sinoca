@@ -43,7 +43,7 @@ async function initBrowser() {
     await page.setViewport({ width: 1920, height: 1080 });
 
     // Login en el panel
-    await page.goto(PAGINA_PANEL_ADMIN, { waitUntil: 'load' });
+    await page.goto('https://partners.777tip.com/AccountCards/rm5002', { waitUntil: 'load' });
     await typeVisible(page, '#app > div > div > div > label:nth-child(1) > input[type=text]', getPanelUser());
     await typeVisible(page, '#app > div > div > div > label:nth-child(2) > input[type=password]', getPanelPassword());
     await clickVisible(page, '#app > div > div > div > button');

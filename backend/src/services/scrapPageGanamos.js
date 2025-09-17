@@ -1,7 +1,6 @@
 const puppeteer = require('puppeteer');
 const {
     LAUNCH_OPTIONS,
-    PAGINA_PANEL_ADMIN,
     getPanelUser,
     getPanelPassword,
 } = require('./constants');
@@ -43,7 +42,7 @@ async function initBrowser() {
     await page.setViewport({ width: 1920, height: 1080 });
 
     // Login en el panel
-    await page.goto(PAGINA_PANEL_ADMIN, { waitUntil: 'load' });
+    await page.goto('https://agents.ganamos.io', { waitUntil: 'load' });
     await typeVisible(page, '#root > div > section > div > div.auth__form > div:nth-child(1) > input', getPanelUser());
     await typeVisible(page, '#root > div > section > div > div.auth__form > div:nth-child(2) > div.input__wrapper > input', getPanelPassword());
     await clickVisible(page, '#root > div > section > div > div.auth__form > div.auth__button > button');
@@ -55,7 +54,6 @@ async function initBrowser() {
  * Navega al listado de usuarios y busca por name.
  */
 async function goToUser(page, name) {
-    //await page.goto(`${PAGINA_PANEL_ADMIN}`, { waitUntil: 'load' });
     await typeVisible(page, '#root > div > div.app__wrapper > main > div.app__wrapper__content > div.users > div.users__filter > form > div:nth-child(1) > div.search-user-input > div > input', name);
     await clickVisible(page, '#root > div > div.app__wrapper > main > div.app__wrapper__content > div.users > div.users__filter > form > div:nth-child(5) > div.users-filter-block-desktop__button > button');
     await new Promise(r => setTimeout(r, 3000)); // espera a que cargue el filtro

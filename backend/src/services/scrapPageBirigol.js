@@ -1,7 +1,6 @@
 const puppeteer = require('puppeteer');
 const {
     LAUNCH_OPTIONS,
-    PAGINA_PANEL_ADMIN,
     getPanelUser,
     getPanelPassword,
 } = require('./constants');
@@ -43,7 +42,7 @@ async function initBrowser() {
     await page.setViewport({ width: 1920, height: 1080 });
 
     // Login en el panel
-    await page.goto(PAGINA_PANEL_ADMIN, { waitUntil: 'load' });
+    await page.goto('https://admin.birigol.com', { waitUntil: 'load' });
     await typeVisible(page, '#user', getPanelUser());
     await typeVisible(page, '#passwd', getPanelPassword());
     await Promise.all([
@@ -58,7 +57,7 @@ async function initBrowser() {
  * Navega al listado de usuarios y busca por name.
  */
 async function goToUser(page, name) {
-    await page.goto(`${PAGINA_PANEL_ADMIN}/users.php`, { waitUntil: 'load' });
+    await page.goto(`https://admin.birigol.com/users.php`, { waitUntil: 'load' });
     await typeVisible(page, '#UserSearch', name);
     await clickVisible(page, '#UserSearchButton');
     await page.waitForTimeout(3000);
@@ -139,7 +138,7 @@ async function adjustBalance(name, amount, action) {
         if (action === 'Descargar') {
             await Promise.all([
                 page.waitForNavigation(),
-                page.goto(`${PAGINA_PANEL_ADMIN}/report_balances.php`, {
+                page.goto(`https://admin.birigol.com/report_balances.php`, {
                     waitUntil: 'load',
                 }),
             ]);

@@ -1,11 +1,11 @@
-import React, { useContext, useState, useEffect, useCallback } from "react";
+import React, { useContext, useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { SocketContext } from "../context/SocketContext";
 import { AuthContext } from '../context/AuthContext';
-import { register as registerAPI } from "../services/auth";
+import { register as registerAPI, getVariables } from "../services/auth";
 import { parsePhoneNumberFromString, AsYouType } from 'libphonenumber-js/min';
 import { ToastContainer, toast } from 'react-toastify';
-import { getVariables } from '../services/auth';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -16,37 +16,61 @@ export default function RegisterPage() {
   const [firstBonus, setFirstBonus] = useState(0);
   const [tokenTrigger, setTokenTrigger] = useState('');
   const [status, setStatus] = useState("idle");
+  const [pixelId, setPixelId] = useState("");     // 👈 pixel desde variables
 
   const socket = useContext(SocketContext);
   const { login } = useContext(AuthContext);
+  const initedPixelRef = useRef(null);            // 👈 evita doble init del mismo pixel
 
+  // Traer variables (bonus + pixel) y luego inicializar Meta Pixel dinámicamente
   useEffect(() => {
-    // Evita cargarlo más de una vez
-    if (window.fbq) return;
-
-    // Inicializar Meta Pixel
-    !(function (f, b, e, v, n, t, s) {
-      if (f.fbq) return;
-      n = f.fbq = function () {
-        n.callMethod ?
-          n.callMethod.apply(n, arguments) : n.queue.push(arguments);
-      };
-      if (!f._fbq) f._fbq = n;
-      n.push = n;
-      n.loaded = true;
-      n.version = '2.0';
-      n.queue = [];
-      t = b.createElement(e);
-      t.async = true;
-      t.src = v;
-      s = b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t, s);
-    })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
-
-    // ID de tu pixel
-    window.fbq('init', '4131976883729228');
-    window.fbq('track', 'PageView');
+    const fetchVars = async () => {
+      try {
+        const response = await getVariables();
+        setFirstBonus(response.data.firstBonus ?? 0);
+        setPixelId(response.data.pixel || "");
+      } catch (error) {
+        console.error('Error fetching variables:', error);
+      }
+    };
+    fetchVars();
   }, []);
+
+  // Inicializar Meta Pixel cuando tengamos pixelId
+  useEffect(() => {
+    if (!pixelId) return;
+
+    // si ya inicializamos este mismo pixel, solo trackeamos y listo
+    if (initedPixelRef.current === pixelId) {
+      window.fbq?.('track', 'PageView');
+      return;
+    }
+
+    // Cargar script si no existe
+    if (!window.fbq) {
+      (function (f, b, e, v, n, t, s) {
+        if (f.fbq) return;
+        n = f.fbq = function () {
+          n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n;
+        n.loaded = true;
+        n.version = '2.0';
+        n.queue = [];
+        t = b.createElement(e);
+        t.async = true;
+        t.src = v;
+        s = b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t, s);
+      })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+    }
+
+    // Init + evento
+    window.fbq('init', pixelId);
+    window.fbq('track', 'PageView');
+    initedPixelRef.current = pixelId;
+  }, [pixelId]);
 
   const handleRegister = useCallback(async () => {
     try {
@@ -115,11 +139,10 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (tokenTrigger) {
-      // Pequeño delay para asegurar que se registre antes del reload
       setTimeout(() => {
         localStorage.setItem('token', tokenTrigger);
         window.location.reload();
-      }, 300); // 200 ms es suficiente
+      }, 300);
     }
   }, [tokenTrigger]);
 
@@ -158,18 +181,6 @@ export default function RegisterPage() {
     const parsed = parsePhoneNumberFromString("+54" + rawDigits, "AR");
     setIsValidPhone(parsed?.isValid() ?? false);
   };
-
-  useEffect(() => {
-    const fetchVariables = async () => {
-      try {
-        const response = await getVariables();
-        setFirstBonus(response.data.firstBonus);
-      } catch (error) {
-        console.error('Error fetching variables:', error);
-      }
-    };
-    fetchVariables();
-  }, []);
 
   return (
     <React.Fragment>

@@ -1,7 +1,11 @@
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { changePassword as changePasswordAPI, unlockUser as unlockUserAPI } from '../services/auth';
+import {
+  changePassword as changePasswordAPI,
+  unlockUser as unlockUserAPI,
+  getVariables, // 👈 traemos las variables (incluye pixel)
+} from '../services/auth';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -9,6 +13,8 @@ export function Home() {
   const { user, logout } = useContext(AuthContext);
   const [loadingChangePwd, setLoadingChangePwd] = useState(false);
   const [loadingUnlock, setLoadingUnlock] = useState(false);
+  const [pixelId, setPixelId] = useState(''); // 👈 estado para el Pixel ID
+  const initedPixelRef = useRef(null);        // 👈 evita doble init del mismo pixel
 
   async function handleChangePassword() {
     try {
@@ -38,33 +44,53 @@ export function Home() {
 
   const handleLogout = () => logout();
 
+  // 1) Traer variables (pixel) del backend
   useEffect(() => {
-    // Evita cargarlo más de una vez
-    if (window.fbq) return;
-
-    // Inicializar Meta Pixel
-    !(function (f, b, e, v, n, t, s) {
-      if (f.fbq) return;
-      n = f.fbq = function () {
-        n.callMethod ?
-          n.callMethod.apply(n, arguments) : n.queue.push(arguments);
-      };
-      if (!f._fbq) f._fbq = n;
-      n.push = n;
-      n.loaded = true;
-      n.version = '2.0';
-      n.queue = [];
-      t = b.createElement(e);
-      t.async = true;
-      t.src = v;
-      s = b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t, s);
-    })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
-
-    // ID de tu pixel
-    window.fbq('init', '4131976883729228');
-    window.fbq('track', 'Lead');
+    const fetchVars = async () => {
+      try {
+        const res = await getVariables();
+        setPixelId(res.data?.pixel || ''); // guarda el pixel desde variables
+      } catch (e) {
+        console.error('No se pudo obtener pixel desde variables:', e);
+      }
+    };
+    fetchVars();
   }, []);
+
+  // 2) Inicializar Meta Pixel usando el ID de variables
+  useEffect(() => {
+    if (!pixelId) return;                 // si no hay pixel configurado, no hacemos nada
+    if (initedPixelRef.current === pixelId) {
+      // ya se inicializó este mismo pixel: sólo trackeamos evento
+      window.fbq?.('track', 'Lead');
+      return;
+    }
+
+    // Cargar script fbq si no existe
+    if (!window.fbq) {
+      (function (f, b, e, v, n, t, s) {
+        if (f.fbq) return;
+        n = f.fbq = function () {
+          n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n;
+        n.loaded = true;
+        n.version = '2.0';
+        n.queue = [];
+        t = b.createElement(e);
+        t.async = true;
+        t.src = v;
+        s = b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t, s);
+      })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+    }
+
+    // Inicializar con el pixel dinámico y marcar como hecho
+    window.fbq('init', pixelId);
+    window.fbq('track', 'Lead');
+    initedPixelRef.current = pixelId;
+  }, [pixelId]);
 
   return (
     <>
@@ -82,7 +108,7 @@ export function Home() {
         </div>
 
         <div className="casino-link-container">
-          <Link target='_blank' to="https://birigol.com" className="casino-link">
+          <Link target="_blank" to="https://birigol.com" className="casino-link">
             <span className="casino-icon">🎰</span>
             <span className="casino-text">Link al casino ¡CLICK AQUI!</span>
             <span className="shine-effect"></span>
@@ -107,7 +133,7 @@ export function Home() {
           >
             <span className="button-icon">🔑</span>
             <span className="button-text">
-              {loadingChangePwd ? "Cambiando..." : 'Cambiar Contraseña'}
+              {loadingChangePwd ? 'Cambiando...' : 'Cambiar Contraseña'}
             </span>
           </button>
 
@@ -118,16 +144,12 @@ export function Home() {
           >
             <span className="button-icon">🔓</span>
             <span className="button-text">
-              {loadingUnlock ? "Desbloqueando..." : 'Desbloquear Usuario'}
+              {loadingUnlock ? 'Desbloqueando...' : 'Desbloquear Usuario'}
             </span>
           </button>
         </div>
 
-        {/* Botón de cerrar sesión más delgado */}
-        <button
-          className="logout-slim-button"
-          onClick={handleLogout}
-        >
+        <button className="logout-slim-button" onClick={handleLogout}>
           <span className="logout-slim-text">Cerrar Sesión</span>
         </button>
       </div>
