@@ -1,0 +1,1 @@
+Tenes que cambiar a mano en Home la pagina a la que redirige y capaz que alguna cosa mas, chequea..
