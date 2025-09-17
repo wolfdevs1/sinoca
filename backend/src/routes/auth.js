@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+
 const { createUser } = require('../services/scrapPageBirigol');
 
 // Login

@@ -2,10 +2,11 @@ const router = require('express').Router();
 const { protect, adminOnly } = require('../middleware/auth');
 const User = require('../models/User');
 const Transfer = require('../models/Transfer');
-const { deposit, withdraw, changePassword, unlockUser } = require('../services/scrapPageBirigol');
 const Withdraw = require('../models/Withdraw');
 const Account = require('../models/Account');
 const CONSTANTE = require('../services/constants');
+
+const { deposit, withdraw, changePassword, unlockUser } = require('../services/scrapPageBirigol');
 
 function setCharAt(str, index, chr) {
     if (index > str.length - 1) return str;
