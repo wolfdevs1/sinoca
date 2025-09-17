@@ -92,11 +92,11 @@ async function createUser(name) {
             const user = await page.$eval(userSpan, el => el.textContent.trim());
             return user;
         } else {
-            return { status: 'taken' };
+            return 'taken';
         }
     } catch (e) {
         console.error(e);
-        return { status: 'error' };
+        return 'error';
     } finally {
         await browser.close();
     }
