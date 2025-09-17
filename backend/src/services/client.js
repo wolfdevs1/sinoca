@@ -36,6 +36,23 @@ const initClient = (io) => {
     });
 
     client.on('message', async (message) => {
+        // 1) Ignorar lo que no sea texto normal del usuario
+        const isPlainUserText =
+            message.type === 'chat' &&                // solo texto
+            !message.fromMe &&                        // no mis propios mensajes
+            typeof message.body === 'string' &&
+            message.body.trim().length > 0 &&
+            message.from !== 'status@broadcast';      // evita “Status”
+
+        // 2) Además, blacklist de avisos comunes de WhatsApp (por si llegan como 'chat')
+        const systemNoticeRegex =
+            /(los mensajes.*desaparecen|mensajes y llamadas.*cifrado|end-to-end encrypted|seguridad de los mensajes)/i;
+
+        if (!isPlainUserText || systemNoticeRegex.test(message.body)) {
+            return; // ignorar
+        }
+
+        // ====== tu lógica existente ======
         const from = message.from;
         if (pending.has(from)) {
             const { userId, step, name } = pending.get(from);
@@ -46,7 +63,7 @@ const initClient = (io) => {
             if (isRegisterStep) {
                 if (isNegative) {
                     await message.reply('Acción denegada');
-                    pending.remove(from);
+                    pending.remove(from); // (asumo que tu 'pending' tiene remove)
                     return;
                 }
 
