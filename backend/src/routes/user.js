@@ -405,40 +405,6 @@ router.get('/caja', protect, adminOnly, async (req, res) => {
     }
 });
 
-// router.get('/caja', protect, adminOnly, async (req, res) => {
-//     try {
-//         const monthParam = req.query.month;
-//         const date = monthParam ? new Date(`${monthParam}-01`) : new Date();
-//         const startOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 1, 0, 0, 0);
-//         const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 2, 0, 23, 59, 59);
-
-//         const transfers = await Transfer.find({
-//             createdAt: { $gte: startOfMonth, $lte: endOfMonth }
-//         });
-
-//         const withdraws = await Withdraw.find({
-//             createdAt: { $gte: startOfMonth, $lte: endOfMonth },
-//             state: true
-//         });
-
-//         const saldos = {};
-//         transfers.forEach(t => {
-//             const acc = t.account;
-//             saldos[acc] = (saldos[acc] || 0) + parseFloat(t.amount.replace(',', '.') || 0);
-//         });
-
-//         withdraws.forEach(w => {
-//             const acc = w.withdrawAccount;
-//             saldos[acc] = (saldos[acc] || 0) - parseFloat(w.amount.replace(',', '.') || 0);
-//         });
-
-//         res.json(saldos);
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).json({ error: 'Error al calcular saldos' });
-//     }
-// });
-
 router.post('/manual-transfer', protect, adminOnly, async (req, res) => {
     const { name, amount, account, descripcion } = req.body;
     try {
@@ -581,7 +547,6 @@ router.get('/caja/resumen', protect, adminOnly, async (req, res) => {
     }
 });
 
-
 router.get('/variables', async (req, res) => {
     try {
         const firstBonus = CONSTANTE.getFirstBonus();
@@ -591,8 +556,18 @@ router.get('/variables', async (req, res) => {
         const panelUser = CONSTANTE.getPanelUser();
         const panelPassword = CONSTANTE.getPanelPassword();
         const nombrePagina = CONSTANTE.getNombrePagina();
+        const pixel = CONSTANTE.getPixel(); // ✅ nuevo
 
-        res.json({ firstBonus, specialBonus, casinoName, supportNumber, panelUser, panelPassword, nombrePagina });
+        res.json({
+            firstBonus,
+            specialBonus,
+            casinoName,
+            supportNumber,
+            panelUser,
+            panelPassword,
+            nombrePagina,
+            pixel, // ✅ devolver pixel
+        });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Error al obtener variables' });
@@ -601,7 +576,16 @@ router.get('/variables', async (req, res) => {
 
 router.post('/variables', protect, adminOnly, async (req, res) => {
     try {
-        const { firstBonus, specialBonus, casinoName, supportNumber, panelUser, panelPassword, nombrePagina } = req.body;
+        const {
+            firstBonus,
+            specialBonus,
+            casinoName,
+            supportNumber,
+            panelUser,
+            panelPassword,
+            nombrePagina,
+            pixel, // ✅ recibir pixel
+        } = req.body;
 
         CONSTANTE.setFirstBonus(firstBonus);
         CONSTANTE.setSpecialBonus(specialBonus);
@@ -610,6 +594,7 @@ router.post('/variables', protect, adminOnly, async (req, res) => {
         CONSTANTE.setPanelUser(panelUser);
         CONSTANTE.setPanelPassword(panelPassword);
         CONSTANTE.setNombrePagina(nombrePagina);
+        CONSTANTE.setPixel(pixel); // ✅ guardar pixel
 
         res.json({ message: 'Variables actualizadas correctamente' });
     } catch (err) {

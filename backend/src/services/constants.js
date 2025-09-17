@@ -39,6 +39,11 @@ CONSTANTE.getSupportNumber = () => {
     return fs.readFileSync('./src/services/variables/supportNumber.txt', 'utf8').trim();
 };
 
+// ✅ Nuevo: getter para Pixel
+CONSTANTE.getPixel = () => {
+    return fs.readFileSync('./src/services/variables/pixel.txt', 'utf8').trim();
+};
+
 CONSTANTE.setNombrePagina = (nombre) => {
     fs.writeFileSync('./src/services/variables/nombrePagina.txt', nombre);
 };
@@ -65,6 +70,11 @@ CONSTANTE.setCasinoName = (nombre) => {
 
 CONSTANTE.setSupportNumber = (numero) => {
     fs.writeFileSync('./src/services/variables/supportNumber.txt', numero);
+};
+
+// ✅ Nuevo: setter para Pixel
+CONSTANTE.setPixel = (valor) => {
+    fs.writeFileSync('./src/services/variables/pixel.txt', valor);
 };
 
 module.exports = CONSTANTE;

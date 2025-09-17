@@ -11,6 +11,7 @@ export default function AdminVariables() {
     const [panelUser, setPanelUser] = useState('');
     const [panelPassword, setPanelPassword] = useState('');
     const [nombrePagina, setNombrePagina] = useState('');
+    const [pixel, setPixel] = useState(''); // ✅ ahora se usa
 
     const navigate = useNavigate();
 
@@ -29,6 +30,7 @@ export default function AdminVariables() {
                 setPanelUser(response.data.panelUser);
                 setPanelPassword(response.data.panelPassword);
                 setNombrePagina(response.data.nombrePagina);
+                setPixel(response.data.pixel); // ✅ cargar pixel
             } catch (error) {
                 console.error('Error fetching variables:', error);
             }
@@ -45,7 +47,8 @@ export default function AdminVariables() {
             supportNumber,
             panelUser,
             panelPassword,
-            nombrePagina
+            nombrePagina,
+            pixel, // ✅ enviar pixel
         };
 
         try {
@@ -165,6 +168,17 @@ export default function AdminVariables() {
                     />
                 </div>
 
+                {/* Nuevo campo Pixel */}
+                <div className="input-row">
+                    <label className="input-label">PIXEL:</label>
+                    <input
+                        type="text"
+                        className="input"
+                        value={pixel}
+                        onChange={(e) => setPixel(e.target.value)}
+                    />
+                </div>
+
                 <div className="button-row" style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>
                     <button
                         onClick={handleSave}
@@ -193,4 +207,4 @@ export default function AdminVariables() {
             </div>
         </div>
     );
-}
+};
