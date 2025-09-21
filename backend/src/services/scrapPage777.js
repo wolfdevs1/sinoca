@@ -173,6 +173,8 @@ async function adjustBalance(name, amount, action) {
     }
 }
 
+deposit('S962.018697', '10,00').then(console.log);
+
 async function deposit(name, amount) {
     return adjustBalance(name, amount, 'Cargar');
 }

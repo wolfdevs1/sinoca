@@ -106,7 +106,6 @@ async function adjustBalance(name, amount, action) {
         const unlockBtn = await page.$('a[title="Desbloquear"]');
         if (unlockBtn) {
             await unlockBtn.click();
-            await page.waitForTimeout(2000);
         }
 
         // Para 'Descargar', chequea saldo disponible

@@ -205,6 +205,7 @@ export default function AdminTransfers() {
                                             thousandSeparator="."
                                             decimalSeparator=","
                                             prefix="$"
+                                            decimalScale={2}
                                         />
                                     </div>
                                     <div className="card-dates">

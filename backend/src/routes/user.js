@@ -73,6 +73,7 @@ router.post('/deposit', protect, async (req, res) => {
         }
 
         // 3) Hacemos el depósito real
+        console.log(formatNumber(amount));
         const response = await deposit(user.name, formatNumber(amount));
 
         if (response === 'ok') {
