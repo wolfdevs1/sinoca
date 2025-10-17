@@ -581,8 +581,14 @@ router.get('/variables/admin', protect, adminOnly, async (req, res) => {
 
         const panelUser = CONSTANTE.getPanelUser();
         const panelPassword = CONSTANTE.getPanelPassword();
+        const firstBonus = CONSTANTE.getFirstBonus();
+        const specialBonus = CONSTANTE.getSpecialBonus();
+        const casinoName = CONSTANTE.getCasinoName();
+        const supportNumber = CONSTANTE.getSupportNumber(); // si esto lo querés público
+        const nombrePagina = CONSTANTE.getNombrePagina();
+        const pixel = CONSTANTE.getPixel();
 
-        res.json({ panelUser, panelPassword });
+        res.json({ panelUser, panelPassword, firstBonus, specialBonus, casinoName, supportNumber, nombrePagina, pixel });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Error al obtener variables sensibles' });
