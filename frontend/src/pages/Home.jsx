@@ -4,7 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import {
   changePassword as changePasswordAPI,
   unlockUser as unlockUserAPI,
-  getVariables, // 👈 traemos las variables (incluye pixel)
+  getVariablesPublic, // 👈 traemos las variables (incluye pixel)
 } from '../services/auth';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -48,7 +48,7 @@ export function Home() {
   useEffect(() => {
     const fetchVars = async () => {
       try {
-        const res = await getVariables();
+        const res = await getVariablesPublic();
         setPixelId(res.data?.pixel || ''); // guarda el pixel desde variables
       } catch (e) {
         console.error('No se pudo obtener pixel desde variables:', e);

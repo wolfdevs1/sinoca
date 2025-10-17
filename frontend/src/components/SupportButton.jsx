@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import './SupportButton.css';
 import { FaHeadset } from 'react-icons/fa';
-import { getVariables } from '../services/auth'; // Importa la función para obtener las variables
+import { getVariablesPublic } from '../services/auth'; // Importa la función para obtener las variables
 
 const SupportButton = () => {
 
@@ -10,7 +10,7 @@ const SupportButton = () => {
   useEffect(() => {
     const fetchVariables = async () => {
       try {
-        const response = await getVariables();
+        const response = await getVariablesPublic();
         setSupportNumber(response.data.supportNumber);
       } catch (error) {
         console.error('Error fetching variables:', error);

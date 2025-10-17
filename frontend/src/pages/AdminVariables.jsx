@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { getVariables, updateVariables } from '../services/auth'; // Asegúrate de que la ruta sea correcta
+import { getVariablesAdmin, updateVariables } from '../services/auth'; // Asegúrate de que la ruta sea correcta
 import { useEffect, useState } from 'react';
 
 export default function AdminVariables() {
@@ -22,7 +22,7 @@ export default function AdminVariables() {
     useEffect(() => {
         const fetchVariables = async () => {
             try {
-                const response = await getVariables();
+                const response = await getVariablesAdmin();
                 setFirstBonus(response.data.firstBonus);
                 setSpecialBonus(response.data.specialBonus);
                 setCasinoName(response.data.casinoName);

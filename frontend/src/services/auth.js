@@ -27,7 +27,8 @@ export const getHistorialCaja = (page = 1, limit = 10, search = '', type) => API
 export const getRandomAccount = () => API.get('/user/random-account');
 export const getSaldos = (month) => API.get(`/user/caja?month=${month}`);
 export const getResumen = (month) => API.get(`/user/caja/resumen?month=${month}`);
-export const getVariables = () => API.get('/user/variables');
+export const getVariablesPublic = () => API.get('/user/variables/public');
+export const getVariablesAdmin = () => API.get('/user/variables/admin');
 export const updateVariables = (data) => API.post('/user/variables', data);
 export const deleteTransfer = (transferId) => API.delete(`/user/transfer/${transferId}`);
 export const deleteUser = (id) => API.delete(`/user/delete/${id}`);

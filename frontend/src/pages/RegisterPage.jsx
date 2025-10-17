@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect, useCallback, useRef } from "rea
 import { Link } from "react-router-dom";
 import { SocketContext } from "../context/SocketContext";
 import { AuthContext } from '../context/AuthContext';
-import { register as registerAPI, getVariables } from "../services/auth";
+import { register as registerAPI, getVariablesPublic } from "../services/auth";
 import { parsePhoneNumberFromString, AsYouType } from 'libphonenumber-js/min';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -26,7 +26,7 @@ export default function RegisterPage() {
   useEffect(() => {
     const fetchVars = async () => {
       try {
-        const response = await getVariables();
+        const response = await getVariablesPublic();
         setFirstBonus(response.data.firstBonus ?? 0);
         setPixelId(response.data.pixel || "");
       } catch (error) {

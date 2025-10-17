@@ -549,30 +549,43 @@ router.get('/caja/resumen', protect, adminOnly, async (req, res) => {
     }
 });
 
-router.get('/variables', async (req, res) => {
+// público: solo datos no sensibles
+router.get('/variables/public', async (req, res) => {
     try {
         const firstBonus = CONSTANTE.getFirstBonus();
         const specialBonus = CONSTANTE.getSpecialBonus();
         const casinoName = CONSTANTE.getCasinoName();
-        const supportNumber = CONSTANTE.getSupportNumber();
-        const panelUser = CONSTANTE.getPanelUser();
-        const panelPassword = CONSTANTE.getPanelPassword();
+        const supportNumber = CONSTANTE.getSupportNumber(); // si esto lo querés público
         const nombrePagina = CONSTANTE.getNombrePagina();
-        const pixel = CONSTANTE.getPixel(); // ✅ nuevo
+        const pixel = CONSTANTE.getPixel();
 
         res.json({
             firstBonus,
             specialBonus,
             casinoName,
             supportNumber,
-            panelUser,
-            panelPassword,
             nombrePagina,
-            pixel, // ✅ devolver pixel
+            pixel,
         });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Error al obtener variables' });
+        res.status(500).json({ error: 'Error al obtener variables públicas' });
+    }
+});
+
+// admin: requiere login y, si querés, rol
+router.get('/variables/admin', protect, adminOnly, async (req, res) => {
+    try {
+        // opcional: verificar rol
+        // if (req.user.role !== 'admin') return res.status(403).json({ error: 'Forbidden' });
+
+        const panelUser = CONSTANTE.getPanelUser();
+        const panelPassword = CONSTANTE.getPanelPassword();
+
+        res.json({ panelUser, panelPassword });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error al obtener variables sensibles' });
     }
 });
 

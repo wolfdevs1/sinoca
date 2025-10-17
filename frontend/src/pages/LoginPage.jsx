@@ -4,7 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { SocketContext } from "../context/SocketContext";
-import { getVariables } from "../services/auth";
+import { getVariablesPublic } from "../services/auth";
 
 function LoginPage() {
   const [name, setName] = useState('');
@@ -62,7 +62,7 @@ function LoginPage() {
   useEffect(() => {
     const fetchVariables = async () => {
       try {
-        const response = await getVariables();
+        const response = await getVariablesPublic();
         setFirstBonus(response.data.firstBonus);
       } catch (error) {
         console.error('Error fetching variables:', error);
