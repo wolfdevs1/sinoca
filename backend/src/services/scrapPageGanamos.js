@@ -5,6 +5,8 @@ const {
     getPanelPassword,
 } = require('./constants');
 
+const URL_PAGINA = 'https://agents.ganamosnet.io/'
+
 // Utility: formats numbers like '1.234,56' to '1234.56'
 function formatNumber(numberStr) {
     return numberStr.replace(/\./g, '').replace(',', '.');
@@ -42,7 +44,7 @@ async function initBrowser() {
     await page.setViewport({ width: 1920, height: 1080 });
 
     // Login en el panel
-    await page.goto('https://agents.ganamos.io', { waitUntil: 'load' });
+    await page.goto(URL_PAGINA, { waitUntil: 'load' });
     await typeVisible(page, '#root > div > section > div > div.auth__form > div:nth-child(1) > input', getPanelUser());
     await typeVisible(page, '#root > div > section > div > div.auth__form > div:nth-child(2) > div.input__wrapper > input', getPanelPassword());
     await clickVisible(page, '#root > div > section > div > div.auth__form > div.auth__button > button');
@@ -75,8 +77,8 @@ async function createUser(name) {
         const btnSubmit = '#root > div > div.app__wrapper > main > div.app__wrapper__content > div > form > div.create-player__bottom > button.button.button_sizable_low.button_colors_default';
         const btnSubmit2 = '#modal-root > div > div > div > div > div.create-player__confirmation-pop-up__buttons > button.button.button_sizable_low.button_colors_transparent';
 
-        const URL_SUCCESS = 'https://agents.ganamos.io/users/all';
-        const URL_CREATE = 'https://agents.ganamos.io/user/create-player';
+        const URL_SUCCESS = `${URL_PAGINA}/users/all`;
+        const URL_CREATE = `${URL_PAGINA}/user/create-player`;
 
         // Flujo de creación
         await clickVisible(page, btnCrear);
