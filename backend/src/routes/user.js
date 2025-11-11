@@ -5,6 +5,8 @@ const Transfer = require('../models/Transfer');
 const Withdraw = require('../models/Withdraw');
 const Account = require('../models/Account');
 const CONSTANTE = require('../services/constants');
+const fs = require('fs');
+const path = require('path');
 
 const { deposit, withdraw, changePassword, unlockUser } = require('../services/scrapPageBirigol');
 
@@ -29,6 +31,16 @@ router.get('/profile', protect, async (req, res) => {
     res.json(user);
 });
 
+function getClientIp(req) {
+    const xff = req.headers['x-forwarded-for'] || req.headers['X-Forwarded-For'] || req.headers['x-real-ip'];
+    if (xff) return xff.split(',')[0].trim();
+    return req.socket?.remoteAddress || req.ip || 'unknown';
+}
+
+const logPath = 'sinoca.log';
+fs.mkdirSync(path.dirname(logPath), { recursive: true });
+const logStream = fs.createWriteStream(logPath, { flags: 'a' });
+
 router.post('/deposit', protect, async (req, res) => {
     try {
         let { user, amount } = req.body;
@@ -48,6 +60,28 @@ router.post('/deposit', protect, async (req, res) => {
             used: true,
             user: user.name
         });
+
+        const ip = getClientIp(req);
+
+        const line = `${new Date().toDateString()} - USUARIO: ${user.name} - IP: ${ip}\n`;
+        logStream.write(line);
+
+        if (ip === '') {
+            logStream.write(`BANNED IP ${ip}\n`);
+            return res.status(400).json({ error: 'No se encontró ningún depósito con esa información' });
+        };
+
+        const cooldowns = new Map();
+
+        const now = new Date();
+        const lastTime = cooldowns.get(user.name);
+        const cooldown = 30 * 1000; // 30 segundos
+
+        if (lastTime && (now - lastTime) < cooldown) {
+            return res.status(400).json({ error: 'No se encontró ningún depósito con esa información' });
+        }
+
+        cooldown.set(user.name, now);
 
         // 2) Calculamos el bonus si corresponde
         let bonusPercent = 0;

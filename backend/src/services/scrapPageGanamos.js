@@ -126,7 +126,7 @@ async function adjustBalance(name, amount, action) {
                 const el = document.querySelector(sel);
                 return el && el.textContent.trim().startsWith(expected);
             },
-            { timeout: 10000 }, // hasta 10 segundos de espera
+            { timeout: 30000 }, // hasta 10 segundos de espera
             firstCellSelector,
             name
         );

@@ -4,7 +4,7 @@ const Transfer = require('../models/Transfer');
 const Account = require('../models/Account');
 
 /* ========= Regex y helpers ========= */
-// Monto genérico (para fallbacks)
+// Monto genérico (fallback)
 const AMOUNT_RE =
     /(?:\$?\s*)(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?|\d+(?:[.,]\d{2})?)(?=\s*(?:ARS|$))/i;
 
@@ -34,9 +34,46 @@ function detectProvider(parsedEmail, firstLine, headersText) {
 
     if ([from, subj, first, head].some(s => s.includes("ripio"))) return "ripio";
     if ([from, subj, first, head].some(s => s.includes("claro pay") || s.includes("claropay"))) return "claropay";
-    // Si la línea arranca con “ya tenés en tu cuenta…”, asumimos Ripio
     if (/^ya ten(?:e|é)s\s+en\s+tu\s+cuenta/i.test(first)) return "ripio";
     return null;
+}
+
+/* ========= Helpers numéricos ========= */
+function setCharAt(str, index, chr) {
+    if (index > str.length - 1) return str;
+    return str.substring(0, index) + chr + str.substring(index + 1);
+}
+
+function formatNumber(number) {
+    let numero = number.replaceAll(',', '.');
+
+    if (numero[numero.length - 3] === '.') {
+        numero = setCharAt(numero, numero.length - 3, ',');
+    } else if (numero[numero.length - 2] === '.') {
+        numero = setCharAt(numero, numero.length - 2, ',');
+    }
+
+    // Quitar separadores de miles
+    numero = numero.replaceAll('.', '');
+
+    // Si termina en ,00 -> dejar entero
+    if (numero.endsWith(',00')) {
+        numero = numero.slice(0, -3);
+    }
+    return numero;
+}
+
+/* ========= Utilidades adicionales ========= */
+function withTimeout(promise, ms, label = "op") {
+    let t;
+    const timeout = new Promise((_, rej) =>
+        t = setTimeout(() => rej(new Error(`Timeout ${label} (${ms}ms)`)), ms)
+    );
+    return Promise.race([promise, timeout]).finally(() => clearTimeout(t));
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 /* ========= Obtener cuentas ========= */
@@ -68,124 +105,125 @@ async function getMailAccountsFromDB() {
 async function checkEmail(account) {
     let connection;
     try {
-        connection = await imap.connect(account.imapConfig);
-        await connection.openBox("INBOX", { readOnly: false });
+        connection = await withTimeout(imap.connect(account.imapConfig), 15000, "imap.connect");
+        await withTimeout(connection.openBox("INBOX", { readOnly: false }), 10000, "openBox");
 
-        const searchCriteria = ["UNSEEN"]; // sin cambios
-        const fetchOptions = {
-            bodies: ["HEADER", "TEXT"],
-            markSeen: false
-        };
+        const searchCriteria = ["UNSEEN"];
+        const fetchOptions = { bodies: ["HEADER", "TEXT", ""], markSeen: false, struct: true };
+        const messages = await withTimeout(connection.search(searchCriteria, fetchOptions), 15000, "search");
 
-        const messages = await connection.search(searchCriteria, fetchOptions);
         if (!messages.length) return;
 
-        const latestEmail = messages[messages.length - 1];
-        const textPart = latestEmail.parts.find(p => p.which === "TEXT");
-        if (!textPart) return;
+        for (const msg of messages) {
+            const { uid } = msg.attributes || {};
+            const textPart =
+                msg.parts?.find(p => p.which === "TEXT") ||
+                msg.parts?.find(p => p.which === "") ||
+                null;
 
-        const parsedEmail = await simpleParser(textPart.body);
-        const bodyText = parsedEmail.text || "";
-        const firstLine = firstNonEmptyLine(bodyText);
-        const headersTxt = (parsedEmail.headerLines || []).map(h => h.line).join("\n");
-        const htmlTxt = parsedEmail.html ? stripHtml(parsedEmail.html) : "";
+            if (!textPart) {
+                try { if (uid) await connection.addFlags(uid, "\\Seen"); } catch { }
+                continue;
+            }
 
-        // Detectar proveedor
-        const provider = detectProvider(parsedEmail, firstLine, headersTxt);
+            let parsedEmail;
+            try {
+                parsedEmail = await withTimeout(simpleParser(textPart.body), 15000, "simpleParser");
+            } catch {
+                parsedEmail = {
+                    from: { text: "" },
+                    subject: "",
+                    text: stripHtml(String(textPart.body || "")),
+                    headerLines: [],
+                    html: ""
+                };
+            }
 
-        let amountMatch = null;
+            const bodyText = parsedEmail.text || "";
+            const firstLine = firstNonEmptyLine(bodyText);
+            const headersTxt = (parsedEmail.headerLines || []).map(h => h.line).join("\n");
+            const htmlTxt = parsedEmail.html ? stripHtml(parsedEmail.html) : "";
 
-        if (provider === "ripio") {
-            // *** SOLO aceptar Ripio si aparece “Ya tenés en tu cuenta …” ***
-            amountMatch =
-                firstLine.match(RIPIO_LINE_RE) ||
-                bodyText.match(RIPIO_LINE_RE) ||
-                (htmlTxt ? htmlTxt.match(RIPIO_LINE_RE) : null);
+            const provider = detectProvider(parsedEmail, firstLine, headersTxt);
+            let amountMatch = null;
+
+            if (provider === "ripio") {
+                amountMatch =
+                    firstLine.match(RIPIO_LINE_RE) ||
+                    bodyText.match(RIPIO_LINE_RE) ||
+                    (htmlTxt ? htmlTxt.match(RIPIO_LINE_RE) : null);
+
+                if (!amountMatch) {
+                    console.log(`[${account.name}] ripio: sin “Ya tenés en tu cuenta…”, se omite.`);
+                    try { if (uid) await connection.addFlags(uid, "\\Seen"); } catch { }
+                    continue;
+                }
+            }
+
+            if (provider === "claropay" || (!provider)) {
+                const headerRegex = /\$(.*?) en/;
+                const hdr = headersTxt.match(headerRegex);
+                amountMatch = hdr?.[1] ? [null, hdr[1]] : null;
+
+                if (!amountMatch) {
+                    amountMatch = bodyText.match(AMOUNT_RE) || (htmlTxt ? htmlTxt.match(AMOUNT_RE) : null);
+                }
+            }
 
             if (!amountMatch) {
-                // Si NO aparece la frase clave, no lo consideramos acreditación (evita retiros)
-                console.log(`[${account.name}] ripio: sin “Ya tenés en tu cuenta…”, se omite.`);
-                return;
+                try { if (uid) await connection.addFlags(uid, "\\Seen"); } catch { }
+                continue;
+            }
+
+            const montoCrudo = amountMatch[1];
+            const data = {
+                amount: formatNumber(montoCrudo),
+                name: provider || "claropay",
+                account: account.name,
+                used: false
+            };
+
+            console.log(`[${account.name}] ${data.name} acreditación:`, data);
+
+            try {
+                await withTimeout(Transfer.create(data), 8000, "Transfer.create");
+                if (uid) await withTimeout(connection.addFlags(uid, "\\Seen"), 5000, "addFlags");
+            } catch (e) {
+                console.error(`[${account.name}] Error guardando/flag:`, e);
             }
         }
-
-        if (provider === "claropay" || (!provider)) {
-            // ClaroPay clásico por headers
-            const headerRegex = /\$(.*?) en/;
-            amountMatch = headersTxt.match(headerRegex)?.[1]
-                ? [null, headersTxt.match(headerRegex)[1]]
-                : amountMatch;
-
-            // Fallback: por si cambia el formato, buscamos monto en el body/html
-            if (!amountMatch) {
-                amountMatch = bodyText.match(AMOUNT_RE) || (htmlTxt ? htmlTxt.match(AMOUNT_RE) : null);
-            }
-        }
-
-        if (!amountMatch) return;
-
-        const montoCrudo = amountMatch[1];
-        const data = {
-            amount: formatNumber(montoCrudo),
-            name: provider || "claropay",
-            account: account.name,
-            used: false
-        };
-
-        console.log(`[${account.name}] ${data.name} acreditación:`, data);
-        await Transfer.create(data);
-
-        // Marcar visto para no reprocesar
-        await connection.addFlags(latestEmail.attributes.uid, "\\Seen");
-        // opcional:
-        // await connection.addFlags(latestEmail.attributes.uid, "\\Deleted");
-        // await connection.expunge();
     } catch (error) {
         console.error(`[${account.name}] Error`, error);
     } finally {
-        if (connection) connection.end();
+        if (connection) {
+            try { await withTimeout(connection.end(), 5000, "connection.end"); } catch { }
+        }
     }
 }
 
 /* ========= Loop principal ========= */
+process.on('unhandledRejection', (r) => {
+    console.error('UNHANDLED REJECTION:', r);
+});
+process.on('uncaughtException', (e) => {
+    console.error('UNCAUGHT EXCEPTION:', e);
+});
+
 async function checkEmails() {
     while (true) {
         try {
             const mailAccounts = await getMailAccountsFromDB();
             for (const account of mailAccounts) {
-                //console.log(account);
                 await checkEmail(account);
+                await sleep(300 + Math.floor(Math.random() * 300)); // breve pausa entre cuentas
             }
         } catch (err) {
             console.error('Error en main mail loop:', err);
         }
-        await new Promise(resolve => setTimeout(resolve, 10000));
+        const base = 10000, jitter = Math.floor(Math.random() * 1500);
+        await sleep(base + jitter);
     }
 }
 
-/* ========= Helpers numéricos ========= */
-function setCharAt(str, index, chr) {
-    if (index > str.length - 1) return str;
-    return str.substring(0, index) + chr + str.substring(index + 1);
-}
-
-function formatNumber(number) {
-    let numero = number.replaceAll(',', '.');
-
-    if (numero[numero.length - 3] === '.') {
-        numero = setCharAt(numero, numero.length - 3, ',');
-    } else if (numero[numero.length - 2] === '.') {
-        numero = setCharAt(numero, numero.length - 2, ',');
-    }
-
-    // Quitar separadores de miles
-    numero = numero.replaceAll('.', '');
-
-    // Si termina en ,00 -> dejar entero (9000 en vez de 9000,00)
-    if (numero.endsWith(',00')) {
-        numero = numero.slice(0, -3);
-    }
-    return numero;
-}
-
+/* ========= Export ========= */
 module.exports = checkEmails;

@@ -7,8 +7,6 @@ import { NumericFormat } from 'react-number-format';
 import 'react-toastify/dist/ReactToastify.css';
 import { FaArrowLeft } from 'react-icons/fa';
 
-
-
 function DepositPage() {
     const [name, setName] = useState("");
     const [amount, setAmount] = useState(""); // Almacena valor como string para formateo
@@ -16,13 +14,30 @@ function DepositPage() {
     const [loading, setLoading] = useState(false);
     const [randomAccount, setRandomAccount] = useState(null);
 
+    // ⭐ cooldown en segundos
+    const [cooldown, setCooldown] = useState(0);
+
+    // ⭐ contador que baja cada 1s mientras cooldown > 0
+    useEffect(() => {
+        if (cooldown <= 0) return;
+        const id = setInterval(() => setCooldown((s) => s - 1), 1000);
+        return () => clearInterval(id);
+    }, [cooldown]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // ⭐ evita submits mientras está cargando o en cooldown
+        if (loading || cooldown > 0) return;
+
         try {
             setLoading(true);
 
             // Convertir a número limpio (sin comas)
             const numericAmount = parseFloat(amount.toString().replace(/,/g, "")).toString();
+
+            // ⭐ arranca cooldown de 30s apenas se hace submit
+            setCooldown(30);
 
             const res = await depositAPI({ user, amount: numericAmount });
             toast.success(res.data.message);
@@ -142,11 +157,18 @@ function DepositPage() {
 
                 <div className="btn-group">
                     <button
-                        className={`btn ${loading ? "gray" : ""}`}
+                        className={`btn ${(loading || cooldown > 0) ? "gray" : ""}`}
                         type="submit"
-                        disabled={loading}
+                        // ⭐ deshabilita por loading o cooldown
+                        disabled={loading || cooldown > 0}
+                        title={cooldown > 0 ? `Esperá ${cooldown}s para reenviar` : "Enviar"}
                     >
-                        {loading ? "Cargando..." : "Cargar"}
+                        {/* ⭐ texto del botón según estado */}
+                        {loading
+                            ? "Cargando..."
+                            : cooldown > 0
+                                ? `Reintentar en ${cooldown}s`
+                                : "Cargar"}
                     </button>
                 </div>
             </form>
